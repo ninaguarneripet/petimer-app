@@ -1226,7 +1226,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbxeTOh0_qEmqejf_QxZSS92IZVtwu-Dw9IF8C2hlUJ9sylJqC6tsBpT9W9FTspRoqQ/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxoupHe5B-yNRJCG2i6QJz0-NIXhoMdqRkpmGasORjV5QsOJy_oLHqky_cjgLOO688i/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -1626,7 +1626,7 @@
     try {
       const d = await api('login', { username: user, password: pass });
       applySession(d.token, d.user);
-    } catch (err) { alert('Usuário ou senha incorretos!'); }
+    } catch (err) { alert(err.message || 'Usuário ou senha incorretos!'); }
   }
 
   function normalizeUsername(value) {
