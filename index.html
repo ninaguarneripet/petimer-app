@@ -462,15 +462,6 @@
   @media(max-width:640px){.entry-mode{gap:5px;flex-wrap:wrap;}.time-controls{height:147.59375px;}.tracker-bar .time-controls .manual-add{width:auto;}}
 
   /* DASHBOARD — inspirado na organização visual do Clockify, adaptado ao PETimer */
-  .dashboard-toolbar{display:flex;justify-content:space-between;align-items:center;margin:-4px 0 14px;}
-  .dashboard-filters{display:flex;align-items:center;gap:10px;margin-left:auto;}
-  .dashboard-scope{height:38px;border:1px solid var(--border);border-radius:7px;background:var(--surface);padding:0 34px 0 12px;font:500 12px inherit;color:var(--text);cursor:pointer;}
-  .dashboard-period{height:38px;display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:7px;overflow:hidden;color:var(--muted);font-size:12px;}
-  .dashboard-period>.line-icon{margin-left:10px;color:var(--muted);}
-  .dashboard-period>span:nth-child(2){min-width:152px;padding:0 12px 0 7px;color:var(--text);}
-  .dashboard-period button{width:38px;height:38px;border:0;border-left:1px solid var(--border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-  .dashboard-period button:hover{background:var(--surface-2);color:var(--accent-dark);}
-  .dashboard-period button svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
   .dashboard-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start;}
   .dashboard-main-card,.dashboard-side-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;overflow:hidden;box-shadow:0 1px 2px rgba(20,22,30,.025);}
   .dashboard-summary{display:grid;grid-template-columns:repeat(3,1fr);background:#f0f3f6;border-bottom:1px solid var(--border);min-height:92px;}
@@ -529,6 +520,8 @@
   .reports-filterbar{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;min-height:58px;}
   .reports-filter-label{font-size:11px;color:var(--muted);font-weight:650;text-transform:uppercase;letter-spacing:.04em;margin-right:2px;}
   .reports-select{height:36px;min-width:145px;border:1px solid var(--border);border-radius:6px;background:var(--surface);padding:0 30px 0 10px;font:500 12px inherit;color:var(--text);}
+  #analysis-people-multi{height:auto;min-height:74px;padding:4px 8px;}
+  #analysis-people-multi option{padding:4px 6px;border-radius:4px;}
   .reports-apply{height:36px;padding:0 16px;border:0;border-radius:6px;background:var(--accent);color:white;font:650 11.5px inherit;cursor:pointer;margin-left:auto;}
   .reports-apply:hover{background:var(--accent-dark)}
   .reports-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(20,22,30,.02);}
@@ -919,8 +912,7 @@
     </div>
     <nav class="sidebar-nav">
       <button class="nav-item active" onclick="switchView('tracker', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></svg><span>Registro de atividade</span></button>
-      <button class="nav-item" onclick="switchView('dashboard', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg><span>Dashboard</span></button>
-      <button class="nav-item" onclick="switchView('reports', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"></path><path d="M4 19h16"></path><path d="M9 15v-4"></path><path d="M13 15V8"></path><path d="M17 15v-6"></path></svg><span>Relatórios</span></button>
+      <button class="nav-item" onclick="switchView('analysis', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg><span>Análise</span></button>
       <button class="nav-item" id="nav-cycle" onclick="switchView('cycle', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M20.5 4v5h-5"></path></svg><span>Período</span></button>
       <button class="nav-item" onclick="switchView('team', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7.5" r="3.5"></circle><path d="M21 20v-2a4 4 0 0 0-3-3.85"></path><path d="M15.5 4.15a3.5 3.5 0 0 1 0 6.7"></path></svg><span>Gestão da Equipe</span></button>
     </nav>
@@ -1035,85 +1027,73 @@
       <div id="entries-list"><div class="empty">Nenhum registro ainda.</div></div>
     </section>
 
-    <section class="view" id="view-dashboard" hidden>
-      <div class="dashboard-toolbar">
-        <div></div>
-        <div class="dashboard-filters">
-          <select id="dashboard-scope" class="dashboard-scope" onchange="renderDashboard()" aria-label="Visualização do dashboard">
-            <option value="member">Membro</option>
-            <option value="team">Equipe</option>
-          </select>
-          <div class="dashboard-period">
-            <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M7 3v4M17 3v4M3 10h18"></path></svg></span>
-            <span id="dashboard-period-label">Esta semana</span>
-            <button type="button" onclick="changeDashboardWeek(-1)" aria-label="Semana anterior"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></button>
-            <button type="button" onclick="changeDashboardWeek(1)" aria-label="Próxima semana"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></button>
-          </div>
-        </div>
-      </div>
-
-      <div class="dashboard-layout">
-        <div class="dashboard-main-card">
-          <div class="dashboard-summary">
-            <div class="dashboard-summary-item"><span>Tempo total</span><strong id="dash-total-time">00:00:00</strong></div>
-            <div class="dashboard-summary-item"><span>Cargo/Projeto principal</span><strong id="dash-top-cargo">—</strong></div>
-            <div class="dashboard-summary-item"><span>Localização principal</span><strong id="dash-top-location">—</strong></div>
-          </div>
-          <div class="dashboard-chart-wrap">
-            <div class="dashboard-y-axis" id="dash-y-axis"></div>
-            <div class="dashboard-bars" id="dash-bars"></div>
-          </div>
-          <div class="dashboard-breakdown">
-            <div class="dashboard-donut-wrap">
-              <div class="dashboard-donut" id="dash-donut"><span id="dash-donut-total">00:00:00</span></div>
-            </div>
-            <div class="dashboard-category-list" id="dash-category-list"></div>
-          </div>
-        </div>
-
-        <aside class="dashboard-side-card">
-          <div class="dashboard-side-head"><span>Atividades mais registradas</span><span>Top 10</span></div>
-          <div id="dash-top-activities" class="dashboard-activity-list"><div class="empty">Sem registros.</div></div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="view" id="view-reports" hidden>
+    <section class="view" id="view-analysis" hidden>
       <div class="reports-shell">
         <div class="reports-topbar">
-          <div class="reports-tabs" role="tablist" aria-label="Tipo de relatório">
-            <button class="reports-tab active" data-report-tab="summary" onclick="setReportTab('summary',this)">Resumo</button>
-            <button class="reports-tab" data-report-tab="detailed" onclick="setReportTab('detailed',this)">Detalhado</button>
-            <button class="reports-tab" data-report-tab="weekly" onclick="setReportTab('weekly',this)">Semanal</button>
+          <div class="reports-tabs" role="tablist" aria-label="Modo de análise">
+            <button class="reports-tab active" data-analysis-mode="overview" onclick="setAnalysisMode('overview',this)">Visão geral</button>
+            <button class="reports-tab" data-analysis-mode="detailed" onclick="setAnalysisMode('detailed',this)">Detalhado</button>
+            <button class="reports-tab" data-analysis-mode="weekly" onclick="setAnalysisMode('weekly',this)">Semanal</button>
           </div>
           <div class="reports-top-actions">
             <div class="reports-period">
               <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg></span>
-              <span class="reports-period-label" id="reports-period-label">Esta semana</span>
-              <button onclick="changeReportWeek(-1)" title="Semana anterior"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></button>
-              <button onclick="changeReportWeek(1)" title="Próxima semana"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></button>
+              <span class="reports-period-label" id="analysis-period-label">Esta semana</span>
+              <button onclick="changeAnalysisWeek(-1)" title="Semana anterior"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></button>
+              <button onclick="changeAnalysisWeek(1)" title="Próxima semana"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></button>
             </div>
-            <button class="reports-export" onclick="exportCurrentReport()">EXPORTAR</button>
+            <button class="reports-export" onclick="exportCurrentAnalysis()">EXPORTAR</button>
           </div>
         </div>
 
         <div class="reports-filterbar">
           <span class="reports-filter-label">Filtros</span>
-          <select id="reports-scope" class="reports-select" onchange="handleReportScopeChange()" aria-label="Escopo do relatório">
-            <option value="member">Membro</option>
-            <option value="team">Equipe</option>
+          <select id="analysis-scope" class="reports-select" onchange="handleAnalysisScopeChange()" aria-label="Quem exibir">
+            <option value="me">Somente eu</option>
+            <option value="custom">Eu + colegas selecionados</option>
+            <option value="team">Equipe inteira</option>
+            <option value="sector">Por setor</option>
           </select>
-          <select id="reports-member" class="reports-select" onchange="renderReports()" aria-label="Membro" hidden></select>
-          <select id="reports-cargo" class="reports-select" onchange="renderReports()" aria-label="Cargo ou projeto"><option value="">Todos os cargos/projetos</option></select>
-          <button class="reports-apply" onclick="renderReports()">APLICAR FILTRO</button>
+          <select id="analysis-people-multi" class="reports-select" multiple size="3" onchange="handleAnalysisPeopleMultiChange()" aria-label="Selecionar até 3 colegas" hidden></select>
+          <select id="analysis-sector" class="reports-select" onchange="renderAnalysis()" aria-label="Setor" hidden></select>
+          <select id="analysis-cargo" class="reports-select" onchange="renderAnalysis()" aria-label="Cargo ou projeto"><option value="">Todos os cargos/projetos</option></select>
+          <select id="analysis-modalidade" class="reports-select" onchange="renderAnalysis()" aria-label="Local de trabalho"><option value="">Todos os locais</option></select>
+          <button class="reports-apply" onclick="renderAnalysis()">APLICAR FILTRO</button>
         </div>
 
-        <div class="reports-card">
-          <div class="reports-card-head">
-            <div><span class="reports-total-label">Total:</span><span class="reports-total" id="reports-total">00:00:00</span></div>
-            <div class="reports-group-label" id="reports-group-label">Agrupado por Cargo/Projeto</div>
+        <div id="analysis-overview-panel">
+          <div class="dashboard-layout">
+            <div class="dashboard-main-card">
+              <div class="dashboard-summary">
+                <div class="dashboard-summary-item"><span>Tempo total</span><strong id="dash-total-time">00:00:00</strong></div>
+                <div class="dashboard-summary-item"><span>Cargo/Projeto principal</span><strong id="dash-top-cargo">—</strong></div>
+                <div class="dashboard-summary-item"><span>Localização principal</span><strong id="dash-top-location">—</strong></div>
+              </div>
+              <div class="dashboard-chart-wrap">
+                <div class="dashboard-y-axis" id="dash-y-axis"></div>
+                <div class="dashboard-bars" id="dash-bars"></div>
+              </div>
+              <div class="dashboard-breakdown">
+                <div class="dashboard-donut-wrap">
+                  <div class="dashboard-donut" id="dash-donut"><span id="dash-donut-total">00:00:00</span></div>
+                </div>
+                <div class="dashboard-category-list" id="dash-category-list"></div>
+              </div>
+            </div>
+
+            <aside class="dashboard-side-card">
+              <div class="dashboard-side-head"><span>Atividades mais registradas</span><span>Top 10</span></div>
+              <div id="dash-top-activities" class="dashboard-activity-list"><div class="empty">Sem registros.</div></div>
+            </aside>
           </div>
-          <div id="reports-content"><div class="reports-empty">Sem registros.</div></div>
+        </div>
+
+        <div class="reports-card" id="analysis-table-panel" hidden>
+          <div class="reports-card-head">
+            <div><span class="reports-total-label">Total:</span><span class="reports-total" id="analysis-table-total">00:00:00</span></div>
+            <div class="reports-group-label" id="analysis-table-group-label">Registros individuais</div>
+          </div>
+          <div id="analysis-table-content"><div class="reports-empty">Sem registros.</div></div>
         </div>
       </div>
     </section>
@@ -1256,7 +1236,6 @@
 
   const DB = {
     getUsers: () => CACHE.users,
-    saveUsers: () => {}, // não usado mais: perfil é salvo via api('updateProfile')
     getTeams: () => CACHE.teams,
     saveTeams: (v) => { CACHE.teams = v; },
     getEntries: () => CACHE.entries,
@@ -1633,12 +1612,6 @@
     return String(value || '').trim().toLowerCase();
   }
 
-  function usernameExists(candidate, exceptUsername = null) {
-    // Mantido apenas para compatibilidade com o restante do código;
-    // a checagem de unicidade real acontece no servidor.
-    return false;
-  }
-
   async function applySession(token, user) {
     authToken = token;
     localStorage.setItem('petimer_token', token);
@@ -1921,7 +1894,7 @@
     updateSuggestions();
   }
 
-  function refreshAppViews() { renderEntries(); renderReports(); renderTeamMembers(); renderCycleBadge(); renderDashboard(); }
+  function refreshAppViews() { renderEntries(); renderTeamMembers(); renderCycleBadge(); renderAnalysis(); }
 
   function switchView(view, btn) {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -1929,10 +1902,10 @@
     document.querySelectorAll('.view').forEach(v => v.hidden = true);
     document.getElementById('view-' + view).hidden = false;
     currentView = view;
-    const titles = { 'tracker': 'Registro de atividade', 'dashboard': 'Dashboard', 'reports': 'Relatórios', 'team': 'Gestão da Equipe', 'cycle': 'Período' };
+    const titles = { 'tracker': 'Registro de atividade', 'analysis': 'Análise', 'team': 'Gestão da Equipe', 'cycle': 'Período' };
     document.getElementById('view-title').textContent = titles[view];
     if (view === 'cycle') renderCycleView();
-    if (view === 'dashboard') renderDashboard();
+    if (view === 'analysis') renderAnalysis();
     renderCycleBadge();
   }
 
@@ -2120,7 +2093,7 @@
   // RENDER ENTRIES AGRUPADO POR DATA E COM EDIÇÃO INLINE 
   function renderEntries() {
     const el = document.getElementById('entries-list');
-    const all = DB.getEntries().filter(e => e.teamCode === session.teamCode);
+    const all = DB.getEntries().filter(e => e.teamCode === session.teamCode && e.user === session.username);
     const run = DB.getRunning();
     let list = [...all];
     const users = DB.getUsers();
@@ -2312,7 +2285,8 @@
   }
 
 
-  let dashboardWeekOffset = 0;
+  let analysisWeekOffset = 0;
+  let analysisMode = 'overview';
 
   function startOfWeek(date) {
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -2323,19 +2297,26 @@
     return d;
   }
 
-  function dashboardWeekRange() {
-    const now = new Date();
-    const start = startOfWeek(now);
-    start.setDate(start.getDate() + dashboardWeekOffset * 7);
+  function analysisWeekRange() {
+    const start = startOfWeek(new Date());
+    start.setDate(start.getDate() + analysisWeekOffset * 7);
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
     end.setHours(23,59,59,999);
     return { start, end };
   }
 
-  function changeDashboardWeek(delta) {
-    dashboardWeekOffset += delta;
-    renderDashboard();
+  function changeAnalysisWeek(delta) {
+    analysisWeekOffset += delta;
+    renderAnalysis();
+  }
+
+  function setAnalysisMode(mode, btn) {
+    analysisMode = mode;
+    document.querySelectorAll('[data-analysis-mode]').forEach(b => b.classList.toggle('active', b.dataset.analysisMode === mode));
+    document.getElementById('analysis-overview-panel').hidden = mode !== 'overview';
+    document.getElementById('analysis-table-panel').hidden = mode === 'overview';
+    renderAnalysis();
   }
 
   function fmtClock(ms) {
@@ -2348,29 +2329,156 @@
     return entry.cargoColor || getCargoColor(entry.cargo) || '#64748b';
   }
 
-  function renderDashboard() {
-    const root = document.getElementById('view-dashboard');
-    if (!root || !session || !session.teamCode) return;
-    const scopeEl = document.getElementById('dashboard-scope');
-    const scope = scopeEl ? scopeEl.value : 'member';
-    const {start,end} = dashboardWeekRange();
-    const todayStart = startOfWeek(new Date());
+  function startOfDay(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  }
 
-    const periodLabel = document.getElementById('dashboard-period-label');
-    if (dashboardWeekOffset === 0) periodLabel.textContent = 'Esta semana';
-    else {
-      const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
-      periodLabel.textContent = `${fmt(start)} – ${fmt(end)}`;
+  function reportDateLabel(d) {
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  function reportMemberName(username) {
+    const u = DB.getUsers()[username];
+    return u ? (u.name || u.username || username) : username;
+  }
+
+  // ---------- Filtros: pessoas (eu / eu+colegas / equipe / setor), setor, cargo, local ----------
+  function getTeamSectors() {
+    const team = DB.getTeams()[session.teamCode];
+    if (!team) return [];
+    const set = new Set();
+    Object.values(team.members || {}).forEach(m => set.add(m.sector || 'Geral'));
+    return [...set].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  }
+
+  function usersInSector(sector) {
+    const team = DB.getTeams()[session.teamCode];
+    if (!team) return [];
+    return Object.keys(team.members || {}).filter(u => (team.members[u].sector || 'Geral') === sector);
+  }
+
+  function getSelectedPeople() {
+    const multi = document.getElementById('analysis-people-multi');
+    const chosen = multi ? Array.from(multi.selectedOptions).map(o => o.value) : [];
+    return [session.username, ...chosen.filter(u => u !== session.username)];
+  }
+
+  function handleAnalysisScopeChange() {
+    const scope = document.getElementById('analysis-scope')?.value || 'me';
+    document.getElementById('analysis-people-multi').hidden = scope !== 'custom';
+    document.getElementById('analysis-sector').hidden = scope !== 'sector';
+    renderAnalysis();
+  }
+
+  function handleAnalysisPeopleMultiChange() {
+    const multi = document.getElementById('analysis-people-multi');
+    const opts = Array.from(multi.selectedOptions);
+    if (opts.length > 3) {
+      alert('Você pode selecionar até 3 colegas além de você mesmo.');
+      opts.slice(3).forEach(o => { o.selected = false; });
+    }
+    renderAnalysis();
+  }
+
+  function populateAnalysisFilters() {
+    if (!session || !session.teamCode) return;
+    const all = DB.getEntries().filter(e => e.teamCode === session.teamCode);
+
+    const cargoSel = document.getElementById('analysis-cargo');
+    if (cargoSel) {
+      const prev = cargoSel.value;
+      const cargos = [...new Set(all.map(e => e.cargo || 'Sem cargo'))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+      cargoSel.innerHTML = '<option value="">Todos os cargos/projetos</option>' + cargos.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      if (cargos.includes(prev)) cargoSel.value = prev;
     }
 
-    let entries = DB.getEntries().filter(e => e.teamCode === session.teamCode);
-    if (scope === 'member') entries = entries.filter(e => e.user === session.username);
+    const modSel = document.getElementById('analysis-modalidade');
+    if (modSel) {
+      const prev = modSel.value;
+      const mods = [...new Set(all.map(e => e.modalidade || 'Sem localização'))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+      modSel.innerHTML = '<option value="">Todos os locais</option>' + mods.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+      if (mods.includes(prev)) modSel.value = prev;
+    }
+
+    const multi = document.getElementById('analysis-people-multi');
+    if (multi) {
+      const prevSelected = Array.from(multi.selectedOptions).map(o => o.value);
+      const team = DB.getTeams()[session.teamCode];
+      const users = DB.getUsers();
+      const members = team ? Object.keys(team.members || {}).filter(u => u !== session.username) : [];
+      multi.innerHTML = members.map(u => {
+        const name = users[u]?.name || users[u]?.username || u;
+        return `<option value="${escapeHtml(u)}" ${prevSelected.includes(u) ? 'selected' : ''}>${escapeHtml(name)}</option>`;
+      }).join('');
+    }
+
+    const sectorSel = document.getElementById('analysis-sector');
+    if (sectorSel) {
+      const prev = sectorSel.value;
+      const sectors = getTeamSectors();
+      sectorSel.innerHTML = sectors.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+      if (sectors.includes(prev)) sectorSel.value = prev;
+      else if (sectors.length) sectorSel.value = sectors[0];
+    }
+  }
+
+  function getAnalysisFilteredEntries() {
+    if (!session || !session.teamCode) return [];
+    const { start, end } = analysisWeekRange();
+    const scope = document.getElementById('analysis-scope')?.value || 'me';
+    const cargo = document.getElementById('analysis-cargo')?.value || '';
+    const modalidade = document.getElementById('analysis-modalidade')?.value || '';
+
+    let entries = DB.getEntries().filter(e => e.teamCode === session.teamCode && e.date);
     entries = entries.filter(e => {
-      if (!e.date) return false;
       const d = new Date(e.date + 'T12:00:00');
       return d >= start && d <= end;
     });
 
+    if (scope === 'me') {
+      entries = entries.filter(e => e.user === session.username);
+    } else if (scope === 'custom') {
+      const picked = getSelectedPeople();
+      entries = entries.filter(e => picked.includes(e.user));
+    } else if (scope === 'sector') {
+      const sector = document.getElementById('analysis-sector')?.value || '';
+      const members = sector ? usersInSector(sector) : [];
+      entries = entries.filter(e => members.includes(e.user));
+    }
+    // scope === 'team' -> sem filtro de usuário
+
+    if (cargo) entries = entries.filter(e => (e.cargo || 'Sem cargo') === cargo);
+    if (modalidade) entries = entries.filter(e => (e.modalidade || 'Sem localização') === modalidade);
+    return entries;
+  }
+
+  function renderAnalysis() {
+    const root = document.getElementById('view-analysis');
+    if (!root || !session || !session.teamCode) return;
+
+    populateAnalysisFilters();
+    const scope = document.getElementById('analysis-scope')?.value || 'me';
+    document.getElementById('analysis-people-multi').hidden = scope !== 'custom';
+    document.getElementById('analysis-sector').hidden = scope !== 'sector';
+
+    const { start, end } = analysisWeekRange();
+    const label = document.getElementById('analysis-period-label');
+    if (label) label.textContent = analysisWeekOffset === 0 ? 'Esta semana' : `${reportDateLabel(start)} – ${reportDateLabel(end)}`;
+
+    const entries = getAnalysisFilteredEntries();
+
+    if (analysisMode === 'overview') {
+      renderAnalysisOverview(entries, start);
+    } else {
+      const total = entries.reduce((sum,e)=>sum+(Number(e.duration)||0),0);
+      const totalEl = document.getElementById('analysis-table-total'); if (totalEl) totalEl.textContent = fmtClock(total);
+      const group = document.getElementById('analysis-table-group-label'); if (group) group.textContent = analysisMode === 'detailed' ? 'Registros individuais' : 'Agrupado por Cargo/Projeto';
+      const content = document.getElementById('analysis-table-content'); if (!content) return;
+      content.innerHTML = analysisMode === 'detailed' ? renderReportDetailed(entries) : renderReportWeekly(entries, start);
+    }
+  }
+
+  function renderAnalysisOverview(entries, start) {
     const total = entries.reduce((sum,e)=>sum+(Number(e.duration)||0),0);
     document.getElementById('dash-total-time').textContent = fmtClock(total);
     document.getElementById('dash-donut-total').textContent = fmtClock(total);
@@ -2448,118 +2556,6 @@
     actList.innerHTML = topActs.length ? topActs.map(([activity,obj])=>`<div class="dashboard-activity-row"><div class="dashboard-activity-main"><div class="dashboard-activity-name">${escapeHtml(activity)}</div><div class="dashboard-activity-sub"><span class="dashboard-dot" style="background:${obj.color}"></span><span style="color:${obj.color}">${escapeHtml(obj.cargo)}</span></div></div><div class="dashboard-activity-time">${fmtClock(obj.duration)}</div></div>`).join('') : '<div class="empty" style="padding:24px 16px">Sem registros nesta semana.</div>';
   }
 
-  function startOfDay(d) {
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  }
-
-  let reportWeekOffset = 0;
-  let reportTab = 'summary';
-
-  function reportWeekRange() {
-    const start = startOfWeek(new Date());
-    start.setDate(start.getDate() + reportWeekOffset * 7);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 6);
-    end.setHours(23,59,59,999);
-    return {start,end};
-  }
-
-  function changeReportWeek(delta) {
-    reportWeekOffset += delta;
-    renderReports();
-  }
-
-  function setReportTab(tab, btn) {
-    reportTab = tab;
-    document.querySelectorAll('[data-report-tab]').forEach(b => b.classList.toggle('active', b.dataset.reportTab === tab));
-    renderReports();
-  }
-
-  function handleReportScopeChange() {
-    const scope = document.getElementById('reports-scope')?.value || 'member';
-    const member = document.getElementById('reports-member');
-    if (member) member.hidden = scope !== 'team';
-    renderReports();
-  }
-
-  function getReportFilteredEntries() {
-    if (!session || !session.teamCode) return [];
-    const {start,end} = reportWeekRange();
-    const scope = document.getElementById('reports-scope')?.value || 'member';
-    const cargo = document.getElementById('reports-cargo')?.value || '';
-    const member = document.getElementById('reports-member')?.value || '';
-    let entries = DB.getEntries().filter(e => e.teamCode === session.teamCode && e.date);
-    entries = entries.filter(e => {
-      const d = new Date(e.date + 'T12:00:00');
-      return d >= start && d <= end;
-    });
-    if (scope === 'member') entries = entries.filter(e => e.user === session.username);
-    else if (member) entries = entries.filter(e => e.user === member);
-    if (cargo) entries = entries.filter(e => (e.cargo || 'Sem cargo') === cargo);
-    return entries;
-  }
-
-  function populateReportFilters() {
-    if (!session || !session.teamCode) return;
-    const all = DB.getEntries().filter(e => e.teamCode === session.teamCode);
-    const cargoSel = document.getElementById('reports-cargo');
-    if (cargoSel) {
-      const prev = cargoSel.value;
-      const cargos = [...new Set(all.map(e => e.cargo || 'Sem cargo'))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-      cargoSel.innerHTML = '<option value="">Todos os cargos/projetos</option>' + cargos.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-      if (cargos.includes(prev)) cargoSel.value = prev;
-    }
-    const memberSel = document.getElementById('reports-member');
-    if (memberSel) {
-      const prev = memberSel.value;
-      const team = DB.getTeams()[session.teamCode];
-      const users = DB.getUsers();
-      const members = team ? Object.keys(team.members || {}) : [];
-      memberSel.innerHTML = '<option value="">Todos os membros</option>' + members.map(u=>{
-        const name = users[u]?.name || users[u]?.username || u;
-        return `<option value="${escapeHtml(u)}">${escapeHtml(name)}</option>`;
-      }).join('');
-      if (members.includes(prev)) memberSel.value = prev;
-    }
-  }
-
-  function reportDateLabel(d) {
-    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
-  }
-
-  function reportMemberName(username) {
-    const u = DB.getUsers()[username];
-    return u ? (u.name || u.username || username) : username;
-  }
-
-  function renderReportSummary(entries, start) {
-    const total = entries.reduce((a,e)=>a+(Number(e.duration)||0),0);
-    const daily = Array.from({length:7}, (_,i)=>({date:new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),total:0,cargos:{}}));
-    const cargoTotals = {};
-    entries.forEach(e=>{
-      const d = new Date(e.date+'T12:00:00');
-      const idx = Math.round((startOfDay(d)-startOfDay(start))/86400000);
-      if(idx<0||idx>6) return;
-      const dur=Number(e.duration)||0, cargo=e.cargo||'Sem cargo', color=dashboardCargoColor(e);
-      daily[idx].total += dur;
-      if(!daily[idx].cargos[cargo]) daily[idx].cargos[cargo]={duration:0,color};
-      daily[idx].cargos[cargo].duration += dur;
-      if(!cargoTotals[cargo]) cargoTotals[cargo]={duration:0,color};
-      cargoTotals[cargo].duration += dur;
-    });
-    const maxMsRaw=Math.max(...daily.map(d=>d.total),3600000), maxH=Math.ceil(maxMsRaw/3600000), chartH=Math.max(2,Math.ceil(maxH/2)*2), chartMax=chartH*3600000;
-    const marks=[0,.2,.4,.6,.8,1].map(r=>Math.round(chartH*r));
-    const y=`<div class="reports-y-axis">${marks.map((h,i)=>`<span class="reports-y-label" style="bottom:${i*20}%">${h}.0h</span>`).join('')}</div>`;
-    const names=['SEG','TER','QUA','QUI','SEX','SÁB','DOM'];
-    const bars=`<div class="reports-bars">${daily.map((d,i)=>{
-      const bh=Math.min(80,d.total/chartMax*80);
-      const segs=Object.entries(d.cargos).map(([name,o])=>`<div class="reports-stack-seg" style="height:${d.total?o.duration/d.total*100:0}%;background:${o.color}" title="${escapeHtml(name)} — ${fmtClock(o.duration)}"></div>`).join('');
-      return `<div class="reports-day" style="--bar-height:${bh}%"><div class="reports-bar-total">${fmtClock(d.total)}</div><div class="reports-stack">${segs}</div><div class="reports-day-label">${names[i]}, ${reportDateLabel(d.date)}</div></div>`;
-    }).join('')}</div>`;
-    const legend=Object.entries(cargoTotals).sort((a,b)=>b[1].duration-a[1].duration).map(([name,o])=>`<div class="reports-legend-item"><span class="reports-legend-dot" style="background:${o.color}"></span><span style="color:${o.color}">${escapeHtml(name)}</span><span class="muted">${fmtClock(o.duration)}</span></div>`).join('');
-    return `<div class="reports-summary-chart">${y}${bars}</div><div class="reports-legend">${legend || '<span class="muted">Sem dados no período.</span>'}</div>`;
-  }
-
   function renderReportDetailed(entries) {
     if(!entries.length) return '<div class="reports-empty">Nenhum registro neste período.</div>';
     const sorted=[...entries].sort((a,b)=>(b.date||'').localeCompare(a.date||'') || (b.startTime||'').localeCompare(a.startTime||''));
@@ -2585,33 +2581,15 @@
     return `<div class="reports-table-wrap"><table class="reports-table weekly-table"><thead><tr><th>Cargo/Projeto</th>${names.map((n,i)=>`<th>${n}, ${reportDateLabel(new Date(start.getFullYear(),start.getMonth(),start.getDate()+i))}</th>`).join('')}<th>Total</th></tr></thead><tbody>${rows.map(([name,o])=>`<tr><td><div class="weekly-cargo"><span class="weekly-dot" style="background:${o.color}"></span><span style="color:${o.color};font-weight:650">${escapeHtml(name)}</span></div></td>${o.days.map(v=>`<td class="reports-timecell">${v?fmtClock(v):'—'}</td>`).join('')}<td class="reports-timecell weekly-total-col">${fmtClock(o.total)}</td></tr>`).join('')}<tr class="weekly-total-row"><td>Total</td>${dailyTotals.map(v=>`<td class="reports-timecell">${fmtClock(v)}</td>`).join('')}<td class="reports-timecell">${fmtClock(grand)}</td></tr></tbody></table></div>`;
   }
 
-  function renderReports() {
-    const root=document.getElementById('view-reports');
-    if(!root || !session || !session.teamCode) return;
-    populateReportFilters();
-    const scope=document.getElementById('reports-scope')?.value||'member';
-    const memberSel=document.getElementById('reports-member');
-    if(memberSel) memberSel.hidden=scope!=='team';
-    const {start,end}=reportWeekRange();
-    const label=document.getElementById('reports-period-label');
-    if(label) label.textContent=reportWeekOffset===0?'Esta semana':`${reportDateLabel(start)} – ${reportDateLabel(end)}`;
-    const entries=getReportFilteredEntries();
-    const total=entries.reduce((sum,e)=>sum+(Number(e.duration)||0),0);
-    const totalEl=document.getElementById('reports-total'); if(totalEl) totalEl.textContent=fmtClock(total);
-    const group=document.getElementById('reports-group-label'); if(group) group.textContent=reportTab==='detailed'?'Registros individuais':'Agrupado por Cargo/Projeto';
-    const content=document.getElementById('reports-content'); if(!content) return;
-    content.innerHTML=reportTab==='detailed'?renderReportDetailed(entries):reportTab==='weekly'?renderReportWeekly(entries,start):renderReportSummary(entries,start);
-  }
-
-  function exportCurrentReport() {
-    const entries=getReportFilteredEntries();
+  function exportCurrentAnalysis() {
+    const entries=getAnalysisFilteredEntries();
     if(!entries.length) return alert('Não há registros para exportar neste período.');
 
     // Abre a janela imediatamente (mantém o gesto do clique e evita bloqueio de pop-up).
     const win=window.open('', '_blank');
     if(!win) return alert('O navegador bloqueou a janela de exportação. Permita pop-ups para o PETimer e tente novamente.');
 
-    const {start,end}=reportWeekRange();
+    const {start,end}=analysisWeekRange();
     const total=entries.reduce((sum,e)=>sum+(Number(e.duration)||0),0);
     const colors=['#276097','#4f8ec7','#7b61a8','#2f8a70','#c58a2d','#b85c69','#557c8d','#6a8f3f','#8b6d52','#4a6fa5','#a15f9d','#3d8b91'];
     const colorFor=(key,index)=>{
