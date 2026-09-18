@@ -128,7 +128,7 @@
   .topbar{display:flex; justify-content:space-between; align-items:center; gap:14px 16px; flex-wrap:wrap; margin-bottom:20px;}
   .topbar h1{font-size:20px; font-weight:700; margin:0; letter-spacing:-.01em;}
 
-  /* AVISO DO CICLO — informação contextual sutil, alinhada à direita do título */
+  /* AVISO DO PERÍODO — informação contextual sutil, alinhada à direita do título */
   .cycle-badge{
     display:flex; align-items:flex-start; gap:8px;
     background:#f7f8fa; border:1px solid var(--border); border-radius:9px;
@@ -144,7 +144,7 @@
   .cycle-badge.is-success{background:#edf8f0; border-color:#c9e3d0;}
   .cycle-badge.is-success .line-icon{color:#4f8760;}
 
-  /* Aviso central do último período do ciclo */
+  /* Aviso central do último período do período */
   .final-period-overlay{
     position:fixed; inset:0; z-index:1200; display:flex; align-items:center; justify-content:center;
     padding:28px; background:rgba(28,31,43,.16); backdrop-filter:blur(1.5px);
@@ -371,7 +371,7 @@
   .manage-delete:hover{background:#fff0ef;color:var(--danger);}
   .manage-delete svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 
-  /* PÁGINA CICLO — formulário organizado por grupos e cards independentes */
+  /* PÁGINA PERÍODO — formulário organizado por grupos e cards independentes */
   .cycle-form-card{padding:20px 22px 18px; margin-bottom:26px;}
   .cycle-form-head{display:flex; align-items:flex-start; gap:12px; margin-bottom:18px;}
   .cycle-form-head .line-icon{width:32px;height:32px;flex-basis:32px;border-radius:8px;background:var(--accent-soft);color:var(--accent);margin-top:1px;}
@@ -550,11 +550,11 @@
   @media(max-width:900px){.reports-top-actions{width:100%;margin-left:0}.reports-filterbar{flex-wrap:wrap}.reports-apply{margin-left:0}.reports-bars{gap:8px}.reports-stack{width:48px}.reports-period-label{min-width:140px}}
 
 
-  /* CICLO — visão de membro e resumo do administrador */
+  /* PERÍODO — visão de membro e resumo do administrador */
   .cycle-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}.cycle-info-card{padding:16px 18px}.cycle-info-card span{display:block;font-size:10.5px;color:var(--muted);margin-bottom:6px}.cycle-info-card strong{font-size:18px}.cycle-planner{padding:18px;margin-bottom:22px}.cycle-planner-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.cycle-planner-head h3{margin:0 0 4px;font-size:14px}.cycle-planner-head p{margin:0;color:var(--muted);font-size:11.5px}.planner-mode{width:auto;min-width:210px}.planner-days{display:grid;grid-template-columns:repeat(7,minmax(90px,1fr));gap:8px}.planner-day{border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface-2)}.planner-day label{font-size:11px;font-weight:650;display:flex;gap:6px;align-items:center;margin-bottom:8px}.planner-day input[type=number]{padding:7px;font-size:12px}.planner-unavailable{opacity:.55}.cycle-admin-summary{margin-bottom:22px}.cycle-admin-table{width:100%;border-collapse:collapse;font-size:12px}.cycle-admin-table th,.cycle-admin-table td{padding:11px 14px;border-bottom:1px solid var(--border);text-align:left}.cycle-admin-table th{font-size:10px;text-transform:uppercase;color:var(--muted)}.cycle-member-name{font-weight:700}.cycle-admin-table tbody tr:nth-child(odd) .cycle-member-name{color:#0b4f8a}.cycle-admin-table tbody tr:nth-child(even) .cycle-member-name{color:#4f8fbd}.cycle-empty-state{padding:38px 20px;text-align:center;color:var(--muted);font-size:13px}.cycle-section-label{font-size:13.5px;font-weight:700;margin:4px 2px 12px}.cycle-ended-note{margin-bottom:16px;padding:12px 14px;border:1px solid #c9e3d0;background:#edf8f0;border-radius:9px;font-size:12px}@media(max-width:900px){.cycle-overview-grid{grid-template-columns:1fr}.planner-days{grid-template-columns:repeat(2,1fr)}}
 
 
-  /* MODAL — papel do administrador no ciclo */
+  /* MODAL — papel do administrador no período */
   .admin-cycle-role-backdrop{position:fixed;inset:0;z-index:1350;background:rgba(17,24,39,.30);display:flex;align-items:center;justify-content:center;padding:24px;}
   .admin-cycle-role-backdrop[hidden]{display:none;}
   .admin-cycle-role-dialog{width:min(520px,calc(100vw - 32px));background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 50px rgba(8,47,83,.20);overflow:hidden;}
@@ -577,7 +577,7 @@
   .admin-cycle-role-actions .btn-outline{padding:9px 14px;}
 
 
-  /* CICLO — navegação interna em abas, inspirada em relatórios */
+  /* PERÍODO — navegação interna em abas, inspirada em relatórios */
   .cycle-tabs-shell{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:-4px 0 18px;flex-wrap:wrap;}
   .cycle-tabs{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface);}
   .cycle-tab{height:40px;padding:0 18px;border:0;border-right:1px solid var(--border);background:var(--surface);color:var(--text);font:500 12px inherit;cursor:pointer;transition:.15s ease;}
@@ -921,7 +921,7 @@
       <button class="nav-item active" onclick="switchView('tracker', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></svg><span>Registro de atividade</span></button>
       <button class="nav-item" onclick="switchView('dashboard', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg><span>Dashboard</span></button>
       <button class="nav-item" onclick="switchView('reports', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"></path><path d="M4 19h16"></path><path d="M9 15v-4"></path><path d="M13 15V8"></path><path d="M17 15v-6"></path></svg><span>Relatórios</span></button>
-      <button class="nav-item" id="nav-cycle" onclick="switchView('cycle', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M20.5 4v5h-5"></path></svg><span>Ciclo</span></button>
+      <button class="nav-item" id="nav-cycle" onclick="switchView('cycle', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M20.5 4v5h-5"></path></svg><span>Período</span></button>
       <button class="nav-item" onclick="switchView('team', this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7.5" r="3.5"></circle><path d="M21 20v-2a4 4 0 0 0-3-3.85"></path><path d="M15.5 4.15a3.5 3.5 0 0 1 0 6.7"></path></svg><span>Gestão da Equipe</span></button>
     </nav>
     <div class="sidebar-footer">
@@ -936,7 +936,7 @@
         </button>
         <button type="button" id="cycle-role-toggle" onclick="openAdminCycleRoleDialog()" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12h8M12 8v8"></path></svg>
-          <span id="cycle-role-toggle-label">Modo no ciclo</span>
+          <span id="cycle-role-toggle-label">Modo no período</span>
         </button>
         <div class="profile-menu-sep"></div>
         <button type="button" class="logout-action" onclick="logout()">
@@ -954,7 +954,7 @@
     <div class="admin-cycle-role-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-cycle-role-title">
       <div class="admin-cycle-role-head">
         <div>
-          <h3 id="admin-cycle-role-title">Participação do administrador no ciclo</h3>
+          <h3 id="admin-cycle-role-title">Participação do administrador no período</h3>
           <p>Escolha como sua conta de administrador deve funcionar dentro desta equipe.</p>
         </div>
         <button type="button" class="admin-cycle-role-close" aria-label="Fechar" onclick="closeAdminCycleRoleDialog()">×</button>
@@ -965,18 +965,18 @@
             <input type="radio" name="admin-cycle-role" value="admin-only" onchange="updateAdminCycleRoleCards()">
             <span class="admin-cycle-role-copy">
               <strong>Apenas administrador</strong>
-              <span>Você administra e acompanha os horários dos membros, mas não participa das metas do ciclo. Sua média pessoal e os avisos de meta semanal ficam desativados.</span>
+              <span>Você administra e acompanha os horários dos membros, mas não participa das metas do período. Sua média pessoal e os avisos de meta semanal ficam desativados.</span>
             </span>
           </label>
           <label class="admin-cycle-role-option" id="admin-role-participant-card">
             <input type="radio" name="admin-cycle-role" value="participant" onchange="updateAdminCycleRoleCards()">
             <span class="admin-cycle-role-copy">
-              <strong>Administrador e participante do ciclo</strong>
-              <span>Além de administrar a equipe, você também participa do ciclo como os demais membros. Seus registros contam para sua média e você recebe avisos e informações sobre suas metas.</span>
+              <strong>Administrador e participante do período</strong>
+              <span>Além de administrar a equipe, você também participa do período como os demais membros. Seus registros contam para sua média e você recebe avisos e informações sobre suas metas.</span>
             </span>
           </label>
         </div>
-        <div class="admin-cycle-role-note">Essa escolha altera apenas sua participação nas metas do ciclo. Suas permissões de administrador continuam as mesmas.</div>
+        <div class="admin-cycle-role-note">Essa escolha altera apenas sua participação nas metas do período. Suas permissões de administrador continuam as mesmas.</div>
         <div class="admin-cycle-role-actions">
           <button type="button" class="btn-outline" onclick="closeAdminCycleRoleDialog()">Cancelar</button>
           <button type="button" class="btn-solid" onclick="saveAdminCycleRole()">Salvar escolha</button>
@@ -1145,9 +1145,9 @@
 
     <section class="view" id="view-cycle" hidden>
       <div class="cycle-tabs-shell">
-        <div class="cycle-tabs" role="tablist" aria-label="Navegação do ciclo">
-          <button type="button" class="cycle-tab active" id="cycle-tab-current" onclick="switchCycleSubView('current')">Ciclo</button>
-          <button type="button" class="cycle-tab" id="cycle-tab-records" onclick="switchCycleSubView('records')">Registros de Ciclos</button>
+        <div class="cycle-tabs" role="tablist" aria-label="Navegação do período">
+          <button type="button" class="cycle-tab active" id="cycle-tab-current" onclick="switchCycleSubView('current')">Período</button>
+          <button type="button" class="cycle-tab" id="cycle-tab-records" onclick="switchCycleSubView('records')">Registros de Períodos</button>
           <button type="button" class="cycle-tab" id="cycle-tab-info" onclick="switchCycleSubView('info')">Acompanhamento</button>
         </div>
       </div>
@@ -1160,7 +1160,7 @@
               <div class="cycle-form-head">
                 <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></span>
                 <div>
-                  <h3 id="cycle-form-title">Criar novo ciclo</h3>
+                  <h3 id="cycle-form-title">Criar novo período</h3>
                   <p id="cycle-form-description">Defina o período e a meta de tempo que deseja acompanhar.</p>
                 </div>
               </div>
@@ -1175,8 +1175,8 @@
               <div class="field"><label for="cycle-unit">Dividir por</label><div class="input-icon-wrap"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M20.5 4v5h-5"></path></svg></span><select id="cycle-unit" required><option value="weeks">Semanas</option><option value="days">Dias</option><option value="hours">Horas</option></select></div></div>
               <div class="field"><label for="cycle-goal-hours">Meta de tempo</label><div class="input-icon-wrap goal-wrap"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></svg></span><input type="number" id="cycle-goal-hours" min="0" placeholder="0" aria-label="Meta em horas"><span class="goal-unit">h</span><span class="goal-sep" aria-hidden="true"></span><input type="number" id="cycle-goal-minutes" min="0" max="59" placeholder="0" aria-label="Meta em minutos"><span class="goal-unit">min</span></div></div>
             </div></div>
-            <p class="form-note"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></span><span>Registros com datas dentro do período são considerados, inclusive registros feitos antes da criação do ciclo.</span></p>
-            <div class="form-actions"><button type="submit" class="btn-solid" id="cycle-submit-btn"><span class="icon-button-content"><span class="line-icon" id="cycle-submit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></span><span id="cycle-submit-label">Criar ciclo</span></span></button><button type="button" class="btn-outline" id="cycle-cancel-btn" onclick="cancelEditCycle()">Cancelar</button></div>
+            <p class="form-note"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></span><span>Registros com datas dentro do período são considerados, inclusive registros feitos antes da criação do período.</span></p>
+            <div class="form-actions"><button type="submit" class="btn-solid" id="cycle-submit-btn"><span class="icon-button-content"><span class="line-icon" id="cycle-submit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></span><span id="cycle-submit-label">Criar período</span></span></button><button type="button" class="btn-outline" id="cycle-cancel-btn" onclick="cancelEditCycle()">Cancelar</button></div>
           </form>
           </div>
         </div>
@@ -1188,7 +1188,7 @@
             <div class="cycle-data-modal-title-wrap">
               <span class="cycle-data-modal-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path><path d="M6 9H2M12 5H8M18 12h-4"></path></svg></span>
               <div>
-                <h3 id="cycle-data-modal-title">Dados sobre o ciclo</h3>
+                <h3 id="cycle-data-modal-title">Dados sobre o período</h3>
                 <p id="cycle-data-modal-period"></p>
               </div>
             </div>
@@ -1203,7 +1203,7 @@
       </div>
 
       <div class="cycle-tab-page" id="cycle-page-records" hidden>
-        <div class="cycle-page-head"><div><h3>Registros de Ciclos</h3><p>Consulte os ciclos da equipe e abra um deles para ver seus detalhes.</p></div></div>
+        <div class="cycle-page-head"><div><h3>Registros de Períodos</h3><p>Consulte os períodos da equipe e abra um deles para ver seus detalhes.</p></div></div>
         <div id="cycle-records-content"></div>
       </div>
 
@@ -1247,7 +1247,7 @@
 
   // ---------- CACHE LOCAL ----------
   // Espelha, em memória, os dados da equipe atualmente aberta. Toda
-  // gravação (registros, ciclos, equipe, etc.) é feita através de
+  // gravação (registros, períodos, equipe, etc.) é feita através de
   // chamadas api(...) para a planilha; o cache é então atualizado a
   // partir da resposta do servidor (refreshTeamData), então todas as
   // funções de renderização abaixo continuam lendo daqui, sem saber
@@ -1929,7 +1929,7 @@
     document.querySelectorAll('.view').forEach(v => v.hidden = true);
     document.getElementById('view-' + view).hidden = false;
     currentView = view;
-    const titles = { 'tracker': 'Registro de atividade', 'dashboard': 'Dashboard', 'reports': 'Relatórios', 'team': 'Gestão da Equipe', 'cycle': 'Ciclo' };
+    const titles = { 'tracker': 'Registro de atividade', 'dashboard': 'Dashboard', 'reports': 'Relatórios', 'team': 'Gestão da Equipe', 'cycle': 'Período' };
     document.getElementById('view-title').textContent = titles[view];
     if (view === 'cycle') renderCycleView();
     if (view === 'dashboard') renderDashboard();
@@ -2746,7 +2746,7 @@
     } catch (err) { alert(err.message); }
   }
 
-  // ---------- CICLO ----------
+  // ---------- PERÍODO ----------
   const CYCLE_UNIT_MS = { weeks: 7 * 86400000, days: 86400000, hours: 3600000 };
   const CYCLE_UNIT_TEXT = {
     weeks: { esta: 'esta semana', desta: 'desta semana', da: 'da semana', por: 'por semana', singular: 'semana', plural: 'semanas', label: 'Semanas' },
@@ -2762,11 +2762,11 @@
     return DB.getCycles().find(c => c.teamCode === session.teamCode && todayStr >= c.startDate && todayStr <= c.endDate) || null;
   }
 
-  // Período atual do ciclo, sempre alinhado ao calendário:
-  //  - semanas: segunda-feira -> domingo (nunca blocos de 7 dias a partir do início do ciclo);
+  // Período atual do período, sempre alinhado ao calendário:
+  //  - semanas: segunda-feira -> domingo (nunca blocos de 7 dias a partir do início do período);
   //  - dias: cada dia do calendário (00:00 -> 23:59);
   //  - horas: cada hora cheia do relógio (HH:00 -> HH:59).
-  // Apenas o trecho do período que está dentro das datas do ciclo é contabilizado.
+  // Apenas o trecho do período que está dentro das datas do período é contabilizado.
   function getCyclePeriodRange(cycle) {
     const unitMs = CYCLE_UNIT_MS[cycle.unit];
     const startMs = new Date(`${cycle.startDate}T00:00:00`).getTime();
@@ -2786,13 +2786,13 @@
       periodStart = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate(), ref.getHours()).getTime();
       periodEnd = periodStart + unitMs;
     }
-    // Somente o intervalo efetivamente abrangido pelo ciclo entra na contagem
+    // Somente o intervalo efetivamente abrangido pelo período entra na contagem
     const countStart = Math.max(periodStart, startMs);
     const countEnd = Math.min(periodEnd, endMs + 1);
     return { periodStart, periodEnd, countStart, countEnd, unitMs, startMs, endMs, nowMs };
   }
 
-  // Quantos períodos (do atual até o fim do ciclo, inclusive) ainda restam
+  // Quantos períodos (do atual até o fim do período, inclusive) ainda restam
   function countRemainingPeriods(cycle, periodStart) {
     const end = new Date(`${cycle.endDate}T00:00:00`);
     const start = new Date(periodStart);
@@ -2858,16 +2858,16 @@
     const u = CYCLE_UNIT_TEXT[cycle.unit];
     const avgLabel = cycleAverageLabel(cycle.unit);
     let line1;
-    if (remainingMs <= 30000) line1 = 'Média do ciclo atingida.';
+    if (remainingMs <= 30000) line1 = 'Média do período atingida.';
     else if (periodCompleted) line1 = `${avgLabel.charAt(0).toUpperCase() + avgLabel.slice(1)} cumprida neste período.`;
     else line1 = `Faltam ${formatHM(remainingThisPeriodMs)} para cumprir a ${avgLabel}.`;
     const unitWord = periodsRemaining === 1 ? u.singular : u.plural;
     const lastPeriodText = cycle.unit === 'weeks'
-      ? 'Esta é a última semana do ciclo.'
+      ? 'Esta é a última semana do período.'
       : cycle.unit === 'hours'
-        ? 'Esta é a última hora do ciclo.'
-        : 'Este é o último dia do ciclo.';
-    const line2 = periodsRemaining === 1 ? lastPeriodText : `O ciclo termina em ${periodsRemaining} ${unitWord}.`;
+        ? 'Esta é a última hora do período.'
+        : 'Este é o último dia do período.';
+    const line2 = periodsRemaining === 1 ? lastPeriodText : `O período termina em ${periodsRemaining} ${unitWord}.`;
     return { line1, line2, progress };
   }
 
@@ -2920,11 +2920,11 @@
     const remaining = Math.max(0, progress.remainingMs);
     const isWeek = periodName === 'semana';
     document.getElementById('final-period-title').textContent = isWeek
-      ? 'Esta é a última semana do ciclo'
-      : `Este é o último ${periodName} do ciclo`;
+      ? 'Esta é a última semana do período'
+      : `Este é o último ${periodName} do período`;
     document.getElementById('final-period-text').innerHTML = remaining > 30000
-      ? `Para cumprir a média definida do ciclo, você precisa fazer <strong>${escapeHtml(formatHM(remaining))}</strong> ${isWeek ? 'nesta última semana' : `neste último ${escapeHtml(periodName)}`}.`
-      : `Você já cumpriu a média necessária do ciclo. Continue registrando suas atividades normalmente.`;
+      ? `Para cumprir a média definida do período, você precisa fazer <strong>${escapeHtml(formatHM(remaining))}</strong> ${isWeek ? 'nesta última semana' : `neste último ${escapeHtml(periodName)}`}.`
+      : `Você já cumpriu a média necessária do período. Continue registrando suas atividades normalmente.`;
     overlay.hidden = false;
   }
 
@@ -2998,7 +2998,7 @@
   function updateCycleRoleControl() {
     const team = DB.getTeams()[session.teamCode], btn=document.getElementById('cycle-role-toggle'), label=document.getElementById('cycle-role-toggle-label');
     if(!btn||!team) return; const admin=team.admin===session.username; btn.hidden=!admin;
-    if(admin && label) label.textContent = adminParticipatesInCycle() ? 'Administrador e participante do ciclo' : 'Apenas administrador';
+    if(admin && label) label.textContent = adminParticipatesInCycle() ? 'Administrador e participante do período' : 'Apenas administrador';
   }
   function memberCycleProgress(cycle, username) {
     const old=session.username; session.username=username; const result=computeCycleProgress(cycle); session.username=old; return result;
@@ -3064,7 +3064,7 @@
       return `<div class="planner-day ${unavailable?'planner-unavailable':''}"><label><input type="checkbox" ${unavailable?'':'checked'} onchange="savePlannerDay('${cycle.id}',${i},this.checked)"><span>${n}</span></label><div class="planner-field-label">Tempo planejado</div><input class="planner-duration-input" type="text" inputmode="numeric" maxlength="4" placeholder="00:00" value="${unavailable?'':plannerDurationValue(val||0)}" ${unavailable?'disabled':''} onfocus="beginPlannerDurationEdit(this)" oninput="maskPlannerDurationInput(this)" onblur="finishPlannerDurationEdit(this,'${cycle.id}',${i},'planned')"><div class="planner-field-label planner-free-label">Horas livres</div><input class="planner-duration-input planner-free-hours-input" type="text" inputmode="numeric" maxlength="4" placeholder="00:00" value="${unavailable?'':plannerDurationValue(free)}" ${unavailable?'disabled':''} onfocus="beginPlannerDurationEdit(this)" oninput="maskPlannerDurationInput(this)" onblur="finishPlannerDurationEdit(this,'${cycle.id}',${i},'free')" aria-label="Horas livres de ${n}"><small>${unavailable?'Indisponível':'Disponível'}</small></div>`;
     }).join('');
     const missing=Math.max(0,remainingMin-planned);
-    return `<div class="card cycle-planner"><div class="cycle-planner-head"><div><h3>Planejamento da próxima semana</h3><p>Marque os dias em que você pode trabalhar, informe quantas <strong>horas livres</strong> você terá em cada dia e defina quanto desse tempo pretende dedicar ao ciclo. As horas livres indicam sua disponibilidade total. Ao usar <strong>Sugerir distribuição</strong>, o PETimer divide a meta proporcionalmente entre os dias disponíveis: dias com mais horas livres recebem uma parcela maior. Na opção <strong>Readequar automaticamente</strong>, qualquer tempo não cumprido também é redistribuído entre os próximos dias disponíveis, sempre respeitando as horas livres informadas.</p></div><div class="planner-mode-wrap"><select class="planner-mode" onchange="savePlannerMode('${cycle.id}',this.value)"><option value="adapt" ${saved.mode==='adapt'?'selected':''}>Readequar automaticamente</option><option value="keep" ${saved.mode==='keep'?'selected':''}>Manter planejamento original</option></select><span class="planner-info" title="No modo automático, o tempo não cumprido é redistribuído somente entre os próximos dias disponíveis, respeitando as horas livres informadas por você.">i</span></div></div><div class="planner-days">${cells}</div><div class="planner-summary"><div><strong>Planejado: ${plannerHM(planned)}</strong><span>Meta: ${plannerHM(remainingMin)}</span><span class="${missing?'planner-missing':'planner-ok'}">${missing?`Faltam distribuir: ${plannerHM(missing)}`:'Planejamento completo ✓'}</span></div><button type="button" class="btn-solid planner-suggest" onclick="suggestPlannerDistribution('${cycle.id}',${remainingMin})">Sugerir distribuição</button></div></div>`;
+    return `<div class="card cycle-planner"><div class="cycle-planner-head"><div><h3>Planejamento da próxima semana</h3><p>Marque os dias em que você pode trabalhar, informe quantas <strong>horas livres</strong> você terá em cada dia e defina quanto desse tempo pretende dedicar ao período. As horas livres indicam sua disponibilidade total. Ao usar <strong>Sugerir distribuição</strong>, o PETimer divide a meta proporcionalmente entre os dias disponíveis: dias com mais horas livres recebem uma parcela maior. Na opção <strong>Readequar automaticamente</strong>, qualquer tempo não cumprido também é redistribuído entre os próximos dias disponíveis, sempre respeitando as horas livres informadas.</p></div><div class="planner-mode-wrap"><select class="planner-mode" onchange="savePlannerMode('${cycle.id}',this.value)"><option value="adapt" ${saved.mode==='adapt'?'selected':''}>Readequar automaticamente</option><option value="keep" ${saved.mode==='keep'?'selected':''}>Manter planejamento original</option></select><span class="planner-info" title="No modo automático, o tempo não cumprido é redistribuído somente entre os próximos dias disponíveis, respeitando as horas livres informadas por você.">i</span></div></div><div class="planner-days">${cells}</div><div class="planner-summary"><div><strong>Planejado: ${plannerHM(planned)}</strong><span>Meta: ${plannerHM(remainingMin)}</span><span class="${missing?'planner-missing':'planner-ok'}">${missing?`Faltam distribuir: ${plannerHM(missing)}`:'Planejamento completo ✓'}</span></div><button type="button" class="btn-solid planner-suggest" onclick="suggestPlannerDistribution('${cycle.id}',${remainingMin})">Sugerir distribuição</button></div></div>`;
   }
 
   function renderWeekSummary(cycle, saved){
@@ -3189,7 +3189,7 @@
     const q=String(filter||'').trim().toLocaleLowerCase('pt-BR');
     const filtered=q?participants.filter(x=>String(x.name||'').toLocaleLowerCase('pt-BR').includes(q)||String(x.username||'').toLocaleLowerCase('pt-BR').includes(q)):participants;
     const rows=filtered.map(x=>`<tr><td><div class="cycle-data-member"><span class="cycle-data-avatar">${escapeHtml(cycleMemberInitials(x.name))}</span><span class="cycle-data-member-name">${escapeHtml(x.name)}</span></div></td><td>${formatHM(x.progress.loggedMs)}</td><td><strong>${formatHM(x.avg)}</strong></td><td>${formatHM(x.progress.remainingMs)}</td></tr>`).join('');
-    return `<div class="cycle-data-summary"><div class="cycle-data-summary-item"><span>Período</span><strong>${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</strong></div><div class="cycle-data-summary-item"><span>Divisão</span><strong>${escapeHtml(CYCLE_UNIT_TEXT[cycle.unit].label)}</strong></div><div class="cycle-data-summary-item"><span>Meta</span><strong>${escapeHtml(cycleGoalText(cycle))}</strong></div><div class="cycle-data-summary-item"><span>Tempo restante</span><strong>${escapeHtml(cycleTimeLeft(cycle))}</strong></div></div><div class="cycle-data-table-card"><div class="cycle-data-table-head"><h4>Médias dos membros no ciclo</h4><label class="cycle-data-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" id="cycle-data-search-input" placeholder="Buscar membro..." autocomplete="off" aria-label="Buscar membro" oninput="filterCycleDataMembers(this.value)"></label></div><div class="cycle-data-table-scroll"><table class="cycle-data-table"><thead><tr><th>Membro</th><th>Tempo registrado</th><th>Média no ciclo</th><th>Tempo restante</th></tr></thead><tbody>${rows||'<tr><td class="cycle-data-empty" colspan="4">Nenhum participante encontrado.</td></tr>'}</tbody></table></div></div>`;
+    return `<div class="cycle-data-summary"><div class="cycle-data-summary-item"><span>Período</span><strong>${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</strong></div><div class="cycle-data-summary-item"><span>Divisão</span><strong>${escapeHtml(CYCLE_UNIT_TEXT[cycle.unit].label)}</strong></div><div class="cycle-data-summary-item"><span>Meta</span><strong>${escapeHtml(cycleGoalText(cycle))}</strong></div><div class="cycle-data-summary-item"><span>Tempo restante</span><strong>${escapeHtml(cycleTimeLeft(cycle))}</strong></div></div><div class="cycle-data-table-card"><div class="cycle-data-table-head"><h4>Médias dos membros no período</h4><label class="cycle-data-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" id="cycle-data-search-input" placeholder="Buscar membro..." autocomplete="off" aria-label="Buscar membro" oninput="filterCycleDataMembers(this.value)"></label></div><div class="cycle-data-table-scroll"><table class="cycle-data-table"><thead><tr><th>Membro</th><th>Tempo registrado</th><th>Média no período</th><th>Tempo restante</th></tr></thead><tbody>${rows||'<tr><td class="cycle-data-empty" colspan="4">Nenhum participante encontrado.</td></tr>'}</tbody></table></div></div>`;
   }
   let activeCycleDataModalId=null;
   function filterCycleDataMembers(value){
@@ -3213,7 +3213,7 @@
     period.textContent=`${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)} · ${cycleGoalText(cycle)}`;
     body.innerHTML=renderCycleMembersTable(cycle);
     const total=cycleParticipants(cycle).length;
-    if(count)count.textContent=`${total} ${total===1?'membro':'membros'} no ciclo`;
+    if(count)count.textContent=`${total} ${total===1?'membro':'membros'} no período`;
     modal.hidden=false;
   }
   function closeCycleDataModal(){
@@ -3226,17 +3226,17 @@
   }
   function renderCycleDetail(cycle,{history=false}={}){
     if(!cycle) return '';
-    const admin=isTeamAdmin(), u=CYCLE_UNIT_TEXT[cycle.unit], actions=admin&&!history?`<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="startEditCycle('${cycle.id}')">Editar ciclo</button><button type="button" class="btn-outline" onclick="deleteCycle('${cycle.id}')">Excluir</button></div>`:'';
+    const admin=isTeamAdmin(), u=CYCLE_UNIT_TEXT[cycle.unit], actions=admin&&!history?`<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="startEditCycle('${cycle.id}')">Editar período</button><button type="button" class="btn-outline" onclick="deleteCycle('${cycle.id}')">Excluir</button></div>`:'';
     const remaining=cycleTimeLeft(cycle);
-    return `<div class="card cycle-detail-hero"><div class="cycle-detail-top"><div class="cycle-detail-title"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg></span><div><h3>${history?'Detalhes do ciclo':'Ciclo atual'}</h3><p>${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div style="display:flex;align-items:center;gap:10px">${cycleStatusLabel(cycle)}${actions}</div></div><div class="cycle-detail-metrics"><div class="cycle-detail-metric"><span>Início</span><strong>${fmtDateBR(cycle.startDate)}</strong></div><div class="cycle-detail-metric"><span>Fim</span><strong>${fmtDateBR(cycle.endDate)}</strong></div><div class="cycle-detail-metric"><span>Divisão</span><strong>${u.label}</strong></div><div class="cycle-detail-metric"><span>Meta</span><strong>${cycleGoalText(cycle)}</strong></div>${!history?`<div class="cycle-detail-metric"><span>Tempo restante</span><strong>${remaining}</strong></div>`:''}</div><div class="cycle-detail-footer"><button type="button" class="btn-outline cycle-data-btn" onclick="openCycleDataModal('${cycle.id}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>Dados sobre o ciclo</button></div></div>`;
+    return `<div class="card cycle-detail-hero"><div class="cycle-detail-top"><div class="cycle-detail-title"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg></span><div><h3>${history?'Detalhes do período':'Período atual'}</h3><p>${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div style="display:flex;align-items:center;gap:10px">${cycleStatusLabel(cycle)}${actions}</div></div><div class="cycle-detail-metrics"><div class="cycle-detail-metric"><span>Início</span><strong>${fmtDateBR(cycle.startDate)}</strong></div><div class="cycle-detail-metric"><span>Fim</span><strong>${fmtDateBR(cycle.endDate)}</strong></div><div class="cycle-detail-metric"><span>Divisão</span><strong>${u.label}</strong></div><div class="cycle-detail-metric"><span>Meta</span><strong>${cycleGoalText(cycle)}</strong></div>${!history?`<div class="cycle-detail-metric"><span>Tempo restante</span><strong>${remaining}</strong></div>`:''}</div><div class="cycle-detail-footer"><button type="button" class="btn-outline cycle-data-btn" onclick="openCycleDataModal('${cycle.id}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>Dados sobre o período</button></div></div>`;
   }
   function openNewCycleForm(){
     if(!isTeamAdmin()) return;
     editingCycleId = null;
     document.getElementById('form-cycle').reset();
-    document.getElementById('cycle-form-title').textContent = 'Criar novo ciclo';
+    document.getElementById('cycle-form-title').textContent = 'Criar novo período';
     document.getElementById('cycle-form-description').textContent = 'Defina o período e a meta de tempo que deseja acompanhar.';
-    document.getElementById('cycle-submit-label').textContent = 'Criar ciclo';
+    document.getElementById('cycle-submit-label').textContent = 'Criar período';
     document.getElementById('cycle-submit-icon').hidden = false;
     document.getElementById('cycle-cancel-btn').hidden = false;
     const modal=document.getElementById('cycle-form-modal');
@@ -3259,35 +3259,35 @@
     if(!el||!team)return;
     const admin=isTeamAdmin();
     if(!cycle){
-      el.innerHTML=`<div class="cycle-page-head"><div><h3>Ciclo</h3><p>Acompanhe o ciclo atual da equipe.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Criar ciclo</button></div>':''}</div><div class="card cycle-empty-state">${escapeHtml(team.name)} não iniciou nenhum ciclo.</div>`;
+      el.innerHTML=`<div class="cycle-page-head"><div><h3>Período</h3><p>Acompanhe o período atual da equipe.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Criar período</button></div>':''}</div><div class="card cycle-empty-state">${escapeHtml(team.name)} não iniciou nenhum período.</div>`;
       if(!editingCycleId) hideCycleForm();
       return;
     }
-    el.innerHTML=`<div class="cycle-page-head"><div><h3>Ciclo</h3><p>Visão geral do ciclo atualmente em andamento.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Novo ciclo</button></div>':''}</div>${renderCycleDetail(cycle)}`;
+    el.innerHTML=`<div class="cycle-page-head"><div><h3>Período</h3><p>Visão geral do período atualmente em andamento.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Novo período</button></div>':''}</div>${renderCycleDetail(cycle)}`;
     if(!editingCycleId) hideCycleForm();
   }
   function selectCycleRecord(id){ selectedCycleDetailId=id; renderCycleRecordsPage(); }
   function renderCycleRecordsPage(){
     const el=document.getElementById('cycle-records-content'); if(!el)return;
     const cycles=DB.getCycles().filter(c=>c.teamCode===session.teamCode).sort((a,b)=>b.startDate.localeCompare(a.startDate));
-    if(!cycles.length){el.innerHTML='<div class="card cycle-empty-state">Nenhum ciclo cadastrado.</div>';return;}
+    if(!cycles.length){el.innerHTML='<div class="card cycle-empty-state">Nenhum período cadastrado.</div>';return;}
     // Exibe cada registro diretamente no card completo de detalhes, evitando
     // repetir as datas em uma caixa lateral menor.
     el.innerHTML=`<div style="display:flex;flex-direction:column;gap:16px">${cycles.map(c=>renderCycleDetail(c,{history:true})).join('')}</div>`;
   }
   function renderCycleInfoPage(){
     const el=document.getElementById('cycle-info-content'),team=DB.getTeams()[session.teamCode],cycle=getActiveCycle(); if(!el||!team)return;
-    if(!cycle){el.innerHTML=`<div class="card cycle-empty-state">${escapeHtml(team.name)} não iniciou nenhum ciclo.</div>`;return;}
-    if(team.admin===session.username&&!adminParticipatesInCycle()){el.innerHTML='<div class="card cycle-empty-state">Você está no modo <strong>Apenas administrador</strong>. Como não participa do ciclo, não há média pessoal nem planejamento de período para exibir.</div>';return;}
+    if(!cycle){el.innerHTML=`<div class="card cycle-empty-state">${escapeHtml(team.name)} não iniciou nenhum período.</div>`;return;}
+    if(team.admin===session.username&&!adminParticipatesInCycle()){el.innerHTML='<div class="card cycle-empty-state">Você está no modo <strong>Apenas administrador</strong>. Como não participa do período, não há média pessoal nem planejamento de período para exibir.</div>';return;}
     const p=computeCycleProgress(cycle),avg=p.loggedMs/Math.max(1,p.totalPeriods),periodLabel=cycle.unit==='weeks'?'semanal':cycle.unit==='days'?'diária':'por hora';
     const goalMs=cycle.goalMinutes*60000, totalGoalMs=goalMs*Math.max(1,p.totalPeriods), pct=Math.min(100,Math.round((p.loggedMs/Math.max(1,totalGoalMs))*100)), currentDone=p.remainingThisPeriodMs<=0;
     const diff=avg-goalMs, diffText=diff>=0?`+ ${formatHM(diff)} acima da meta`:`${formatHM(Math.abs(diff))} abaixo da meta`;
-    el.innerHTML=`${renderMemberPlanner(cycle,p)}${renderWeekSummary(cycle, getPlan(cycle.id).data)}<div class="cycle-info-summary cycle-info-summary-bottom"><div class="card cycle-info-card cycle-info-primary"><span>Sua média ${periodLabel}</span><strong>${formatHM(avg)}</strong><small>Meta: ${formatHM(goalMs)}</small><em class="${diff>=0?'positive':'negative'}">${diffText}</em></div><div class="card cycle-info-card"><span>Registrado no ciclo</span><strong>${formatHM(p.loggedMs)}</strong><small>Período: ${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</small><div class="cycle-mini-progress"><i style="width:${pct}%"></i></div></div><div class="card cycle-info-card ${currentDone?'cycle-info-success':''}"><span>Meta do período atual</span><strong>${currentDone?'Concluída ✓':`Faltam ${formatHM(p.remainingThisPeriodMs)}`}</strong><small>${formatHM(Math.max(0,goalMs-p.remainingThisPeriodMs))} / ${formatHM(goalMs)}</small></div></div>`;
+    el.innerHTML=`${renderMemberPlanner(cycle,p)}${renderWeekSummary(cycle, getPlan(cycle.id).data)}<div class="cycle-info-summary cycle-info-summary-bottom"><div class="card cycle-info-card cycle-info-primary"><span>Sua média ${periodLabel}</span><strong>${formatHM(avg)}</strong><small>Meta: ${formatHM(goalMs)}</small><em class="${diff>=0?'positive':'negative'}">${diffText}</em></div><div class="card cycle-info-card"><span>Registrado no período</span><strong>${formatHM(p.loggedMs)}</strong><small>Período: ${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</small><div class="cycle-mini-progress"><i style="width:${pct}%"></i></div></div><div class="card cycle-info-card ${currentDone?'cycle-info-success':''}"><span>Meta do período atual</span><strong>${currentDone?'Concluída ✓':`Faltam ${formatHM(p.remainingThisPeriodMs)}`}</strong><small>${formatHM(Math.max(0,goalMs-p.remainingThisPeriodMs))} / ${formatHM(goalMs)}</small></div></div>`;
   }
   function renderCycleMemberArea(){ renderCycleCurrentPage(); }
-  function renderAdminCycleSummary(){ /* conteúdo integrado às páginas internas do ciclo */ }
+  function renderAdminCycleSummary(){ /* conteúdo integrado às páginas internas do período */ }
   function notifyEndedCycle(){
-    const team=DB.getTeams()[session.teamCode]; if(!team || (team.admin===session.username&&!adminParticipatesInCycle()))return; const today=localDateStr(new Date()); const ended=DB.getCycles().filter(c=>c.teamCode===session.teamCode&&c.endDate<today).sort((a,b)=>b.endDate.localeCompare(a.endDate))[0]; if(!ended)return; const key=`petimer_cycle_ended_${session.teamCode}_${session.username}_${ended.id}`; if(sessionStorage.getItem(key))return; sessionStorage.setItem(key,'1'); setTimeout(()=>alert(`O ciclo de ${fmtDateBR(ended.startDate)} a ${fmtDateBR(ended.endDate)} terminou. Acesse Registros de Ciclos para consultar os resultados.`),100);
+    const team=DB.getTeams()[session.teamCode]; if(!team || (team.admin===session.username&&!adminParticipatesInCycle()))return; const today=localDateStr(new Date()); const ended=DB.getCycles().filter(c=>c.teamCode===session.teamCode&&c.endDate<today).sort((a,b)=>b.endDate.localeCompare(a.endDate))[0]; if(!ended)return; const key=`petimer_cycle_ended_${session.teamCode}_${session.username}_${ended.id}`; if(sessionStorage.getItem(key))return; sessionStorage.setItem(key,'1'); setTimeout(()=>alert(`O período de ${fmtDateBR(ended.startDate)} a ${fmtDateBR(ended.endDate)} terminou. Acesse Registros de Períodos para consultar os resultados.`),100);
   }
 
   function isTeamAdmin() {
@@ -3306,7 +3306,7 @@
 
   async function handleSaveCycle(e) {
     e.preventDefault();
-    if (!isTeamAdmin()) return alert('Apenas o administrador da equipe pode gerenciar ciclos.');
+    if (!isTeamAdmin()) return alert('Apenas o administrador da equipe pode gerenciar períodos.');
 
     const startDate = document.getElementById('cycle-start').value;
     const endDate = document.getElementById('cycle-end').value;
@@ -3339,8 +3339,8 @@
     document.getElementById('cycle-unit').value = cycle.unit;
     document.getElementById('cycle-goal-hours').value = Math.floor(cycle.goalMinutes / 60);
     document.getElementById('cycle-goal-minutes').value = cycle.goalMinutes % 60;
-    document.getElementById('cycle-form-title').textContent = 'Editar ciclo';
-    document.getElementById('cycle-form-description').textContent = 'Altere as informações do ciclo e salve quando terminar.';
+    document.getElementById('cycle-form-title').textContent = 'Editar período';
+    document.getElementById('cycle-form-description').textContent = 'Altere as informações do período e salve quando terminar.';
     document.getElementById('cycle-submit-label').textContent = 'Salvar alterações';
     document.getElementById('cycle-submit-icon').hidden = true;
     document.getElementById('cycle-cancel-btn').hidden = false;
@@ -3350,17 +3350,17 @@
   function cancelEditCycle() {
     editingCycleId = null;
     document.getElementById('form-cycle').reset();
-    document.getElementById('cycle-form-title').textContent = 'Criar novo ciclo';
+    document.getElementById('cycle-form-title').textContent = 'Criar novo período';
     document.getElementById('cycle-form-description').textContent = 'Defina o período e a meta de tempo que deseja acompanhar.';
-    document.getElementById('cycle-submit-label').textContent = 'Criar ciclo';
+    document.getElementById('cycle-submit-label').textContent = 'Criar período';
     document.getElementById('cycle-submit-icon').hidden = false;
     document.getElementById('cycle-cancel-btn').hidden = false;
     hideCycleForm();
   }
 
   async function deleteCycle(id) {
-    if (!isTeamAdmin()) return alert('Apenas o administrador da equipe pode gerenciar ciclos.');
-    if (!confirm('Tem certeza que deseja excluir este ciclo?')) return;
+    if (!isTeamAdmin()) return alert('Apenas o administrador da equipe pode gerenciar períodos.');
+    if (!confirm('Tem certeza que deseja excluir este período?')) return;
     try {
       await api('deleteCycle', { cycleId: id });
       await refreshTeamData();
