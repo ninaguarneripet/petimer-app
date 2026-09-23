@@ -183,7 +183,7 @@
   
   .tracker-input{flex:1; border:none; background:transparent; font-size:14.5px; padding:6px 8px; font-weight:500;}
   .tracker-input:focus{outline:none;}
-  .timer-readout{font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:600; min-width:96px; text-align:right;}
+  .timer-readout{font-family:inherit; font-size:13px; font-weight:400; min-width:96px; text-align:right; font-variant-numeric:tabular-nums;}
   .btn-pill{border:none; border-radius:24px; padding:9px 22px; font-weight:700; font-size:12.5px; cursor:pointer;}
   .btn-start{background:var(--accent); color:#ffffff;}
   .btn-stop{background:var(--danger); color:#fff;}
@@ -313,7 +313,7 @@
   }
   .tracker-bar .tracker-input{min-width:0;width:100%;font-size:14px;padding:6px 6px;}
   .tracker-bar .btn-pill{padding:8px 18px;}
-  .tracker-bar .timer-readout{font-size:17px;min-width:88px;}
+  .tracker-bar .timer-readout{font-size:13px;min-width:88px;}
   .tracker-bar .icon-select-wrap{width:100%;min-width:0;}
   .tracker-bar .icon-select-wrap .tracker-select{flex:1;min-width:0;width:100%;}
   .tracker-bar .tracker-date{width:100%;min-width:0;}
@@ -544,7 +544,7 @@
 
 
   /* PERÍODO — visão de membro e resumo do administrador */
-  .cycle-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}.cycle-info-card{padding:16px 18px}.cycle-info-card span{display:block;font-size:10.5px;color:var(--muted);margin-bottom:6px}.cycle-info-card strong{font-size:18px}.cycle-planner{padding:18px;margin-bottom:22px}.cycle-planner-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.cycle-planner-head h3{margin:0 0 4px;font-size:14px}.cycle-planner-head p{margin:0;color:var(--muted);font-size:11.5px}.planner-mode{width:auto;min-width:210px}.planner-days{display:grid;grid-template-columns:repeat(7,minmax(90px,1fr));gap:8px}.planner-day{border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface-2)}.planner-day label{font-size:11px;font-weight:650;display:flex;gap:6px;align-items:center;margin-bottom:8px}.planner-day input[type=number]{padding:7px;font-size:12px}.planner-unavailable{opacity:.55}.cycle-admin-summary{margin-bottom:22px}.cycle-admin-table{width:100%;border-collapse:collapse;font-size:12px}.cycle-admin-table th,.cycle-admin-table td{padding:11px 14px;border-bottom:1px solid var(--border);text-align:left}.cycle-admin-table th{font-size:10px;text-transform:uppercase;color:var(--muted)}.cycle-member-name{font-weight:700}.cycle-admin-table tbody tr:nth-child(odd) .cycle-member-name{color:#0b4f8a}.cycle-admin-table tbody tr:nth-child(even) .cycle-member-name{color:#4f8fbd}.cycle-empty-state{padding:38px 20px;text-align:center;color:var(--muted);font-size:13px}.cycle-section-label{font-size:13.5px;font-weight:700;margin:4px 2px 12px}.cycle-ended-note{margin-bottom:16px;padding:12px 14px;border:1px solid #c9e3d0;background:#edf8f0;border-radius:9px;font-size:12px}@media(max-width:900px){.cycle-overview-grid{grid-template-columns:1fr}.planner-days{grid-template-columns:repeat(2,1fr)}}
+  .cycle-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}.cycle-admin-summary{margin-bottom:22px}.cycle-admin-table{width:100%;border-collapse:collapse;font-size:12px}.cycle-admin-table th,.cycle-admin-table td{padding:11px 14px;border-bottom:1px solid var(--border);text-align:left}.cycle-admin-table th{font-size:10px;text-transform:uppercase;color:var(--muted)}.cycle-member-name{font-weight:700}.cycle-admin-table tbody tr:nth-child(odd) .cycle-member-name{color:#0b4f8a}.cycle-admin-table tbody tr:nth-child(even) .cycle-member-name{color:#4f8fbd}.cycle-empty-state{padding:38px 20px;text-align:center;color:var(--muted);font-size:13px}.cycle-section-label{font-size:13.5px;font-weight:700;margin:4px 2px 12px}.cycle-ended-note{margin-bottom:16px;padding:12px 14px;border:1px solid #c9e3d0;background:#edf8f0;border-radius:9px;font-size:12px}@media(max-width:900px){.cycle-overview-grid{grid-template-columns:1fr}}
 
 
   /* MODAL — papel do administrador no período */
@@ -648,20 +648,9 @@
   .cycle-form-modal-close{width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:23px;line-height:1;cursor:pointer;flex:0 0 34px;}
   .cycle-form-modal-close:hover{background:var(--surface-2);color:var(--text);}
   @media(max-width:640px){.cycle-form-modal-backdrop{padding:12px}.cycle-form-modal-backdrop .cycle-form-card{max-height:calc(100vh - 24px);padding:18px 16px}}
-  .cycle-info-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px;}
   @media(max-width:1050px){.cycle-records-layout{grid-template-columns:1fr}.cycle-detail-metrics{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:700px){.cycle-tabs{width:100%;display:grid;grid-template-columns:1fr}.cycle-tab{border-right:0;border-bottom:1px solid var(--border)}.cycle-tab:last-child{border-bottom:0}.cycle-detail-metrics,.cycle-info-summary{grid-template-columns:1fr}.cycle-page-head{flex-direction:column}}
+  @media(max-width:700px){.cycle-tabs{width:100%;display:grid;grid-template-columns:1fr}.cycle-tab{border-right:0;border-bottom:1px solid var(--border)}.cycle-tab:last-child{border-bottom:0}.cycle-detail-metrics{grid-template-columns:1fr}.cycle-page-head{flex-direction:column}}
 
-
-  /* Acompanhamento — versão compacta */
-  .cycle-info-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}.cycle-info-card{min-height:118px}.cycle-info-card small{display:block;margin-top:7px;color:var(--muted);font-size:10.5px}.cycle-info-card em{display:block;margin-top:9px;font-size:10.5px;font-style:normal;font-weight:700}.cycle-info-card .positive{color:#16834b}.cycle-info-card .negative{color:#b76520}.cycle-info-primary{background:#f8fbfe}.cycle-info-success{background:#f6fcf8;border-color:#d6eadc}.cycle-info-success strong{color:#16834b}.cycle-mini-progress{height:6px;border-radius:999px;background:#e5eaf0;margin-top:10px;overflow:hidden}.cycle-mini-progress i{display:block;height:100%;background:var(--accent);border-radius:inherit}.planner-mode-wrap{display:flex;align-items:center;gap:7px}.planner-info{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#aab4c1;color:#fff;font-size:11px;font-weight:700;cursor:help}.planner-day{min-height:128px}.planner-day label{justify-content:flex-start}.planner-time-wrap{position:relative}.planner-time-wrap input{width:100%;color:transparent;caret-color:transparent}.planner-time-wrap>span{position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:12px;color:var(--text);font-weight:600}.planner-day small{display:inline-block;margin-top:9px;padding:4px 8px;border-radius:6px;background:#edf6ff;color:#1767ad;font-size:10px}.planner-unavailable small{background:#eef1f4;color:#737b87}.planner-summary{display:flex;justify-content:space-between;align-items:center;gap:14px;border-top:1px solid var(--border);margin:16px -18px -18px;padding:14px 18px}.planner-summary>div{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:11px}.planner-summary>div span{color:var(--muted)}.planner-summary .planner-missing{color:#d56520}.planner-summary .planner-ok{color:#16834b}.planner-suggest{width:auto;padding:9px 14px}@media(max-width:900px){.cycle-info-summary{grid-template-columns:1fr}.planner-summary{align-items:stretch;flex-direction:column}.planner-suggest{width:100%}}
-.planner-field-label{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:7px 0 4px}.planner-duration-input{width:100%;padding:7px!important;font-size:12px!important;color:var(--text)!important;caret-color:auto!important;font-weight:600}.planner-free-label{margin-top:9px}.planner-free-window{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:4px;align-items:center}.planner-free-window input[type=time]{width:100%;min-width:0;padding:6px 4px;border:1px solid var(--border);border-radius:7px;background:#fff;color:var(--text);font-size:10px}.planner-free-window span{font-size:9px;color:var(--muted)}.cycle-planner-head p{max-width:920px;line-height:1.45}.planner-unavailable .planner-duration-input,.planner-unavailable .planner-free-window input{background:#f2f4f7}.planner-days{align-items:stretch}
-
-/* Resumo visual da semana planejada */
-.week-summary-card{margin-top:14px;padding:18px 18px 16px}.week-summary-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}.week-summary-head h3{margin:0 0 4px;font-size:15px}.week-summary-head p{margin:0;color:var(--muted);font-size:11.5px}.week-summary-legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:10.5px}.week-summary-legend span{display:inline-flex;align-items:center;gap:6px}.week-summary-dot{width:8px;height:8px;border-radius:50%;display:inline-block}.week-summary-dot.plan{background:#276097}.week-summary-dot.work{background:#78b9ed}.week-summary-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px}.week-summary-day{border:1px solid #d9dee6;border-radius:9px;background:#f3f5f7;padding:11px 10px;min-width:0}.week-summary-day.future{background:#f6f7f9}.week-summary-day.today{border-color:#b8cee2;background:#eef3f7}.week-summary-day-head{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:9px}.week-summary-day-name{font-size:11.5px;font-weight:700;color:var(--text)}.week-summary-day-date{display:block;margin-top:2px;font-size:9.5px;color:var(--muted);font-weight:500}.week-summary-values{font-size:11px;font-weight:650;color:var(--text);white-space:nowrap;margin-bottom:9px}.week-summary-values .sep{color:#a2a8b2;font-weight:500;margin:0 3px}.week-summary-bars{display:flex;flex-direction:column;gap:5px}.week-summary-track{height:6px;border-radius:999px;background:#e8edf2;overflow:hidden}.week-summary-fill{height:100%;border-radius:inherit;min-width:0}.week-summary-fill.plan{background:#276097}.week-summary-fill.work{background:#78b9ed}.week-summary-status{margin-top:8px;font-size:9.5px;color:var(--muted)}.week-summary-status.done{color:#16834b}.week-summary-status.behind{color:#b76520}@media(max-width:1100px){.week-summary-days{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:700px){.week-summary-head{flex-direction:column}.week-summary-days{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
-/* Ajuste visual do Acompanhamento: resumo semanal no topo e leitura um pouco maior */
-.week-summary-card{margin-bottom:18px;padding:18px 20px}.week-summary-head h3{font-size:15px}.week-summary-head p{font-size:11.8px}.week-summary-day{padding:12px 13px;min-height:126px}.week-summary-day-name{font-size:12.5px}.week-summary-day-date{font-size:10.5px}.week-summary-values{font-size:12px;margin-bottom:10px}.week-summary-status{font-size:10.3px}.week-summary-track{height:7px}.planner-duration-input{min-height:40px;font-size:13px!important}.planner-field-label{font-size:9.5px}.cycle-info-summary-bottom{margin-top:18px;margin-bottom:0}.cycle-info-summary-bottom .cycle-info-card{min-height:126px;padding:18px 20px}.cycle-info-summary-bottom .cycle-info-card span{font-size:11px}.cycle-info-summary-bottom .cycle-info-card strong{font-size:19px}.cycle-info-summary-bottom .cycle-info-card small,.cycle-info-summary-bottom .cycle-info-card em{font-size:11px}
 
   /* Cargo/Projeto: largura acompanha o nome selecionado, sem cortar o texto */
   .tracker-bar .cargo-select-wrap{width:auto;min-width:150px;max-width:230px;}
@@ -672,14 +661,17 @@
     .tracker-bar .cargo-select-wrap,.entry-primary .entry-cargo-wrap{max-width:190px;}
     .tracker-bar .cargo-select-wrap .tracker-select,.entry-primary .entry-cargo-wrap .edit-select{max-width:158px;}
   }
+.cargo-select-wrap{position:relative;}
+.cargo-picker-trigger{border:0;background:transparent;display:flex;align-items:center;gap:6px;flex:1;min-width:118px;max-width:none;padding:5px 24px 5px 2px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;position:relative;white-space:nowrap}
+.cargo-picker-trigger .cargo-picker-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cargo-picker-trigger:after{content:'';position:absolute;right:6px;top:50%;width:7px;height:7px;border-right:1.7px solid #2f343b;border-bottom:1.7px solid #2f343b;transform:translateY(-65%) rotate(45deg)}
+.cargo-picker-popover{position:absolute;top:calc(100% + 10px);left:0;right:auto;width:400px;max-width:min(400px,calc(100vw - 32px));background:#fff;border:1px solid #dce3ea;border-radius:8px;box-shadow:0 10px 28px rgba(15,35,55,.18);z-index:1500;overflow:hidden;color:var(--text)}
+.cargo-picker-search{padding:10px 12px 10px 34px;border-bottom:1px solid #e7ebef}.cargo-picker-search input{width:100%;box-sizing:border-box;border:1px solid #ccd6df;border-radius:6px;padding:10px 12px;font:inherit;font-size:13px;outline:none}.cargo-picker-search input:focus{border-color:#8bb7db;box-shadow:0 0 0 2px rgba(39,96,151,.08)}
+.cargo-picker-projects{max-height:360px;overflow:auto;padding:6px 0}.cargo-project-block{border-bottom:1px solid #eef1f4}.cargo-project-block:last-child{border-bottom:0}.cargo-project-row{display:flex;align-items:center;gap:9px;padding:10px 12px;min-height:42px}.cargo-project-main{display:flex;align-items:center;gap:8px;min-width:0;flex:1;cursor:pointer}.cargo-project-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}.cargo-project-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cargo-picker-footer{border-top:1px solid #e6ebef;padding:9px 12px}.cargo-picker-footer button{border:0;background:transparent;color:#176fae;font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;padding:3px 0}
+@media(max-width:900px){.cargo-picker-popover{right:auto;left:0;width:360px}}
 </style>
 
-<style>
-/* Diferenciação sutil dos cards do Resumo da semana */
-.week-summary-day,
-.week-summary-day.future { background:#f3f5f7; }
-.week-summary-day.today { background:#eef3f7; }
-</style>
 <style id="registro-visual-align-v2">
 /* Registros salvos: modalidade com o mesmo tratamento visual do seletor superior */
 .row-item-edit .entry-select-modalidade{
@@ -732,6 +724,20 @@
 .entry-right-cluster .entry-actions{flex:0 0 auto;margin-left:0;}
 @media(max-width:1320px){.tracker-bar{grid-template-columns:1fr !important}.tracker-right-cluster{justify-content:flex-start;flex-wrap:wrap}}
 @media(max-width:1240px){.row-item-edit{grid-template-columns:1fr !important;row-gap:8px}.entry-right-cluster{justify-content:flex-start;flex-wrap:wrap}}
+</style>
+
+<style id="tracker-fixed-select-position-v1">
+/* Mantém Cargo/Projeto e Local de trabalho na mesma posição nos modos manual e cronômetro. */
+@media (min-width:1321px){
+  .tracker-right-cluster .time-controls{
+    flex:0 0 394px;
+    width:394px;
+  }
+  .tracker-right-cluster .time-controls .entry-mode{
+    width:100%;
+    justify-content:flex-end;
+  }
+}
 </style>
 </head>
 <body>
@@ -992,7 +998,13 @@
         <div class="tracker-right-cluster">
         <div class="icon-select-wrap cargo-select-wrap" title="Cargo/Projeto">
           <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M8.5 15.5h7"></path><path d="M9 15.5c-.2-1.4-.8-2.2-1.7-3.1A5.9 5.9 0 1 1 16.7 12.4c-.9.9-1.5 1.7-1.7 3.1"></path></svg></span>
-          <select id="cargo-input" class="tracker-select" onchange="handleManagedSelectChange('cargo', this)"></select>
+          <select id="cargo-input" class="tracker-select" onchange="handleManagedSelectChange('cargo', this)" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;"></select>
+          <button id="cargo-picker-trigger" class="cargo-picker-trigger" type="button" onclick="toggleCargoPicker(event)" aria-haspopup="true" aria-expanded="false"><span class="cargo-picker-label">Cargo/Projeto</span></button>
+          <div id="cargo-picker-popover" class="cargo-picker-popover" hidden onclick="event.stopPropagation()">
+            <div class="cargo-picker-search"><input id="cargo-picker-search" type="text" placeholder="Buscar cargo ou projeto" autocomplete="off" oninput="renderCargoPicker(this.value)"></div>
+            <div id="cargo-picker-projects" class="cargo-picker-projects"></div>
+            <div class="cargo-picker-footer"><button type="button" onclick="closeCargoPicker();openOptionsManager('cargo', managedSelectPreviousValue.cargo || '')">＋ Adicionar / gerenciar cargos e projetos</button></div>
+          </div>
         </div>
 
         <div class="icon-select-wrap modalidade-select-wrap" title="Local de trabalho">
@@ -1015,7 +1027,6 @@
             <button class="icon-btn-line" type="button" onclick="setEntryMode('timer')" title="Usar cronômetro" aria-label="Usar cronômetro"><svg viewBox="0 0 24 24"><path d="M9 2h6M12 2v3M18 6l2-2"/><circle cx="12" cy="14" r="8"/><path d="M12 9v5l3 2"/></svg></button>
           </div>
           <div id="timer-controls" class="entry-mode" hidden>
-            <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 2h6M12 2v3M18 6l2-2"/><circle cx="12" cy="14" r="8"/><path d="M12 9v5l3 2"/></svg></span>
             <div class="timer-readout" id="timer-digits">00:00:00</div>
             <button class="btn-pill btn-start" id="timer-btn" onclick="toggleTimer()">INICIAR</button>
             <button class="icon-btn-line" type="button" onclick="setEntryMode('manual')" title="Inserir horário manualmente" aria-label="Inserir horário manualmente"><svg viewBox="0 0 24 24"><path d="M12 17a7 7 0 1 1 5-10M9 5v5l3 2M13 20l1-4 6-6 3 3-6 6-4 1ZM18 12l3 3"/></svg></button>
@@ -1128,7 +1139,6 @@
         <div class="cycle-tabs" role="tablist" aria-label="Navegação do período">
           <button type="button" class="cycle-tab active" id="cycle-tab-current" onclick="switchCycleSubView('current')">Período</button>
           <button type="button" class="cycle-tab" id="cycle-tab-records" onclick="switchCycleSubView('records')">Registros de Períodos</button>
-          <button type="button" class="cycle-tab" id="cycle-tab-info" onclick="switchCycleSubView('info')">Acompanhamento</button>
         </div>
       </div>
 
@@ -1186,11 +1196,6 @@
         <div class="cycle-page-head"><div><h3>Registros de Períodos</h3><p>Consulte os períodos da equipe e abra um deles para ver seus detalhes.</p></div></div>
         <div id="cycle-records-content"></div>
       </div>
-
-      <div class="cycle-tab-page" id="cycle-page-info" hidden>
-        <div class="cycle-page-head"><div><h3>Acompanhamento</h3><p>Acompanhe sua própria média e organize o tempo que pretende dedicar ao período atual.</p></div></div>
-        <div id="cycle-info-content"></div>
-      </div>
     </section>
   </main>
 </div>
@@ -1206,7 +1211,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycby1p_TxRrvvUB12wFzOcQZEBCn1apuWZnduKHJAvl4ZMQ7jw_2hM-df4cD7ytj8eEcm/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbySEr1txLShskoFwyhJZYw9tqYZ2nme_PuC1h2StmUKlfV4s4hqj_QvChe54p1XIfu4/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -1232,7 +1237,7 @@
   // partir da resposta do servidor (refreshTeamData), então todas as
   // funções de renderização abaixo continuam lendo daqui, sem saber
   // que os dados na verdade vêm do Google Sheets.
-  let CACHE = { users: {}, teams: {}, entries: [], cycles: [], running: null, teamRunning: [], myTeams: [], plans: {} };
+  let CACHE = { users: {}, teams: {}, entries: [], cycles: [], running: null, teamRunning: [], myTeams: [] };
 
   const DB = {
     getUsers: () => CACHE.users,
@@ -1270,7 +1275,6 @@
     const mine = running.find(r => r.user === session.username);
     CACHE.running = mine ? { id: 'running', teamCode: session.teamCode, ...mine } : null;
     CACHE.teamRunning = running.filter(r => r.user !== session.username);
-    CACHE.plans = d.myPlanners || {};
   }
 
   const DEFAULT_CARGOS = [
@@ -1328,9 +1332,8 @@
     return found ? found.color : '#334155';
   }
   function cargoOptionsHTML(selected='', includeManage=true) {
-    const manage = includeManage ? '<option class="manage-select-option" value="__manage__">＋ Adicionar</option>' : '';
-    const opts = getCargoOptions().map(c => `<option value="${escapeHtml(c.name)}" style="color:${c.color};font-weight:600;" ${c.name===selected?'selected':''}>${escapeHtml(c.name)}</option>`).join('');
-    return manage + opts;
+    const manage = includeManage ? '<option class="manage-select-option" value="__manage__">＋ Adicionar / gerenciar</option>' : '';
+    return manage + getCargoOptions().map(c => `<option value="${escapeHtml(c.name)}" style="color:${c.color};font-weight:600;" ${c.name===selected?'selected':''}>${escapeHtml(c.name)}</option>`).join('');
   }
   function modalidadeOptionsHTML(selected='', includeManage=true) {
     const manage = includeManage ? '<option class="manage-select-option" value="__manage__">＋ Adicionar</option>' : '';
@@ -1338,29 +1341,21 @@
     return manage + opts;
   }
   function populateManagedSelects(preserve=true) {
-    const cargoEl = document.getElementById('cargo-input');
-    const modEl = document.getElementById('modalidade-input');
-    if (!cargoEl || !modEl || !session || !session.teamCode) return;
-    const cargoCurrent = preserve && cargoEl.value !== '__manage__' ? cargoEl.value : managedSelectPreviousValue.cargo;
-    const modCurrent = preserve && modEl.value !== '__manage__' ? modEl.value : managedSelectPreviousValue.modalidade;
-    cargoEl.innerHTML = cargoOptionsHTML(cargoCurrent);
-    modEl.innerHTML = modalidadeOptionsHTML(modCurrent);
-
-    const cargos = getCargoOptions();
-    const modalidades = getModalidadeOptions();
-    const cargoNext = cargoCurrent && cargos.some(c=>c.name===cargoCurrent) ? cargoCurrent : (cargos[0]?.name || '__manage__');
-    const modNext = modCurrent && modalidades.includes(modCurrent) ? modCurrent : (modalidades[0] || '__manage__');
-    cargoEl.value = cargoNext;
-    modEl.value = modNext;
-    if (cargoNext !== '__manage__') managedSelectPreviousValue.cargo = cargoNext;
-    if (modNext !== '__manage__') managedSelectPreviousValue.modalidade = modNext;
-    applyCargoSelectColor(cargoEl);
+    const cargoEl=document.getElementById('cargo-input'), modEl=document.getElementById('modalidade-input');
+    if(!cargoEl||!modEl||!session||!session.teamCode)return;
+    const cargoCurrent=(preserve?cargoEl.value:managedSelectPreviousValue.cargo)||managedSelectPreviousValue.cargo;
+    const modCurrent=preserve&&modEl.value!=='__manage__'?modEl.value:managedSelectPreviousValue.modalidade;
+    cargoEl.innerHTML=cargoOptionsHTML(cargoCurrent,true); modEl.innerHTML=modalidadeOptionsHTML(modCurrent);
+    const cargos=getCargoOptions(), modalidades=getModalidadeOptions(), cargoObj=cargos.find(c=>c.name===cargoCurrent);
+    const cargoNext=cargoObj?cargoCurrent:(cargos[0]?.name||'__manage__');
+    const modNext=modCurrent&&modalidades.includes(modCurrent)?modCurrent:(modalidades[0]||'__manage__');
+    cargoEl.value=cargoNext; modEl.value=modNext; if(cargoNext)managedSelectPreviousValue.cargo=cargoNext; if(modNext!=='__manage__')managedSelectPreviousValue.modalidade=modNext;
+    applyCargoSelectColor(cargoEl); syncCargoPickerTrigger();
   }
   function applyCargoSelectColor(select) {
     if (!select) return;
-    const value = select.value;
-    select.style.color = value && value !== '__manage__' ? getCargoColor(value) : 'var(--text)';
-    select.style.fontWeight = value && value !== '__manage__' ? '600' : '400';
+    select.style.color = select.value && select.value !== '__manage__' ? getCargoColor(select.value) : 'var(--text)';
+    select.style.fontWeight = select.value && select.value !== '__manage__' ? '600' : '400';
   }
   function handleManagedSelectChange(type, select) {
     if (select.value === '__manage__') {
@@ -1370,6 +1365,15 @@
     managedSelectPreviousValue[type] = select.value;
     if (type === 'cargo') applyCargoSelectColor(select);
   }
+  function syncCargoPickerTrigger(){
+    const trigger=document.getElementById('cargo-picker-trigger'),select=document.getElementById('cargo-input');if(!trigger||!select)return;
+    const label=select.value||'Cargo/Projeto';const span=trigger.querySelector('.cargo-picker-label');if(span)span.textContent=label;trigger.style.color=select.value?getCargoColor(select.value):'var(--text)';
+  }
+  function toggleCargoPicker(event){event?.stopPropagation();const pop=document.getElementById('cargo-picker-popover');if(!pop)return;const opening=pop.hidden;pop.hidden=!opening;document.getElementById('cargo-picker-trigger')?.setAttribute('aria-expanded',String(opening));if(opening){const q=document.getElementById('cargo-picker-search');if(q)q.value='';renderCargoPicker('');setTimeout(()=>q?.focus(),0);}}
+  function closeCargoPicker(){const pop=document.getElementById('cargo-picker-popover');if(pop)pop.hidden=true;document.getElementById('cargo-picker-trigger')?.setAttribute('aria-expanded','false');}
+  function selectCargoFromPicker(encodedCargo){const cargo=decodeURIComponent(encodedCargo),select=document.getElementById('cargo-input');if(!select)return;select.value=cargo;managedSelectPreviousValue.cargo=cargo;applyCargoSelectColor(select);syncCargoPickerTrigger();closeCargoPicker();}
+  function renderCargoPicker(filter=''){const host=document.getElementById('cargo-picker-projects');if(!host)return;const q=String(filter||'').trim().toLocaleLowerCase('pt-BR');const items=getCargoOptions().filter(c=>!q||c.name.toLocaleLowerCase('pt-BR').includes(q));if(!items.length){host.innerHTML='<div class="empty" style="padding:18px">Nenhum cargo ou projeto encontrado.</div>';return;}host.innerHTML=items.map(c=>{const enc=encodeURIComponent(c.name);return `<div class="cargo-project-block"><div class="cargo-project-row"><div class="cargo-project-main" onclick="selectCargoFromPicker('${enc}')"><span class="cargo-project-dot" style="background:${c.color}"></span><span class="cargo-project-name" style="color:${c.color}">${escapeHtml(c.name)}</span></div></div></div>`;}).join('');}
+  document.addEventListener('click',event=>{const wrap=document.querySelector('.cargo-select-wrap');if(wrap&&!wrap.contains(event.target))closeCargoPicker();});
   function openOptionsManager(type, fallback='') {
     managingOptionType = type;
     if (fallback && fallback !== '__manage__') managedSelectPreviousValue[type] = fallback;
@@ -1630,7 +1634,7 @@
     if (DB.getRunning()) await stopTimer();
     authToken = null;
     session = null;
-    CACHE = { users: {}, teams: {}, entries: [], cycles: [], running: null, teamRunning: [], myTeams: [], plans: {} };
+    CACHE = { users: {}, teams: {}, entries: [], cycles: [], running: null, teamRunning: [], myTeams: [] };
     localStorage.removeItem('petimer_token');
     localStorage.removeItem('petimer_last_team');
     location.reload();
@@ -1879,7 +1883,7 @@
     const run = DB.getRunning();
     if (run && run.user === session.username && run.teamCode === session.teamCode) {
       document.getElementById('activity-input').value = run.activity;
-      if(run.cargo) { document.getElementById('cargo-input').value = run.cargo; applyCargoSelectColor(document.getElementById('cargo-input')); }
+      if(run.cargo) { document.getElementById('cargo-input').value = run.cargo; applyCargoSelectColor(document.getElementById('cargo-input')); syncCargoPickerTrigger(); }
       if(run.modalidade) document.getElementById('modalidade-input').value = run.modalidade;
       if(run.date) document.getElementById('date-input').value = run.date;
       document.getElementById('activity-input').disabled = true;
@@ -2982,164 +2986,6 @@
     const old=session.username; session.username=username; const result=computeCycleProgress(cycle); session.username=old; return result;
   }
   function cycleTimeLeft(cycle){ const ms=new Date(cycle.endDate+'T23:59:59').getTime()-Date.now(); if(ms<=0)return 'Encerrado'; const d=Math.floor(ms/86400000),h=Math.floor(ms%86400000/3600000); return d?`${d}d ${h}h`:`${h}h`; }
-  function plannerHM(min){ const m=Math.max(0,Math.round(Number(min)||0)); return `${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`; }
-  function plannerDurationValue(mins){ const m=Math.min(5999,Math.max(0,Number(mins)||0)); return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
-  function beginPlannerDurationEdit(input){
-    if(!input) return;
-    // Guarda o valor que estava visível antes da edição. Se o usuário sair sem digitar,
-    // esse valor é restaurado exatamente como estava.
-    input.dataset.previousValue = input.value || '00:00';
-    input.value = '';
-  }
-  function maskPlannerDurationInput(input){
-    if(!input) return;
-    // Durante a digitação mantemos apenas os quatro algarismos. A interpretação HH:MM
-    // acontece ao sair do campo: 2 -> 02:00, 20 -> 20:00, 203 -> 20:30, 2033 -> 20:33.
-    input.value = String(input.value || '').replace(/\D/g,'').slice(0,4);
-  }
-  function plannerDurationFromTypedDigits(value){
-    const digits=String(value||'').replace(/\D/g,'').slice(0,4);
-    if(!digits) return null;
-    let h=0,m=0;
-    if(digits.length<=2){
-      h=Number(digits);
-    }else if(digits.length===3){
-      h=Number(digits.slice(0,2));
-      m=Number(digits[2])*10;
-    }else{
-      h=Number(digits.slice(0,2));
-      m=Number(digits.slice(2,4));
-    }
-    if(!Number.isFinite(h)||!Number.isFinite(m)||m>59) return undefined;
-    return h*60+m;
-  }
-  function finishPlannerDurationEdit(input,id,i,type){
-    if(!input) return;
-    const raw=String(input.value||'').trim();
-    if(!raw){
-      input.value=input.dataset.previousValue||'00:00';
-      return;
-    }
-    const mins=plannerDurationFromTypedDigits(raw);
-    if(mins===undefined){
-      input.value=input.dataset.previousValue||'00:00';
-      return;
-    }
-    input.value=plannerDurationValue(mins);
-    if(type==='free') savePlannerFreeMinutes(id,i,mins);
-    else savePlannerDurationMinutes(id,i,mins);
-  }
-  function renderMemberPlanner(cycle, progress){
-    const saved=getPlan(cycle.id).data;
-    saved.freeHours=saved.freeHours||{};
-    const names=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom']; const remainingMin=Math.max(0,Math.round(progress.remainingThisPeriodMs/60000));
-    const today=(new Date().getDay()+6)%7;
-    let planned=0;
-    const cells=names.map((n,i)=>{
-      let val=saved.days[i]; if(val===undefined && i>=today) val=0;
-      const unavailable=val===-1; if(!unavailable) planned+=Math.max(0,Number(val)||0);
-      const free=Number(saved.freeHours?.[i])||0;
-      return `<div class="planner-day ${unavailable?'planner-unavailable':''}"><label><input type="checkbox" ${unavailable?'':'checked'} onchange="savePlannerDay('${cycle.id}',${i},this.checked)"><span>${n}</span></label><div class="planner-field-label">Tempo planejado</div><input class="planner-duration-input" type="text" inputmode="numeric" maxlength="4" placeholder="00:00" value="${unavailable?'':plannerDurationValue(val||0)}" ${unavailable?'disabled':''} onfocus="beginPlannerDurationEdit(this)" oninput="maskPlannerDurationInput(this)" onblur="finishPlannerDurationEdit(this,'${cycle.id}',${i},'planned')"><div class="planner-field-label planner-free-label">Horas livres</div><input class="planner-duration-input planner-free-hours-input" type="text" inputmode="numeric" maxlength="4" placeholder="00:00" value="${unavailable?'':plannerDurationValue(free)}" ${unavailable?'disabled':''} onfocus="beginPlannerDurationEdit(this)" oninput="maskPlannerDurationInput(this)" onblur="finishPlannerDurationEdit(this,'${cycle.id}',${i},'free')" aria-label="Horas livres de ${n}"><small>${unavailable?'Indisponível':'Disponível'}</small></div>`;
-    }).join('');
-    const missing=Math.max(0,remainingMin-planned);
-    return `<div class="card cycle-planner"><div class="cycle-planner-head"><div><h3>Planejamento da próxima semana</h3><p>Marque os dias em que você pode trabalhar, informe quantas <strong>horas livres</strong> você terá em cada dia e defina quanto desse tempo pretende dedicar ao período. As horas livres indicam sua disponibilidade total. Ao usar <strong>Sugerir distribuição</strong>, o PETimer divide a meta proporcionalmente entre os dias disponíveis: dias com mais horas livres recebem uma parcela maior. Na opção <strong>Readequar automaticamente</strong>, qualquer tempo não cumprido também é redistribuído entre os próximos dias disponíveis, sempre respeitando as horas livres informadas.</p></div><div class="planner-mode-wrap"><select class="planner-mode" onchange="savePlannerMode('${cycle.id}',this.value)"><option value="adapt" ${saved.mode==='adapt'?'selected':''}>Readequar automaticamente</option><option value="keep" ${saved.mode==='keep'?'selected':''}>Manter planejamento original</option></select><span class="planner-info" title="No modo automático, o tempo não cumprido é redistribuído somente entre os próximos dias disponíveis, respeitando as horas livres informadas por você.">i</span></div></div><div class="planner-days">${cells}</div><div class="planner-summary"><div><strong>Planejado: ${plannerHM(planned)}</strong><span>Meta: ${plannerHM(remainingMin)}</span><span class="${missing?'planner-missing':'planner-ok'}">${missing?`Faltam distribuir: ${plannerHM(missing)}`:'Planejamento completo ✓'}</span></div><button type="button" class="btn-solid planner-suggest" onclick="suggestPlannerDistribution('${cycle.id}',${remainingMin})">Sugerir distribuição</button></div></div>`;
-  }
-
-  function renderWeekSummary(cycle, saved){
-    const names=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-    const now=new Date();
-    const todayIndex=(now.getDay()+6)%7;
-    const currentMonday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-todayIndex);
-    const entries=DB.getEntries().filter(e=>e.teamCode===session.teamCode && e.user===session.username);
-    const running=DB.getRunning();
-    if(running && running.teamCode===session.teamCode && running.user===session.username) entries.push({...running,isRunning:true});
-    const cards=names.map((name,i)=>{
-      const d=new Date(currentMonday.getFullYear(),currentMonday.getMonth(),currentMonday.getDate()+i);
-      const dateStr=localDateStr(d);
-      const planned=saved.days?.[i]===-1?0:Math.max(0,Number(saved.days?.[i])||0);
-      let worked=0;
-      entries.forEach(e=>{
-        const eDate=e.date || (e.start?localDateStr(new Date(e.start)):'');
-        if(eDate!==dateStr) return;
-        const dur=Math.max(0,e.isRunning?Date.now()-new Date(e.start).getTime():Number(e.duration)||0);
-        worked+=dur/60000;
-      });
-      const max=Math.max(planned,worked,1);
-      const planPct=Math.min(100,(planned/max)*100);
-      const workPct=Math.min(100,(worked/max)*100);
-      let status='Ainda não iniciado',statusClass='';
-      if(worked>0 && planned>0 && worked>=planned){status='Planejado cumprido';statusClass='done';}
-      else if(worked>0 && planned>0){status=`Faltam ${plannerHM(planned-worked)}`;statusClass='behind';}
-      else if(planned<=0){status='Sem horas planejadas';}
-      const dayClass=i===todayIndex?'today':(i>todayIndex?'future':'');
-      return `<div class="week-summary-day ${dayClass}"><div class="week-summary-day-head"><div><span class="week-summary-day-name">${name}</span><span class="week-summary-day-date">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</span></div></div><div class="week-summary-values">${plannerHM(planned)}<span class="sep">/</span>${plannerHM(worked)}</div><div class="week-summary-bars"><div class="week-summary-track" title="Horas planejadas"><div class="week-summary-fill plan" style="width:${planPct}%"></div></div><div class="week-summary-track" title="Horas trabalhadas"><div class="week-summary-fill work" style="width:${workPct}%"></div></div></div><div class="week-summary-status ${statusClass}">${status}</div></div>`;
-    }).join('');
-    return `<div class="card week-summary-card"><div class="week-summary-head"><div><h3>Resumo da semana</h3><p>Acompanhe o que foi planejado e o que já foi trabalhado em cada dia.</p></div><div class="week-summary-legend"><span><i class="week-summary-dot plan"></i>Horas planejadas</span><span><i class="week-summary-dot work"></i>Horas trabalhadas</span></div></div><div class="week-summary-days">${cards}</div></div>`;
-  }
-
-  function plannerFreeCapacity(data,i){ const v=Number(data.freeHours?.[i]); return Number.isFinite(v)&&v>0?v:0; }
-  function suggestPlannerDistribution(id,total){
-    const p=getPlan(id), days=[0,1,2,3,4,5,6];
-    p.data.freeHours=p.data.freeHours||{};
-    const avail=days.filter(i=>p.data.days[i]!==-1 && plannerFreeCapacity(p.data,i)>0);
-    if(!avail.length) return;
-
-    // Distribui proporcionalmente à disponibilidade informada: quem tem mais horas livres
-    // recebe uma parcela maior da meta, sempre respeitando o limite de horas livres do dia.
-    const totalCapacity=avail.reduce((sum,i)=>sum+plannerFreeCapacity(p.data,i),0);
-    const target=Math.max(0,Math.min(Number(total)||0,totalCapacity));
-    const raw=avail.map(i=>{
-      const cap=plannerFreeCapacity(p.data,i);
-      const exact=totalCapacity>0 ? target*(cap/totalCapacity) : 0;
-      const base=Math.min(cap,Math.floor(exact));
-      return {i,cap,exact,base,fraction:exact-base};
-    });
-
-    let assigned=raw.reduce((sum,o)=>sum+o.base,0);
-    let remaining=Math.max(0,Math.round(target-assigned));
-    raw.sort((a,b)=>b.fraction-a.fraction || b.cap-a.cap || a.i-b.i);
-    while(remaining>0){
-      let changed=false;
-      for(const o of raw){
-        if(remaining<=0) break;
-        if(o.base<o.cap){ o.base++; remaining--; changed=true; }
-      }
-      if(!changed) break;
-    }
-
-    raw.forEach(o=>{ p.data.days[o.i]=o.base; });
-    persistPlan(id,p.data);
-    renderCycleView();
-  }
-  function getPlan(cycleId){
-    const key=`petimer_plan_${session.teamCode}_${session.username}_${cycleId}`;
-    const data = CACHE.plans[cycleId] || JSON.parse(localStorage.getItem(key)||'null') || {mode:'adapt',days:{},freeHours:{}};
-    data.freeHours=data.freeHours||{};
-    return {key,data};
-  }
-  function persistPlan(cycleId, data){
-    CACHE.plans[cycleId] = data;
-    const key=`petimer_plan_${session.teamCode}_${session.username}_${cycleId}`;
-    localStorage.setItem(key, JSON.stringify(data)); // cache local: abre instantâneo e funciona offline
-    api('savePlanner', { code: session.teamCode, cycleId, data }).catch(err => {
-      console.error('Não foi possível sincronizar o planejamento:', err.message);
-    });
-  }
-  function savePlannerMode(id,v){const p=getPlan(id);p.data.mode=v;persistPlan(id,p.data);renderCycleView();}
-  function savePlannerDay(id,i,ok){const p=getPlan(id);p.data.days[i]=ok?(p.data.days[i]===-1?0:(p.data.days[i]||0)):-1;persistPlan(id,p.data);renderCycleView();}
-  function savePlannerMinutes(id,i,v){const p=getPlan(id);p.data.days[i]=Math.max(0,parseInt(v,10)||0);persistPlan(id,p.data);renderCycleView();}
-  function parsePlannerDuration(v){
-    const parsed=plannerDurationFromTypedDigits(v);
-    return parsed===undefined?null:(parsed===null?0:parsed);
-  }
-  function savePlannerDurationMinutes(id,i,mins){
-    const p=getPlan(id);p.data.days[i]=Math.max(0,Number(mins)||0);persistPlan(id,p.data);renderCycleView();
-  }
-  function savePlannerFreeMinutes(id,i,mins){
-    const p=getPlan(id);p.data.freeHours=p.data.freeHours||{};p.data.freeHours[i]=Math.max(0,Number(mins)||0);persistPlan(id,p.data);renderCycleView();
-  }
-  function savePlannerDuration(id,i,v){ const mins=parsePlannerDuration(v); if(mins===null){renderCycleView();return;} savePlannerDurationMinutes(id,i,mins); }
-  function savePlannerFreeHours(id,i,v){ const mins=parsePlannerDuration(v); if(mins===null){renderCycleView();return;} savePlannerFreeMinutes(id,i,mins); }
   function cycleStatusLabel(cycle){
     const today=localDateStr(new Date());
     if(today<cycle.startDate) return '<span class="status-badge status-neutral">Agendado</span>';
@@ -3224,12 +3070,11 @@
   function handleCycleModalBackdrop(event){ if(event.target===event.currentTarget) cancelEditCycle(); }
   function switchCycleSubView(view){
     cycleSubView=view;
-    ['current','records','info'].forEach(v=>{
+    ['current','records'].forEach(v=>{
       document.getElementById(`cycle-tab-${v}`)?.classList.toggle('active',v===view);
       const p=document.getElementById(`cycle-page-${v}`); if(p)p.hidden=v!==view;
     });
     if(view==='records') renderCycleRecordsPage();
-    if(view==='info') renderCycleInfoPage();
     if(view==='current') renderCycleCurrentPage();
   }
   function renderCycleCurrentPage(){
@@ -3252,15 +3097,6 @@
     // Exibe cada registro diretamente no card completo de detalhes, evitando
     // repetir as datas em uma caixa lateral menor.
     el.innerHTML=`<div style="display:flex;flex-direction:column;gap:16px">${cycles.map(c=>renderCycleDetail(c,{history:true})).join('')}</div>`;
-  }
-  function renderCycleInfoPage(){
-    const el=document.getElementById('cycle-info-content'),team=DB.getTeams()[session.teamCode],cycle=getActiveCycle(); if(!el||!team)return;
-    if(!cycle){el.innerHTML=`<div class="card cycle-empty-state">${escapeHtml(team.name)} não iniciou nenhum período.</div>`;return;}
-    if(team.admin===session.username&&!adminParticipatesInCycle()){el.innerHTML='<div class="card cycle-empty-state">Você está no modo <strong>Apenas administrador</strong>. Como não participa do período, não há média pessoal nem planejamento de período para exibir.</div>';return;}
-    const p=computeCycleProgress(cycle),avg=p.loggedMs/Math.max(1,p.totalPeriods),periodLabel=cycle.unit==='weeks'?'semanal':cycle.unit==='days'?'diária':'por hora';
-    const goalMs=cycle.goalMinutes*60000, totalGoalMs=goalMs*Math.max(1,p.totalPeriods), pct=Math.min(100,Math.round((p.loggedMs/Math.max(1,totalGoalMs))*100)), currentDone=p.remainingThisPeriodMs<=0;
-    const diff=avg-goalMs, diffText=diff>=0?`+ ${formatHM(diff)} acima da meta`:`${formatHM(Math.abs(diff))} abaixo da meta`;
-    el.innerHTML=`${renderMemberPlanner(cycle,p)}${renderWeekSummary(cycle, getPlan(cycle.id).data)}<div class="cycle-info-summary cycle-info-summary-bottom"><div class="card cycle-info-card cycle-info-primary"><span>Sua média ${periodLabel}</span><strong>${formatHM(avg)}</strong><small>Meta: ${formatHM(goalMs)}</small><em class="${diff>=0?'positive':'negative'}">${diffText}</em></div><div class="card cycle-info-card"><span>Registrado no período</span><strong>${formatHM(p.loggedMs)}</strong><small>Período: ${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</small><div class="cycle-mini-progress"><i style="width:${pct}%"></i></div></div><div class="card cycle-info-card ${currentDone?'cycle-info-success':''}"><span>Meta do período atual</span><strong>${currentDone?'Concluída ✓':`Faltam ${formatHM(p.remainingThisPeriodMs)}`}</strong><small>${formatHM(Math.max(0,goalMs-p.remainingThisPeriodMs))} / ${formatHM(goalMs)}</small></div></div>`;
   }
   function renderCycleMemberArea(){ renderCycleCurrentPage(); }
   function renderAdminCycleSummary(){ /* conteúdo integrado às páginas internas do período */ }
