@@ -146,26 +146,6 @@
   .cycle-badge.is-danger{background:#fff0ef; border-color:#edc5c1;}
   .cycle-badge.is-danger .line-icon{color:#c84a43;}
 
-  /* CAIXA DE ALERTA DA MÉDIA — sempre visível na aba Registro de atividade */
-  .week-alert{display:flex;align-items:flex-start;gap:13px;padding:14px 18px;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius);background:#f7f8fa;box-shadow:var(--shadow);transition:background .18s ease,border-color .18s ease;}
-  .week-alert-icon{width:34px;height:34px;flex:0 0 34px;border-radius:9px;display:grid;place-items:center;background:#e9edf2;color:#5b6472;}
-  .week-alert-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
-  .week-alert-body{min-width:0;flex:1;}
-  .week-alert-title{font-size:13.5px;font-weight:700;color:var(--text);margin:0 0 3px;}
-  .week-alert-text{font-size:12.5px;line-height:1.5;color:var(--text);}
-  .week-alert-meta{font-size:11px;line-height:1.5;color:var(--muted);margin-top:5px;}
-  .week-alert-bar{height:6px;border-radius:99px;background:rgba(0,0,0,.08);overflow:hidden;margin-top:10px;}
-  .week-alert-bar span{display:block;height:100%;border-radius:99px;background:#5b6472;transition:width .3s ease;}
-  .week-alert.is-success{background:#edf8f0;border-color:#c9e3d0;}
-  .week-alert.is-success .week-alert-icon{background:#dcefe2;color:#3f7a52;}
-  .week-alert.is-success .week-alert-bar span{background:#4f8760;}
-  .week-alert.is-warning{background:#fff8df;border-color:#eadca7;}
-  .week-alert.is-warning .week-alert-icon{background:#f6ecc3;color:#9b7a19;}
-  .week-alert.is-warning .week-alert-bar span{background:#c9a227;}
-  .week-alert.is-danger{background:#fff0ef;border-color:#edc5c1;}
-  .week-alert.is-danger .week-alert-icon{background:#f9d9d6;color:#c84a43;}
-  .week-alert.is-danger .week-alert-bar span{background:#c84a43;}
-
   /* Aviso central do último período do período */
   .final-period-overlay{
     position:fixed; inset:0; z-index:1200; display:flex; align-items:center; justify-content:center;
@@ -556,8 +536,31 @@
   .reports-filterbar{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;min-height:58px;}
   .reports-filter-label{font-size:11px;color:var(--muted);font-weight:650;text-transform:uppercase;letter-spacing:.04em;margin-right:2px;}
   .reports-select{height:36px;min-width:145px;border:1px solid var(--border);border-radius:6px;background:var(--surface);padding:0 30px 0 10px;font:500 12px inherit;color:var(--text);}
-  #analysis-people-multi{height:auto;min-height:74px;padding:4px 8px;}
-  #analysis-people-multi option{padding:4px 6px;border-radius:4px;}
+  .analysis-scope-wrap{position:relative;}
+  .analysis-scope-btn{height:36px;min-width:145px;border:1px solid var(--border);border-radius:6px;background:var(--surface);padding:0 10px;font:500 12px inherit;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;}
+  .analysis-scope-btn:hover{border-color:#c9d7e5;}
+  .analysis-scope-btn #analysis-scope-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .analysis-scope-btn .scope-arrow{font-size:9px;color:var(--muted);transition:transform .15s ease;flex:0 0 auto;}
+  .analysis-scope-btn[aria-expanded="true"] .scope-arrow{transform:rotate(180deg);}
+  .analysis-scope-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:190px;background:#fff;border:1px solid #e4e6ec;border-radius:8px;box-shadow:0 10px 28px rgba(8,47,83,.16);padding:5px;z-index:60;}
+  .analysis-scope-menu[hidden]{display:none;}
+  .analysis-scope-menu-item{padding:9px 10px;border-radius:6px;font-size:12.5px;color:#343946;cursor:pointer;white-space:nowrap;}
+  .analysis-scope-menu-item:hover{background:#f3f6fa;color:#082f53;}
+  .analysis-scope-menu-item.active{color:#276097;font-weight:650;background:#eaf2fa;}
+  .user-select-dialog{width:min(380px,calc(100vw - 32px));background:#fff;border:1px solid #e4e6ec;border-radius:14px;box-shadow:0 18px 50px rgba(8,47,83,.20);overflow:hidden;}
+  .user-select-body{padding:16px 20px 20px;}
+  .user-select-search{width:100%;height:38px;border:1px solid #dfe3ea;border-radius:8px;background:#fff;color:#252a34;font:500 13px/1 inherit;padding:0 11px;outline:none;margin-bottom:12px;box-sizing:border-box;}
+  .user-select-search:focus{border-color:#7ca7cf;box-shadow:0 0 0 3px rgba(39,96,151,.10);}
+  .user-select-list{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow:auto;}
+  .user-select-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid #e5e8ee;border-radius:9px;background:#fff;cursor:pointer;text-align:left;transition:border-color .15s ease,background .15s ease;}
+  .user-select-item:hover{border-color:#c9d7e5;background:#fbfcfe;}
+  .user-select-item.selected{border-color:#9fc0df;background:#f5f9fd;}
+  .user-select-radio{width:17px;height:17px;border-radius:50%;border:2px solid #c3cad6;flex:0 0 17px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
+  .user-select-item.selected .user-select-radio{border-color:#276097;}
+  .user-select-radio-dot{width:9px;height:9px;border-radius:50%;background:#276097;display:none;}
+  .user-select-item.selected .user-select-radio-dot{display:block;}
+  .user-select-name{font-size:13px;font-weight:600;color:#252a34;}
+  .user-select-empty{padding:20px 4px;text-align:center;color:#8a909e;font-size:12px;}
   .reports-apply{height:36px;padding:0 16px;border:0;border-radius:6px;background:var(--accent);color:white;font:650 11.5px inherit;cursor:pointer;margin-left:auto;}
   .reports-apply:hover{background:var(--accent-dark)}
   .reports-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(20,22,30,.02);}
@@ -1026,7 +1029,6 @@
     </header>
 
     <section class="view" id="view-tracker">
-      <div class="week-alert" id="week-alert-box" role="status" aria-live="polite"></div>
       <div class="card tracker-bar">
         <!-- Input de atividade com o recurso de autocompletar (list) -->
         <input type="text" id="activity-input" class="tracker-input" list="activity-suggestions" placeholder="O que você está fazendo agora?" style="min-width:200px;">
@@ -1096,13 +1098,16 @@
 
         <div class="reports-filterbar">
           <span class="reports-filter-label">Filtros</span>
-          <select id="analysis-scope" class="reports-select" onchange="handleAnalysisScopeChange()" aria-label="Quem exibir">
-            <option value="me">Somente eu</option>
-            <option value="custom">Eu + colegas selecionados</option>
-            <option value="team">Equipe inteira</option>
-            <option value="sector">Por setor</option>
-          </select>
-          <select id="analysis-people-multi" class="reports-select" multiple size="3" onchange="handleAnalysisPeopleMultiChange()" aria-label="Selecionar até 3 colegas" hidden></select>
+          <div class="analysis-scope-wrap" id="analysis-scope-wrap">
+            <button type="button" id="analysis-scope-btn" class="analysis-scope-btn" onclick="toggleAnalysisScopeMenu(event)" aria-haspopup="listbox" aria-expanded="false" aria-label="Quem exibir">
+              <span id="analysis-scope-label">Usuário</span><span class="scope-arrow" aria-hidden="true">▼</span>
+            </button>
+            <div class="analysis-scope-menu" id="analysis-scope-menu" role="listbox" hidden>
+              <div class="analysis-scope-menu-item" data-scope="user" role="option" onclick="chooseAnalysisScopeOption('user')">Usuário</div>
+              <div class="analysis-scope-menu-item" data-scope="team" role="option" onclick="chooseAnalysisScopeOption('team')">Equipe inteira</div>
+              <div class="analysis-scope-menu-item" data-scope="sector" role="option" onclick="chooseAnalysisScopeOption('sector')">Por setor</div>
+            </div>
+          </div>
           <select id="analysis-sector" class="reports-select" onchange="renderAnalysis()" aria-label="Setor" hidden></select>
           <select id="analysis-cargo" class="reports-select" onchange="renderAnalysis()" aria-label="Cargo ou projeto"><option value="">Todos os cargos/projetos</option></select>
           <select id="analysis-modalidade" class="reports-select" onchange="renderAnalysis()" aria-label="Local de trabalho"><option value="">Todos os locais</option></select>
@@ -1265,7 +1270,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbyPe4x-ONtWDi3PgWYJ5929YzkPllB7NduteYyfD0u9AEpfsAA37flw359pNkx0Rva3/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxIYEeS7CTJvwDpXjZqwFTcTo36aVD2Z5oxqL4KMLV9uA5mA2uHFPbH8x_IVtWLMiE/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2345,6 +2350,9 @@
 
   let analysisWeekOffset = 0;
   let analysisMode = 'overview';
+  let analysisScope = 'user';
+  let analysisSelectedUser = null;
+  let userSelectPendingChoice = null;
 
   function startOfWeek(date) {
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -2415,26 +2423,126 @@
     return Object.keys(team.members || {}).filter(u => (team.members[u].sector || 'Geral') === sector);
   }
 
-  function getSelectedPeople() {
-    const multi = document.getElementById('analysis-people-multi');
-    const chosen = multi ? Array.from(multi.selectedOptions).map(o => o.value) : [];
-    return [session.username, ...chosen.filter(u => u !== session.username)];
+  // Membros da equipe atual, para a seleção individual de usuário.
+  // Reutiliza exclusivamente os dados que o frontend já mantém (team.members / DB.getUsers()).
+  function getAnalysisTeamMembers() {
+    const team = DB.getTeams()[session.teamCode];
+    if (!team) return [];
+    const users = DB.getUsers();
+    return Object.keys(team.members || {}).map(u => ({
+      username: u,
+      name: (users[u] && users[u].name) || (u === session.username ? session.name : null) || u
+    })).sort((a,b) => a.username.localeCompare(b.username,'pt-BR'));
   }
 
-  function handleAnalysisScopeChange() {
-    const scope = document.getElementById('analysis-scope')?.value || 'me';
-    document.getElementById('analysis-people-multi').hidden = scope !== 'custom';
+  // Garante que o usuário selecionado ainda é válido para a equipe atual
+  // (equipe trocada, membro removido, etc.). Se não for, volta para o próprio usuário logado.
+  function ensureAnalysisSelectedUser() {
+    const members = getAnalysisTeamMembers();
+    const stillValid = analysisSelectedUser && members.some(m => m.username === analysisSelectedUser);
+    if (!stillValid) analysisSelectedUser = members.some(m => m.username === session.username) ? session.username : (members[0]?.username || null);
+  }
+
+  function updateAnalysisScopeLabel() {
+    const label = document.getElementById('analysis-scope-label');
+    if (!label) return;
+    if (analysisScope === 'team') label.textContent = 'Equipe inteira';
+    else if (analysisScope === 'sector') label.textContent = 'Por setor';
+    else label.textContent = analysisSelectedUser || 'Usuário';
+    document.querySelectorAll('#analysis-scope-menu .analysis-scope-menu-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.scope === analysisScope);
+    });
+  }
+
+  function toggleAnalysisScopeMenu(evt) {
+    if (evt) evt.stopPropagation();
+    const menu = document.getElementById('analysis-scope-menu');
+    const btn = document.getElementById('analysis-scope-btn');
+    if (!menu || !btn) return;
+    const willOpen = menu.hidden;
+    menu.hidden = !willOpen;
+    btn.setAttribute('aria-expanded', String(willOpen));
+  }
+
+  function closeAnalysisScopeMenu() {
+    const menu = document.getElementById('analysis-scope-menu');
+    const btn = document.getElementById('analysis-scope-btn');
+    if (menu) menu.hidden = true;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
+  document.addEventListener('click', (evt) => {
+    const wrap = document.getElementById('analysis-scope-wrap');
+    if (wrap && !wrap.contains(evt.target)) closeAnalysisScopeMenu();
+  });
+
+  function chooseAnalysisScopeOption(scope) {
+    closeAnalysisScopeMenu();
+    if (scope === 'user') {
+      openUserSelectModal();
+      return;
+    }
+    analysisScope = scope;
     document.getElementById('analysis-sector').hidden = scope !== 'sector';
+    updateAnalysisScopeLabel();
     renderAnalysis();
   }
 
-  function handleAnalysisPeopleMultiChange() {
-    const multi = document.getElementById('analysis-people-multi');
-    const opts = Array.from(multi.selectedOptions);
-    if (opts.length > 3) {
-      alert('Você pode selecionar até 3 colegas além de você mesmo.');
-      opts.slice(3).forEach(o => { o.selected = false; });
+  // ---------- Modal de seleção de usuário ----------
+  function openUserSelectModal() {
+    ensureAnalysisSelectedUser();
+    userSelectPendingChoice = analysisScope === 'user' ? analysisSelectedUser : (analysisSelectedUser || session.username);
+    const search = document.getElementById('user-select-search');
+    if (search) search.value = '';
+    renderUserSelectList('');
+    const overlay = document.getElementById('user-select-overlay');
+    if (overlay) overlay.hidden = false;
+    if (search) setTimeout(() => search.focus(), 0);
+  }
+
+  function closeUserSelectModal() {
+    const overlay = document.getElementById('user-select-overlay');
+    if (overlay) overlay.hidden = true;
+  }
+
+  function renderUserSelectList(filterText) {
+    const list = document.getElementById('user-select-list');
+    if (!list) return;
+    const members = getAnalysisTeamMembers();
+    const term = (filterText || '').trim().toLowerCase();
+    const filtered = term ? members.filter(m => m.username.toLowerCase().includes(term) || m.name.toLowerCase().includes(term)) : members;
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="user-select-empty">Nenhum usuário encontrado.</div>';
+      return;
     }
+
+    list.innerHTML = filtered.map(m => {
+      const selected = m.username === userSelectPendingChoice;
+      return `<button type="button" class="user-select-item ${selected ? 'selected' : ''}" data-username="${escapeHtml(m.username)}" onclick="pickUserSelectOption('${escapeHtml(m.username)}')">
+        <span class="user-select-radio"><span class="user-select-radio-dot"></span></span>
+        <span class="user-select-name">${escapeHtml(m.username)}</span>
+      </button>`;
+    }).join('');
+  }
+
+  function filterUserSelectList() {
+    const search = document.getElementById('user-select-search');
+    renderUserSelectList(search ? search.value : '');
+  }
+
+  function pickUserSelectOption(username) {
+    userSelectPendingChoice = username;
+    renderUserSelectList(document.getElementById('user-select-search')?.value || '');
+  }
+
+  function confirmUserSelect() {
+    if (!userSelectPendingChoice) { alert('Selecione um usuário.'); return; }
+    analysisScope = 'user';
+    analysisSelectedUser = userSelectPendingChoice;
+    document.getElementById('analysis-sector').hidden = true;
+    closeUserSelectModal();
+    updateAnalysisScopeLabel();
     renderAnalysis();
   }
 
@@ -2458,17 +2566,7 @@
       if (mods.includes(prev)) modSel.value = prev;
     }
 
-    const multi = document.getElementById('analysis-people-multi');
-    if (multi) {
-      const prevSelected = Array.from(multi.selectedOptions).map(o => o.value);
-      const team = DB.getTeams()[session.teamCode];
-      const users = DB.getUsers();
-      const members = team ? Object.keys(team.members || {}).filter(u => u !== session.username) : [];
-      multi.innerHTML = members.map(u => {
-        const name = users[u]?.name || users[u]?.username || u;
-        return `<option value="${escapeHtml(u)}" ${prevSelected.includes(u) ? 'selected' : ''}>${escapeHtml(name)}</option>`;
-      }).join('');
-    }
+    ensureAnalysisSelectedUser();
 
     const sectorSel = document.getElementById('analysis-sector');
     if (sectorSel) {
@@ -2478,12 +2576,14 @@
       if (sectors.includes(prev)) sectorSel.value = prev;
       else if (sectors.length) sectorSel.value = sectors[0];
     }
+
+    updateAnalysisScopeLabel();
   }
 
   function getAnalysisFilteredEntries() {
     if (!session || !session.teamCode) return [];
     const { start, end } = analysisWeekRange();
-    const scope = document.getElementById('analysis-scope')?.value || 'me';
+    const scope = analysisScope || 'user';
     const cargo = document.getElementById('analysis-cargo')?.value || '';
     const modalidade = document.getElementById('analysis-modalidade')?.value || '';
 
@@ -2493,11 +2593,8 @@
       return d >= start && d <= end;
     });
 
-    if (scope === 'me') {
-      entries = entries.filter(e => e.user === session.username);
-    } else if (scope === 'custom') {
-      const picked = getSelectedPeople();
-      entries = entries.filter(e => picked.includes(e.user));
+    if (scope === 'user') {
+      entries = entries.filter(e => e.user === analysisSelectedUser);
     } else if (scope === 'sector') {
       const sector = document.getElementById('analysis-sector')?.value || '';
       const members = sector ? usersInSector(sector) : [];
@@ -2515,9 +2612,7 @@
     if (!root || !session || !session.teamCode) return;
 
     populateAnalysisFilters();
-    const scope = document.getElementById('analysis-scope')?.value || 'me';
-    document.getElementById('analysis-people-multi').hidden = scope !== 'custom';
-    document.getElementById('analysis-sector').hidden = scope !== 'sector';
+    document.getElementById('analysis-sector').hidden = analysisScope !== 'sector';
 
     const { start, end } = analysisWeekRange();
     const label = document.getElementById('analysis-period-label');
@@ -3106,66 +3201,7 @@
     overlay.hidden = false;
   }
 
-  // Caixa fixa da aba "Registro de atividade": diz se o usuário está dentro
-  // da média do período e, se não estiver, quantas horas ainda precisa fazer.
-  function renderWeekAlert() {
-    const box = document.getElementById('week-alert-box');
-    if (!box) return;
-    const paint = (status, title, text, meta, pct) => {
-      box.className = 'week-alert is-' + status;
-      box.innerHTML = `<span class="week-alert-icon" aria-hidden="true">${statusIconSvg(status)}</span><div class="week-alert-body"><div class="week-alert-title">${title}</div><div class="week-alert-text">${text}</div>${meta ? `<div class="week-alert-meta">${meta}</div>` : ''}${pct === null ? '' : `<div class="week-alert-bar"><span style="width:${pct}%"></span></div>`}</div>`;
-    };
-    if (!session || !session.teamCode || !DB.getTeams()[session.teamCode]) {
-      paint('neutral', 'Média do período', 'Entre em uma equipe para acompanhar sua média.', '', null);
-      return;
-    }
-    if (isTeamAdmin() && !adminParticipatesInCycle()) {
-      paint('neutral', 'Média do período', 'Você está como apenas administrador, então não há meta a acompanhar aqui.', '', null);
-      return;
-    }
-    const cycle = getActiveCycle();
-    if (!cycle) {
-      paint('neutral', 'Média do período', 'Nenhum período ativo no momento. Quando o administrador iniciar um período, sua média aparecerá aqui.', '', null);
-      return;
-    }
-    const progress = computeCycleProgress(cycle);
-    const range = getCyclePeriodRange(cycle);
-    const u = CYCLE_UNIT_TEXT[cycle.unit];
-    const avgLabel = cycleAverageLabel(cycle.unit);
-    const done = progress.currentLoggedMs;
-    const target = progress.targetThisPeriodMs;
-    const missing = progress.remainingThisPeriodMs;
-    const pct = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 100;
-
-    let status, title, text;
-    if (progress.periodCompleted) {
-      status = 'success';
-      title = `Você está dentro da ${avgLabel}`;
-      text = progress.remainingMs <= 30000
-        ? `Você já cumpriu toda a meta do período. Registrado ${u.esta}: <strong>${escapeHtml(formatHM(done))}</strong>.`
-        : `Você registrou <strong>${escapeHtml(formatHM(done))}</strong> ${u.esta} e já atingiu o necessário (${escapeHtml(formatHM(target))}).`;
-    } else {
-      status = progress.alertLevel === 'danger' ? 'danger' : 'warning';
-      title = `Você está abaixo da ${avgLabel}`;
-      text = `Faltam <strong>${escapeHtml(formatHM(missing))}</strong> ${u.esta} para atingir a ${avgLabel}. Você registrou ${escapeHtml(formatHM(done))} de ${escapeHtml(formatHM(target))} necessárias.`;
-    }
-
-    const meta = [];
-    if (cycle.unit === 'weeks') {
-      const weekStartIso = localDateStr(new Date(range.periodStart));
-      meta.push(`Semana de ${fmtDateBR(weekStartIso)} a ${fmtDateBR(getWeekEndIso(weekStartIso))}`);
-      const holiday = (cycle.holidayWeeks || []).find(x => x.weekStart === weekStartIso);
-      if (holiday) meta.push(`Semana com feriado (${fmtDateBR(holiday.holidayDate)}) — meta ajustada`);
-      if (progress.currentMinimumMs > 0) meta.push(`Mínimo semanal: ${formatHM(progress.currentMinimumMs)}`);
-    }
-    meta.push(progress.periodsRemaining === 1
-      ? (cycle.unit === 'weeks' ? 'Esta é a última semana do período' : `Este é o último ${u.singular} do período`)
-      : `Restam ${progress.periodsRemaining} ${u.plural} no período`);
-    paint(status, title, text, escapeHtml(meta.join(' · ')), pct);
-  }
-
   function renderCycleBadge() {
-    renderWeekAlert();
     const badge = document.getElementById('cycle-status-badge');
     if (!badge) return;
     if (currentView !== 'tracker') {
@@ -3500,6 +3536,20 @@
     <div class="profile-dialog-head"><h3 id="team-switcher-title">Trocar de equipe</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeTeamSwitcher()">×</button></div>
     <p class="switch-team-intro">Selecione uma das equipes das quais você já faz parte.</p>
     <div class="switch-team-list" id="team-switcher-list"></div>
+  </div>
+</div>
+
+<div class="profile-popover-card" id="user-select-overlay" hidden onclick="if(event.target===this) closeUserSelectModal()">
+  <div class="user-select-dialog" role="dialog" aria-modal="true" aria-labelledby="user-select-title">
+    <div class="profile-dialog-head"><h3 id="user-select-title">Selecionar usuário</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeUserSelectModal()">×</button></div>
+    <div class="user-select-body">
+      <input type="text" id="user-select-search" class="user-select-search" placeholder="Buscar usuário..." oninput="filterUserSelectList()">
+      <div class="user-select-list" id="user-select-list"></div>
+      <div class="profile-dialog-actions">
+        <button class="profile-btn profile-btn-secondary" type="button" onclick="closeUserSelectModal()">Cancelar</button>
+        <button class="profile-btn profile-btn-primary" type="button" onclick="confirmUserSelect()">Selecionar</button>
+      </div>
+    </div>
   </div>
 </div>
 </body>
