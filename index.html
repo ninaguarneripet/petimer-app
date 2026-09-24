@@ -146,6 +146,26 @@
   .cycle-badge.is-danger{background:#fff0ef; border-color:#edc5c1;}
   .cycle-badge.is-danger .line-icon{color:#c84a43;}
 
+  /* CAIXA DE ALERTA DA MÉDIA — sempre visível na aba Registro de atividade */
+  .week-alert{display:flex;align-items:flex-start;gap:13px;padding:14px 18px;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius);background:#f7f8fa;box-shadow:var(--shadow);transition:background .18s ease,border-color .18s ease;}
+  .week-alert-icon{width:34px;height:34px;flex:0 0 34px;border-radius:9px;display:grid;place-items:center;background:#e9edf2;color:#5b6472;}
+  .week-alert-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+  .week-alert-body{min-width:0;flex:1;}
+  .week-alert-title{font-size:13.5px;font-weight:700;color:var(--text);margin:0 0 3px;}
+  .week-alert-text{font-size:12.5px;line-height:1.5;color:var(--text);}
+  .week-alert-meta{font-size:11px;line-height:1.5;color:var(--muted);margin-top:5px;}
+  .week-alert-bar{height:6px;border-radius:99px;background:rgba(0,0,0,.08);overflow:hidden;margin-top:10px;}
+  .week-alert-bar span{display:block;height:100%;border-radius:99px;background:#5b6472;transition:width .3s ease;}
+  .week-alert.is-success{background:#edf8f0;border-color:#c9e3d0;}
+  .week-alert.is-success .week-alert-icon{background:#dcefe2;color:#3f7a52;}
+  .week-alert.is-success .week-alert-bar span{background:#4f8760;}
+  .week-alert.is-warning{background:#fff8df;border-color:#eadca7;}
+  .week-alert.is-warning .week-alert-icon{background:#f6ecc3;color:#9b7a19;}
+  .week-alert.is-warning .week-alert-bar span{background:#c9a227;}
+  .week-alert.is-danger{background:#fff0ef;border-color:#edc5c1;}
+  .week-alert.is-danger .week-alert-icon{background:#f9d9d6;color:#c84a43;}
+  .week-alert.is-danger .week-alert-bar span{background:#c84a43;}
+
   /* Aviso central do último período do período */
   .final-period-overlay{
     position:fixed; inset:0; z-index:1200; display:flex; align-items:center; justify-content:center;
@@ -1006,6 +1026,7 @@
     </header>
 
     <section class="view" id="view-tracker">
+      <div class="week-alert" id="week-alert-box" role="status" aria-live="polite"></div>
       <div class="card tracker-bar">
         <!-- Input de atividade com o recurso de autocompletar (list) -->
         <input type="text" id="activity-input" class="tracker-input" list="activity-suggestions" placeholder="O que você está fazendo agora?" style="min-width:200px;">
@@ -1160,7 +1181,9 @@
 
       <div class="cycle-tab-page" id="cycle-page-current">
         <div id="cycle-current-content"></div>
-        <div class="cycle-form-modal-backdrop" id="cycle-form-modal" hidden onclick="handleCycleModalBackdrop(event)">
+      </div>
+
+      <div class="cycle-form-modal-backdrop" id="cycle-form-modal" hidden onclick="handleCycleModalBackdrop(event)">
           <div class="card cycle-form-card inline-cycle-form" id="cycle-form-card" role="dialog" aria-modal="true" aria-labelledby="cycle-form-title">
             <div class="cycle-form-modal-head">
               <div class="cycle-form-head">
@@ -1202,7 +1225,6 @@
           </form>
           </div>
         </div>
-      </div>
 
       <div class="cycle-data-modal-backdrop" id="cycle-data-modal" hidden onclick="handleCycleDataModalBackdrop(event)">
         <div class="cycle-data-modal" role="dialog" aria-modal="true" aria-labelledby="cycle-data-modal-title">
@@ -1243,7 +1265,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzREWYNFiJ5y_TRiJif4MJnYegRf9b2yKkPt1PcF9j8V8LMoV-Nz447jA32gBrk_Rp_/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyPe4x-ONtWDi3PgWYJ5929YzkPllB7NduteYyfD0u9AEpfsAA37flw359pNkx0Rva3/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2848,6 +2870,7 @@
     renderCycleHolidayDraft();
     document.getElementById('cycle-holiday-date').value = '';
     document.getElementById('cycle-holiday-week-label').value = '';
+    return true;
   }
   function removeCycleHolidayWeek(index) {
     cycleHolidayWeeksDraft.splice(index, 1);
@@ -2961,19 +2984,27 @@
     let basePeriodGoalMs = Number(cycle.goalMinutes) * 60000;
     let currentMinimumMs = 0;
     let currentGoalMs = basePeriodGoalMs;
+    let weightShare = 1 / periodsRemaining; // fatia da semana atual no que ainda falta
     if (cycle.unit === 'weeks') {
       const currentWeekStart = localDateStr(new Date(periodStart));
       const currentWeek = weeklyPeriods.find(w => w.weekStart === currentWeekStart) || { goalMinutes: cycle.goalMinutes, minimumMinutes: cycle.minimumMinutes || 0 };
       currentGoalMs = currentWeek.goalMinutes * 60000;
       currentMinimumMs = currentWeek.minimumMinutes * 60000;
       basePeriodGoalMs = currentGoalMs;
+      // Semanas com feriado têm meta menor: o que falta é dividido
+      // proporcionalmente às metas das semanas restantes, e não por igual.
+      const weekIdx = weeklyPeriods.findIndex(w => w.weekStart === currentWeekStart);
+      if (weekIdx >= 0) {
+        const sumGoals = weeklyPeriods.slice(weekIdx).reduce((sum, w) => sum + w.goalMinutes, 0);
+        if (sumGoals > 0) weightShare = currentWeek.goalMinutes / sumGoals;
+      }
     }
 
     const goalMs = cycle.unit === 'weeks'
       ? weeklyPeriods.reduce((sum, w) => sum + w.goalMinutes * 60000, 0)
       : totalPeriods * basePeriodGoalMs;
     const remainingMs = Math.max(0, goalMs - loggedMs);
-    const balanceTargetMs = Math.max(0, (remainingMs + currentLoggedMs) / periodsRemaining);
+    const balanceTargetMs = Math.max(0, (remainingMs + currentLoggedMs) * weightShare);
     const targetThisPeriodMs = Math.max(currentMinimumMs, balanceTargetMs);
     const remainingThisPeriodMs = Math.max(0, targetThisPeriodMs - currentLoggedMs);
     const requiredMs = remainingMs / periodsRemaining;
@@ -3075,7 +3106,66 @@
     overlay.hidden = false;
   }
 
+  // Caixa fixa da aba "Registro de atividade": diz se o usuário está dentro
+  // da média do período e, se não estiver, quantas horas ainda precisa fazer.
+  function renderWeekAlert() {
+    const box = document.getElementById('week-alert-box');
+    if (!box) return;
+    const paint = (status, title, text, meta, pct) => {
+      box.className = 'week-alert is-' + status;
+      box.innerHTML = `<span class="week-alert-icon" aria-hidden="true">${statusIconSvg(status)}</span><div class="week-alert-body"><div class="week-alert-title">${title}</div><div class="week-alert-text">${text}</div>${meta ? `<div class="week-alert-meta">${meta}</div>` : ''}${pct === null ? '' : `<div class="week-alert-bar"><span style="width:${pct}%"></span></div>`}</div>`;
+    };
+    if (!session || !session.teamCode || !DB.getTeams()[session.teamCode]) {
+      paint('neutral', 'Média do período', 'Entre em uma equipe para acompanhar sua média.', '', null);
+      return;
+    }
+    if (isTeamAdmin() && !adminParticipatesInCycle()) {
+      paint('neutral', 'Média do período', 'Você está como apenas administrador, então não há meta a acompanhar aqui.', '', null);
+      return;
+    }
+    const cycle = getActiveCycle();
+    if (!cycle) {
+      paint('neutral', 'Média do período', 'Nenhum período ativo no momento. Quando o administrador iniciar um período, sua média aparecerá aqui.', '', null);
+      return;
+    }
+    const progress = computeCycleProgress(cycle);
+    const range = getCyclePeriodRange(cycle);
+    const u = CYCLE_UNIT_TEXT[cycle.unit];
+    const avgLabel = cycleAverageLabel(cycle.unit);
+    const done = progress.currentLoggedMs;
+    const target = progress.targetThisPeriodMs;
+    const missing = progress.remainingThisPeriodMs;
+    const pct = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 100;
+
+    let status, title, text;
+    if (progress.periodCompleted) {
+      status = 'success';
+      title = `Você está dentro da ${avgLabel}`;
+      text = progress.remainingMs <= 30000
+        ? `Você já cumpriu toda a meta do período. Registrado ${u.esta}: <strong>${escapeHtml(formatHM(done))}</strong>.`
+        : `Você registrou <strong>${escapeHtml(formatHM(done))}</strong> ${u.esta} e já atingiu o necessário (${escapeHtml(formatHM(target))}).`;
+    } else {
+      status = progress.alertLevel === 'danger' ? 'danger' : 'warning';
+      title = `Você está abaixo da ${avgLabel}`;
+      text = `Faltam <strong>${escapeHtml(formatHM(missing))}</strong> ${u.esta} para atingir a ${avgLabel}. Você registrou ${escapeHtml(formatHM(done))} de ${escapeHtml(formatHM(target))} necessárias.`;
+    }
+
+    const meta = [];
+    if (cycle.unit === 'weeks') {
+      const weekStartIso = localDateStr(new Date(range.periodStart));
+      meta.push(`Semana de ${fmtDateBR(weekStartIso)} a ${fmtDateBR(getWeekEndIso(weekStartIso))}`);
+      const holiday = (cycle.holidayWeeks || []).find(x => x.weekStart === weekStartIso);
+      if (holiday) meta.push(`Semana com feriado (${fmtDateBR(holiday.holidayDate)}) — meta ajustada`);
+      if (progress.currentMinimumMs > 0) meta.push(`Mínimo semanal: ${formatHM(progress.currentMinimumMs)}`);
+    }
+    meta.push(progress.periodsRemaining === 1
+      ? (cycle.unit === 'weeks' ? 'Esta é a última semana do período' : `Este é o último ${u.singular} do período`)
+      : `Restam ${progress.periodsRemaining} ${u.plural} no período`);
+    paint(status, title, text, escapeHtml(meta.join(' · ')), pct);
+  }
+
   function renderCycleBadge() {
+    renderWeekAlert();
     const badge = document.getElementById('cycle-status-badge');
     if (!badge) return;
     if (currentView !== 'tracker') {
@@ -3214,7 +3304,7 @@
   }
   function renderCycleDetail(cycle,{history=false}={}){
     if(!cycle) return '';
-    const admin=isTeamAdmin(), u=CYCLE_UNIT_TEXT[cycle.unit], actions=admin&&!history?`<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="startEditCycle('${cycle.id}')">Editar período</button><button type="button" class="btn-outline" onclick="deleteCycle('${cycle.id}')">Excluir</button></div>`:'';
+    const admin=isTeamAdmin(), u=CYCLE_UNIT_TEXT[cycle.unit], editable=admin&&cycle.endDate>=localDateStr(new Date()), actions=editable?`<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="startEditCycle('${cycle.id}')">Editar período</button><button type="button" class="btn-outline" onclick="deleteCycle('${cycle.id}')">Excluir</button></div>`:'';
     const remaining=cycleTimeLeft(cycle);
     const holidaySummary = cycle.unit === 'weeks' && (cycle.holidayWeeks || []).length ? `<div class="cycle-detail-section"><div class="cycle-detail-section-title">Semanas com feriado</div>${(cycle.holidayWeeks || []).map(x => `<div class="cycle-holiday-item"><div><strong>Feriado: ${fmtDateBR(x.holidayDate)}</strong><span>Semana de ${fmtDateBR(x.weekStart)} a ${fmtDateBR(getWeekEndIso(x.weekStart))} · Meta: ${formatCycleDraftMinutes(x.goalMinutes)} · Mínimo: ${formatCycleDraftMinutes(x.minimumMinutes)}</span></div></div>`).join('')}</div>` : '';
     return `<div class="card cycle-detail-hero"><div class="cycle-detail-top"><div class="cycle-detail-title"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg></span><div><h3>${history?'Detalhes do período':'Período atual'}</h3><p>${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div style="display:flex;align-items:center;gap:10px">${cycleStatusLabel(cycle)}${actions}</div></div><div class="cycle-detail-metrics"><div class="cycle-detail-metric"><span>Início</span><strong>${fmtDateBR(cycle.startDate)}</strong></div><div class="cycle-detail-metric"><span>Fim</span><strong>${fmtDateBR(cycle.endDate)}</strong></div><div class="cycle-detail-metric"><span>Divisão</span><strong>${u.label}</strong></div><div class="cycle-detail-metric"><span>Meta</span><strong>${cycleGoalText(cycle)}</strong></div>${cycle.unit==='weeks'?`<div class="cycle-detail-metric"><span>Mínimo semanal</span><strong>${formatCycleDraftMinutes(cycle.minimumMinutes || 0)}</strong></div>`:''}${!history?`<div class="cycle-detail-metric"><span>Tempo restante</span><strong>${remaining}</strong></div>`:''}</div>${holidaySummary}<div class="cycle-detail-footer"><button type="button" class="btn-outline cycle-data-btn" onclick="openCycleDataModal('${cycle.id}')"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>Dados sobre o período</button></div></div>`;
@@ -3299,6 +3389,10 @@
     if (!startDate || !endDate) return alert('Preencha as datas de início e término.');
     if (endDate < startDate) return alert('A data de término deve ser posterior à data de início.');
     if (goalMinutes <= 0) return alert('Defina uma meta de tempo maior que zero.');
+    // Se o feriado foi preenchido mas o botão "Adicionar" não foi clicado, inclui agora.
+    if (unit === 'weeks' && document.getElementById('cycle-holiday-date')?.value) {
+      if (!addCycleHolidayWeek()) return;
+    }
     if (minimumMinutes > goalMinutes) return alert('O mínimo semanal não pode ser maior que a meta semanal.');
     if (unit === 'weeks') {
       for (const item of cycleHolidayWeeksDraft) {
@@ -3321,7 +3415,6 @@
 
   function startEditCycle(id) {
     if (!isTeamAdmin()) return;
-    if (cycleSubView !== 'current') switchCycleSubView('current');
     const cycle = DB.getCycles().find(c => c.id === id);
     if (!cycle) return;
     editingCycleId = id;
