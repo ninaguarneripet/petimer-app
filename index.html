@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PETimer — Gestão de Atividades e Equipes</title>
+<script>
+  // Somente navegação; não guarda dados de membros, registros ou gráficos.
+  window.petimerVisualRestore = null;
+  try {
+    if (localStorage.getItem('petimer_token')) {
+      const teamCode = localStorage.getItem('petimer_last_team');
+      let saved = null;
+      try { saved = JSON.parse(sessionStorage.getItem('petimer_visual_navigation') || 'null'); } catch (_) {}
+      const state = saved && saved.teamCode === teamCode ? saved : {};
+      window.petimerVisualRestore = {
+        view: ['tracker','analysis','cycle','team'].includes(state.view) ? state.view : 'tracker',
+        cycleSubView: state.cycleSubView === 'records' ? 'records' : 'current',
+        analysisMode: ['overview','detailed','weekly'].includes(state.analysisMode) ? state.analysisMode : 'overview'
+      };
+      document.documentElement.classList.add('petimer-restoring');
+      document.documentElement.dataset.petimerRestoreView = window.petimerVisualRestore.view;
+    }
+  } catch (_) { /* Armazenamento indisponível: mantém o fluxo normal. */ }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -620,6 +639,72 @@
   .cycle-page-head h3{margin:0 0 4px;font-size:15px}.cycle-page-head p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.45;}
   .cycle-page-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .cycle-page-actions .btn-solid,.cycle-page-actions .btn-outline{width:auto;padding:9px 14px;}
+
+  /* ===== Período / Registros de Períodos — novo visual (somente apresentação) ===== */
+  .pc-hero{padding:22px 24px;margin-bottom:16px;}
+  .pc-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .pc-hero-id{display:flex;align-items:flex-start;gap:14px;min-width:0;}
+  .pc-hero-icon{width:44px;height:44px;flex:0 0 44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;}
+  .pc-hero-icon svg,.pc-mi svg,.pc-hol-icon svg,.pc-data-btn svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;}
+  .pc-hero-icon svg{width:22px;height:22px;}
+  .pc-hero-titlerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pc-hero-titlerow h3{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--text);}
+  .pc-hero-range{margin:5px 0 0;font-size:14px;color:var(--muted);font-weight:500;}
+  .pc-hero-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .pc-hero-actions .cycle-page-actions{gap:8px;}
+  .pc-data-btn{width:auto;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:var(--surface);}
+  .pc-data-btn svg{width:15px;height:15px;color:var(--accent);}
+  .pc-data-btn:hover{border-color:#c9d7e5;background:var(--surface-2);}
+  .pc-progress{margin-top:22px;}
+  .pc-progress-label{font-size:12.5px;color:var(--muted);margin-bottom:8px;}
+  .pc-progress-label strong{color:var(--text);font-weight:700;}
+  .pc-bar{height:6px;border-radius:999px;background:#eceff4;overflow:hidden;}
+  .pc-bar-fill{height:100%;border-radius:999px;background:var(--accent);transition:width .3s ease;}
+  .pc-progress-foot{display:flex;justify-content:space-between;gap:12px;margin-top:9px;font-size:12px;color:var(--muted);}
+  .pc-progress-foot strong{color:var(--text);font-weight:600;}
+  .pc-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px;}
+  .pc-metric{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);min-width:0;}
+  .pc-mi{width:36px;height:36px;flex:0 0 36px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;}
+  .pc-mi svg{width:18px;height:18px;}
+  .pc-metric-text{min-width:0;}
+  .pc-metric-text span{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-bottom:3px;}
+  .pc-metric-text strong{display:block;font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pc-block{padding:20px 24px;margin-bottom:16px;}
+  .pc-block-head{margin-bottom:6px;}
+  .pc-block-head h4{margin:0;font-size:15px;font-weight:700;color:var(--text);}
+  .pc-block-head p{margin:4px 0 0;font-size:12px;color:var(--muted);}
+  .pc-hol-list{display:flex;flex-direction:column;}
+  .pc-hol{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-top:1px solid var(--border);flex-wrap:wrap;}
+  .pc-hol:first-child{border-top:0;}
+  .pc-hol-main{display:flex;align-items:center;gap:14px;min-width:0;}
+  .pc-hol-icon{width:36px;height:36px;flex:0 0 36px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;}
+  .pc-hol-icon svg{width:18px;height:18px;}
+  .pc-hol-text strong{display:block;font-size:14px;font-weight:700;color:var(--text);}
+  .pc-hol-text span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .pc-hol-goal{font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;}
+  .pc-hol-goal i{font-style:normal;color:#b5bac6;margin:0 8px;}
+  .pc-records{display:flex;flex-direction:column;gap:14px;}
+  .pc-record{padding:20px 24px;}
+  .pc-record-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .pc-record-eyebrow{font-size:11.5px;color:var(--muted);font-weight:500;margin-bottom:4px;}
+  .pc-record-title{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--text);}
+  .pc-record-side{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pc-record-body{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:18px;}
+  .pc-record-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,max-content));gap:14px 44px;}
+  .pc-record-info div span{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-bottom:4px;}
+  .pc-record-info div strong{display:block;font-size:14px;font-weight:700;color:var(--text);}
+  .pc-record .pc-hol-list{margin-top:18px;border-top:1px solid var(--border);}
+  .pc-record .pc-hol{padding:12px 0;}
+  .pc-record .pc-hol-list-title{font-size:12px;font-weight:600;color:var(--muted);margin-top:16px;}
+  @media(max-width:1050px){.pc-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  @media(max-width:700px){.pc-metrics{grid-template-columns:1fr;}.pc-hero,.pc-block,.pc-record{padding:18px;}.pc-hol-goal{white-space:normal;}}
+
+  /* ===== Análise: ícone de perfil e nome no filtro de usuário ===== */
+  .analysis-scope-btn #analysis-scope-label{display:inline-flex;align-items:center;gap:8px;min-width:0;}
+  .analysis-scope-btn .scope-user-icon{width:16px;height:16px;flex:0 0 16px;color:#7b8798;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;}
+  .analysis-scope-btn .scope-user-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .analysis-scope-menu-item[data-scope="user"].active{font-weight:400;}
+  .analysis-scope-menu-item[data-scope="user"] strong{font-weight:700;}
   .cycle-detail-hero{padding:18px 20px;margin-bottom:14px;}
   .cycle-detail-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
   .cycle-detail-title{display:flex;align-items:flex-start;gap:10px}.cycle-detail-title .line-icon{margin-top:1px;color:var(--accent);}
@@ -709,6 +794,27 @@
 .cargo-picker-projects{max-height:360px;overflow:auto;padding:6px 0}.cargo-project-block{border-bottom:1px solid #eef1f4}.cargo-project-block:last-child{border-bottom:0}.cargo-project-row{display:flex;align-items:center;gap:9px;padding:10px 12px;min-height:42px}.cargo-project-main{display:flex;align-items:center;gap:8px;min-width:0;flex:1;cursor:pointer}.cargo-project-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}.cargo-project-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cargo-picker-footer{border-top:1px solid #e6ebef;padding:9px 12px}.cargo-picker-footer button{border:0;background:transparent;color:#176fae;font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;padding:3px 0}
 @media(max-width:900px){.cargo-picker-popover{right:auto;left:0;width:360px}}
+
+  /* Feedback temporário de restauração e troca de equipe. */
+  #petimer-loading{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.58);backdrop-filter:blur(4px) saturate(.75);-webkit-backdrop-filter:blur(4px) saturate(.75);cursor:wait;touch-action:none;}
+  #petimer-loading .petimer-loading-content{text-align:center;width:min(340px,80vw);}
+  #petimer-loading svg{display:block;width:100%;height:auto;overflow:visible;mix-blend-mode:multiply;}
+  #petimer-loading p{margin:22px 0 0;color:#082f53;font:500 13px/1.5 'Inter',sans-serif;}
+  .petimer-loading-hand{transform-origin:305px 320px;animation:petimer-clock-tick 60s steps(60,end) infinite;}
+  .petimer-loading-hand-short{animation-duration:3600s;animation-timing-function:steps(60,end);}
+  @keyframes petimer-clock-tick{to{transform:rotate(360deg);}}
+  body.petimer-is-loading{overflow:hidden;}
+  @media(prefers-reduced-motion:reduce){.petimer-loading-hand{animation:none;}}
+
+  /* Antes de init(): só a estrutura da área salva, sem simular dados. */
+  html.petimer-restoring #auth-screen{display:none!important;}
+  html.petimer-restoring #main-app{display:flex!important;pointer-events:none;}
+  html.petimer-restoring #main-app .view{display:none!important;}
+  html.petimer-restoring[data-petimer-restore-view="tracker"] #view-tracker,
+  html.petimer-restoring[data-petimer-restore-view="analysis"] #view-analysis,
+  html.petimer-restoring[data-petimer-restore-view="cycle"] #view-cycle,
+  html.petimer-restoring[data-petimer-restore-view="team"] #view-team{display:block!important;}
+  html.petimer-restoring #petimer-loading{display:flex!important;}
 </style>
 
 <style id="registro-visual-align-v2">
@@ -1259,7 +1365,56 @@
   </main>
 </div>
 
+
+<div id="petimer-loading" hidden tabindex="-1" role="status" aria-live="polite" aria-atomic="true" aria-label="Carregando PETimer">
+  <div class="petimer-loading-content">
+    <svg viewBox="140 116 950 350" aria-hidden="true" focusable="false">
+      <defs>
+        <!-- Conserva a imagem oficial, recortando somente os ponteiros originais. -->
+        <clipPath id="petimer-loading-logo-clip"><path clip-rule="evenodd" d="M0 0H1177V552H0Z M277 211L426 237L426 267L313 338L288 338Z"/></clipPath>
+      </defs>
+      <image id="petimer-loading-logo" width="1177" height="552" clip-path="url(#petimer-loading-logo-clip)"/>
+      <path class="petimer-loading-hand petimer-loading-hand-short" d="M301 320L285 225L289 225L309 320Z" fill="#343733"/>
+      <path class="petimer-loading-hand" d="M302 316L417 249L307 324Z" fill="#343733"/>
+      <circle cx="305" cy="320" r="9" fill="#343733"/>
+    </svg>
+    <p id="petimer-loading-message">Carregando PETimer...</p>
+  </div>
+</div>
+
 <script>
+
+  let petimerLoadingDepth = 0;
+  let petimerLoadingState = [];
+  let petimerLoadingFocus = null;
+  let petimerLoadingBusy = null;
+  function showPetimerLoading(message = 'Carregando PETimer...') {
+    const overlay = document.getElementById('petimer-loading');
+    if (petimerLoadingDepth++ > 0) return;
+    document.getElementById('petimer-loading-logo').setAttribute('href', document.getElementById('brand-logo-source').getAttribute('src'));
+    document.getElementById('petimer-loading-message').textContent = message;
+    petimerLoadingFocus = document.activeElement;
+    petimerLoadingBusy = document.body.getAttribute('aria-busy');
+    petimerLoadingState = Array.from(document.body.children)
+      .filter(el => el !== overlay && !['SCRIPT','STYLE'].includes(el.tagName))
+      .map(el => ({el, inert: el.inert}));
+    petimerLoadingState.forEach(({el}) => { el.inert = true; });
+    document.body.setAttribute('aria-busy','true');
+    document.body.classList.add('petimer-is-loading');
+    overlay.hidden = false;
+    overlay.focus({preventScroll:true});
+  }
+  function hidePetimerLoading() {
+    if (!petimerLoadingDepth || --petimerLoadingDepth > 0) return;
+    document.getElementById('petimer-loading').hidden = true;
+    petimerLoadingState.forEach(({el,inert}) => { el.inert = inert; });
+    petimerLoadingState = [];
+    if (petimerLoadingBusy === null) document.body.removeAttribute('aria-busy');
+    else document.body.setAttribute('aria-busy', petimerLoadingBusy);
+    document.body.classList.remove('petimer-is-loading');
+    if (petimerLoadingFocus?.isConnected && !petimerLoadingFocus.closest('[hidden],[inert]')) petimerLoadingFocus.focus({preventScroll:true});
+    petimerLoadingFocus = null;
+  }
   // Sincroniza a logo oficial (definida uma única vez na sidebar) em todas as telas que a exibem
   document.addEventListener('DOMContentLoaded', function(){
     var src = document.getElementById('brand-logo-source').getAttribute('src');
@@ -1270,7 +1425,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbxIYEeS7CTJvwDpXjZqwFTcTo36aVD2Z5oxqL4KMLV9uA5mA2uHFPbH8x_IVtWLMiE/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyVHsJWatDP5xhThpB6yW9XSghwdHLVNdd9IJ19k1zMPcJjQkz4fFFGidakwzcSvyS2/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -1534,8 +1689,32 @@
   let cycleSubView = 'current';
   let selectedCycleDetailId = null;
 
+
+  function savePetimerVisualNavigation() {
+    if (!session?.teamCode) return;
+    try {
+      sessionStorage.setItem('petimer_visual_navigation', JSON.stringify({
+        teamCode: session.teamCode, view: currentView, cycleSubView, analysisMode
+      }));
+    } catch (_) { /* Preferência opcional; nunca impede a navegação. */ }
+  }
+  function preparePetimerVisualRestore() {
+    const state = window.petimerVisualRestore;
+    if (!state || !authToken) return;
+    showScreen('main-app');
+    setAnalysisMode(state.analysisMode, null, false);
+    switchCycleSubView(state.cycleSubView, false);
+    const button = Array.from(document.querySelectorAll('.nav-item'))
+      .find(b => b.getAttribute('onclick')?.includes("switchView('" + state.view + "'"));
+    switchView(state.view, button, false);
+    showPetimerLoading('Carregando PETimer...');
+    document.documentElement.classList.remove('petimer-restoring');
+    document.documentElement.removeAttribute('data-petimer-restore-view');
+  }
+
   async function init() {
     if (!authToken) { showScreen('auth-screen'); return; }
+    if (!petimerLoadingDepth) showPetimerLoading('Carregando PETimer...');
     try {
       const d = await api('me');
       session = { username: d.user.username, name: d.user.displayName, teamCode: null };
@@ -1550,7 +1729,10 @@
         renderHub();
       }
     } catch (err) {
+      showScreen('auth-screen');
       logout();
+    } finally {
+      hidePetimerLoading();
     }
   }
 
@@ -1696,6 +1878,7 @@
     CACHE = { users: {}, teams: {}, entries: [], cycles: [], running: null, teamRunning: [], myTeams: [] };
     localStorage.removeItem('petimer_token');
     localStorage.removeItem('petimer_last_team');
+    try { sessionStorage.removeItem('petimer_visual_navigation'); } catch (_) {}
     location.reload();
   }
 
@@ -1764,20 +1947,25 @@
   }
 
   async function enterTeam(code) {
-    if (session.teamCode && session.teamCode !== code) { if (DB.getRunning()) await stopTimer(); }
-    session.teamCode = code;
-    localStorage.setItem('petimer_last_team', code);
+    showPetimerLoading('Carregando equipe...');
     try {
-      await refreshTeamData();
-    } catch (err) {
-      alert(err.message);
-      session.teamCode = null;
-      showScreen('hub-screen'); renderHub();
-      return;
+      if (session.teamCode && session.teamCode !== code) { if (DB.getRunning()) await stopTimer(); }
+      session.teamCode = code;
+      localStorage.setItem('petimer_last_team', code);
+      try {
+        await refreshTeamData();
+      } catch (err) {
+        alert(err.message);
+        session.teamCode = null;
+        showScreen('hub-screen'); renderHub();
+        return;
+      }
+      showScreen('main-app');
+      setupApp();
+      startPolling();
+    } finally {
+      hidePetimerLoading();
     }
-    showScreen('main-app');
-    setupApp();
-    startPolling();
   }
 
   function toggleProfileMenu(event) {
@@ -1893,14 +2081,19 @@
   async function switchTeamInline(code) {
     if (!code || code === session.teamCode) { closeTeamSwitcher(); return; }
     if (!(CACHE.myTeams || []).some(t => t.code === code)) return alert('Você não faz parte desta equipe.');
-    const running = DB.getRunning();
-    if (running && running.user === session.username && running.teamCode === session.teamCode) await stopTimer();
-    session.teamCode = code;
-    localStorage.setItem('petimer_last_team', code);
-    closeTeamSwitcher();
-    try { await refreshTeamData(); } catch (err) { alert(err.message); }
-    setupApp();
-    startPolling();
+    showPetimerLoading('Carregando equipe...');
+    try {
+      const running = DB.getRunning();
+      if (running && running.user === session.username && running.teamCode === session.teamCode) await stopTimer();
+      session.teamCode = code;
+      localStorage.setItem('petimer_last_team', code);
+      closeTeamSwitcher();
+      try { await refreshTeamData(); } catch (err) { alert(err.message); }
+      setupApp();
+      startPolling();
+    } finally {
+      hidePetimerLoading();
+    }
   }
   document.addEventListener('click', function(e) {
     const menu = document.getElementById('sidebar-profile-menu');
@@ -1955,18 +2148,21 @@
     }
     refreshAppViews();
     updateSuggestions();
+    savePetimerVisualNavigation();
   }
 
-  function refreshAppViews() { renderEntries(); renderTeamMembers(); renderCycleBadge(); renderAnalysis(); }
+  function refreshAppViews() { renderEntries(); renderTeamMembers(); renderCycleBadge(); renderAnalysis(); if (currentView === 'cycle') renderCycleView(); }
 
-  function switchView(view, btn) {
+  function switchView(view, btn, render = true) {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    btn?.classList.add('active');
     document.querySelectorAll('.view').forEach(v => v.hidden = true);
     document.getElementById('view-' + view).hidden = false;
     currentView = view;
     const titles = { 'tracker': 'Registro de atividade', 'analysis': 'Análise', 'team': 'Gestão da Equipe', 'cycle': 'Período' };
     document.getElementById('view-title').textContent = titles[view];
+    savePetimerVisualNavigation();
+    if (!render) return;
     if (view === 'cycle') renderCycleView();
     if (view === 'analysis') renderAnalysis();
     renderCycleBadge();
@@ -2377,12 +2573,13 @@
     renderAnalysis();
   }
 
-  function setAnalysisMode(mode, btn) {
+  function setAnalysisMode(mode, btn, render = true) {
     analysisMode = mode;
     document.querySelectorAll('[data-analysis-mode]').forEach(b => b.classList.toggle('active', b.dataset.analysisMode === mode));
     document.getElementById('analysis-overview-panel').hidden = mode !== 'overview';
     document.getElementById('analysis-table-panel').hidden = mode === 'overview';
-    renderAnalysis();
+    savePetimerVisualNavigation();
+    if (render) renderAnalysis();
   }
 
   function fmtClock(ms) {
@@ -2448,7 +2645,10 @@
     if (!label) return;
     if (analysisScope === 'team') label.textContent = 'Equipe inteira';
     else if (analysisScope === 'sector') label.textContent = 'Por setor';
-    else label.textContent = analysisSelectedUser || 'Usuário';
+    else if (analysisSelectedUser) label.innerHTML = '<svg class="scope-user-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"></circle><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"></path></svg><span class="scope-user-name">' + escapeHtml(analysisSelectedUser) + '</span>';
+    else label.textContent = 'Usuário';
+    const userItem = document.querySelector('#analysis-scope-menu .analysis-scope-menu-item[data-scope="user"]');
+    if (userItem) userItem.innerHTML = analysisSelectedUser ? 'Usuário (<strong>' + escapeHtml(analysisSelectedUser) + '</strong>)' : 'Usuário';
     document.querySelectorAll('#analysis-scope-menu .analysis-scope-menu-item').forEach(el => {
       el.classList.toggle('active', el.dataset.scope === analysisScope);
     });
@@ -3279,7 +3479,7 @@
   function cycleStatusLabel(cycle){
     const today=localDateStr(new Date());
     if(today<cycle.startDate) return '<span class="status-badge status-neutral">Agendado</span>';
-    if(today>cycle.endDate) return '<span class="status-badge status-neutral">Finalizado</span>';
+    if(today>cycle.endDate) return '<span class="status-badge status-neutral">Encerrado</span>';
     return '<span class="status-badge status-active">Ativo</span>';
   }
   function cycleGoalText(cycle){
@@ -3342,8 +3542,37 @@
     if(!cycle) return '';
     const admin=isTeamAdmin(), u=CYCLE_UNIT_TEXT[cycle.unit], editable=admin&&cycle.endDate>=localDateStr(new Date()), actions=editable?`<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="startEditCycle('${cycle.id}')">Editar período</button><button type="button" class="btn-outline" onclick="deleteCycle('${cycle.id}')">Excluir</button></div>`:'';
     const remaining=cycleTimeLeft(cycle);
-    const holidaySummary = cycle.unit === 'weeks' && (cycle.holidayWeeks || []).length ? `<div class="cycle-detail-section"><div class="cycle-detail-section-title">Semanas com feriado</div>${(cycle.holidayWeeks || []).map(x => `<div class="cycle-holiday-item"><div><strong>Feriado: ${fmtDateBR(x.holidayDate)}</strong><span>Semana de ${fmtDateBR(x.weekStart)} a ${fmtDateBR(getWeekEndIso(x.weekStart))} · Meta: ${formatCycleDraftMinutes(x.goalMinutes)} · Mínimo: ${formatCycleDraftMinutes(x.minimumMinutes)}</span></div></div>`).join('')}</div>` : '';
-    return `<div class="card cycle-detail-hero"><div class="cycle-detail-top"><div class="cycle-detail-title"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg></span><div><h3>${history?'Detalhes do período':'Período atual'}</h3><p>${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div style="display:flex;align-items:center;gap:10px">${cycleStatusLabel(cycle)}${actions}</div></div><div class="cycle-detail-metrics"><div class="cycle-detail-metric"><span>Início</span><strong>${fmtDateBR(cycle.startDate)}</strong></div><div class="cycle-detail-metric"><span>Fim</span><strong>${fmtDateBR(cycle.endDate)}</strong></div><div class="cycle-detail-metric"><span>Divisão</span><strong>${u.label}</strong></div><div class="cycle-detail-metric"><span>Meta</span><strong>${cycleGoalText(cycle)}</strong></div>${cycle.unit==='weeks'?`<div class="cycle-detail-metric"><span>Mínimo semanal</span><strong>${formatCycleDraftMinutes(cycle.minimumMinutes || 0)}</strong></div>`:''}${!history?`<div class="cycle-detail-metric"><span>Tempo restante</span><strong>${remaining}</strong></div>`:''}</div>${holidaySummary}<div class="cycle-detail-footer"><button type="button" class="btn-outline cycle-data-btn" onclick="openCycleDataModal('${cycle.id}')"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>Dados sobre o período</button></div></div>`;
+    const holidays = cycle.unit === 'weeks' ? (cycle.holidayWeeks || []) : [];
+    // Ícones lineares (apenas apresentação)
+    const ico = {
+      cal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg>',
+      target:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><circle cx="12" cy="12" r="1"></circle></svg>',
+      clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>',
+      layers:'<svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg>',
+      bars:'<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>',
+      flag:'<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"></path></svg>'
+    };
+    const dataBtn = `<button type="button" class="btn-outline cycle-data-btn pc-data-btn" onclick="openCycleDataModal('${cycle.id}')">${ico.bars}Dados sobre o período</button>`;
+    const holidayRows = holidays.map(x => `<div class="pc-hol"><div class="pc-hol-main"><span class="pc-hol-icon" aria-hidden="true">${ico.cal}</span><div class="pc-hol-text"><strong>Feriado: ${fmtDateBR(x.holidayDate)}</strong><span>Semana de ${fmtDateBR(x.weekStart)} a ${fmtDateBR(getWeekEndIso(x.weekStart))}</span></div></div><div class="pc-hol-goal">Meta: ${formatCycleDraftMinutes(x.goalMinutes)}<i>•</i>Mínimo: ${formatCycleDraftMinutes(x.minimumMinutes)}</div></div>`).join('');
+    // Duração e progresso: cálculo simples somente com as datas já existentes no frontend
+    const isoToUtc = iso => { const [y,m,d]=iso.split('-').map(Number); return Date.UTC(y,m-1,d); };
+    const totalDays = Math.max(1, Math.round((isoToUtc(cycle.endDate)-isoToUtc(cycle.startDate))/86400000)+1);
+
+    if(history){
+      const minCell = cycle.unit==='weeks' ? `<div><span>Mínimo semanal</span><strong>${formatCycleDraftMinutes(cycle.minimumMinutes || 0)}</strong></div>` : '';
+      const holBlock = holidays.length ? `<div class="pc-hol-list-title">Semanas com feriado</div><div class="pc-hol-list">${holidayRows}</div>` : '';
+      return `<div class="card pc-record"><div class="pc-record-head"><div><div class="pc-record-eyebrow">Detalhes do período</div><h3 class="pc-record-title">${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</h3></div><div class="pc-record-side">${cycleStatusLabel(cycle)}${actions}</div></div><div class="pc-record-body"><div class="pc-record-info"><div><span>Início</span><strong>${fmtDateBR(cycle.startDate)}</strong></div><div><span>Fim</span><strong>${fmtDateBR(cycle.endDate)}</strong></div><div><span>Meta</span><strong>${cycleGoalText(cycle)}</strong></div><div><span>Divisão</span><strong>${u.label}</strong></div>${minCell}<div><span>Duração</span><strong>${totalDays} ${totalDays===1?'dia':'dias'}</strong></div></div>${dataBtn}</div>${holBlock}</div>`;
+    }
+
+    const todayUtc = isoToUtc(localDateStr(new Date()));
+    const elapsedDays = Math.min(totalDays, Math.max(0, Math.round((todayUtc-isoToUtc(cycle.startDate))/86400000)+1));
+    const leftDays = totalDays - elapsedDays;
+    const pct = Math.round(elapsedDays/totalDays*100);
+    const metric = (icon,label,value) => `<div class="pc-metric"><span class="pc-mi" aria-hidden="true">${icon}</span><div class="pc-metric-text"><span>${label}</span><strong>${value}</strong></div></div>`;
+    const row2 = metric(ico.layers,'Divisão',u.label)
+      + (cycle.unit==='weeks' ? metric(ico.bars,'Mínimo semanal',formatCycleDraftMinutes(cycle.minimumMinutes || 0)) + metric(ico.flag,'Semanas com feriado',holidays.length) : '');
+    const holBlock = holidays.length ? `<div class="card pc-block"><div class="pc-block-head"><h4>Semanas com feriado</h4><p>Semanas que possuem feriados e suas metas ajustadas.</p></div><div class="pc-hol-list">${holidayRows}</div></div>` : '';
+    return `<div class="card pc-hero"><div class="pc-hero-top"><div class="pc-hero-id"><span class="pc-hero-icon" aria-hidden="true">${ico.cal}</span><div><div class="pc-hero-titlerow"><h3>Período atual</h3>${cycleStatusLabel(cycle)}</div><p class="pc-hero-range">${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div class="pc-hero-actions">${actions}${dataBtn}</div></div><div class="pc-progress"><div class="pc-progress-label"><strong>${pct}%</strong> do período</div><div class="pc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div class="pc-bar-fill" style="width:${pct}%"></div></div><div class="pc-progress-foot"><span><strong>${elapsedDays}</strong> ${elapsedDays===1?'dia decorrido':'dias decorridos'}</span><span><strong>${leftDays}</strong> ${leftDays===1?'dia restante':'dias restantes'}</span></div></div></div><div class="pc-metrics">${metric(ico.cal,'Início',fmtDateBR(cycle.startDate))}${metric(ico.cal,'Fim',fmtDateBR(cycle.endDate))}${metric(ico.target,'Meta',cycleGoalText(cycle))}${metric(ico.clock,'Tempo restante',remaining)}${row2}</div>${holBlock}`;
   }
   function openNewCycleForm(){
     if(!isTeamAdmin()) return;
@@ -3362,12 +3591,14 @@
 
   function hideCycleForm(){ const modal=document.getElementById('cycle-form-modal'); if(modal)modal.hidden=true; }
   function handleCycleModalBackdrop(event){ if(event.target===event.currentTarget) cancelEditCycle(); }
-  function switchCycleSubView(view){
+  function switchCycleSubView(view, render = true){
     cycleSubView=view;
     ['current','records'].forEach(v=>{
       document.getElementById(`cycle-tab-${v}`)?.classList.toggle('active',v===view);
       const p=document.getElementById(`cycle-page-${v}`); if(p)p.hidden=v!==view;
     });
+    savePetimerVisualNavigation();
+    if (!render) return;
     if(view==='records') renderCycleRecordsPage();
     if(view==='current') renderCycleCurrentPage();
   }
@@ -3377,11 +3608,9 @@
     const admin=isTeamAdmin();
     if(!cycle){
       el.innerHTML=`<div class="cycle-page-head"><div><h3>Período</h3><p>Acompanhe o período atual da equipe.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Criar período</button></div>':''}</div><div class="card cycle-empty-state">${escapeHtml(team.name)} não iniciou nenhum período.</div>`;
-      if(!editingCycleId) hideCycleForm();
       return;
     }
     el.innerHTML=`<div class="cycle-page-head"><div><h3>Período</h3><p>Visão geral do período atualmente em andamento.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Novo período</button></div>':''}</div>${renderCycleDetail(cycle)}`;
-    if(!editingCycleId) hideCycleForm();
   }
   function selectCycleRecord(id){ selectedCycleDetailId=id; renderCycleRecordsPage(); }
   function renderCycleRecordsPage(){
@@ -3390,7 +3619,7 @@
     if(!cycles.length){el.innerHTML='<div class="card cycle-empty-state">Nenhum período cadastrado.</div>';return;}
     // Exibe cada registro diretamente no card completo de detalhes, evitando
     // repetir as datas em uma caixa lateral menor.
-    el.innerHTML=`<div style="display:flex;flex-direction:column;gap:16px">${cycles.map(c=>renderCycleDetail(c,{history:true})).join('')}</div>`;
+    el.innerHTML=`<div class="pc-records">${cycles.map(c=>renderCycleDetail(c,{history:true})).join('')}</div>`;
   }
   function renderCycleMemberArea(){ renderCycleCurrentPage(); }
   function renderAdminCycleSummary(){ /* conteúdo integrado às páginas internas do período */ }
@@ -3412,8 +3641,21 @@
 
   function renderCyclesList(admin) { renderCycleRecordsPage(); }
 
+  // Limites inclusivos: compartilhar até mesmo um dia já é conflito.
+  function findCycleOverlap(cycles, teamCode, startDate, endDate, excludedId) {
+    return cycles.find(c => c.teamCode === teamCode
+      && (excludedId == null || String(c.id) !== String(excludedId))
+      && startDate <= c.endDate && endDate >= c.startDate) || null;
+  }
+
+  function cycleOverlapMessage(cycle, editing) {
+    return `Não é possível ${editing ? 'editar' : 'criar'} este período porque as datas selecionadas coincidem com um período já existente (${fmtDateBR(cycle.startDate)} a ${fmtDateBR(cycle.endDate)}). Escolha um intervalo sem sobreposição.`;
+  }
+
+  let savingCycle = false;
   async function handleSaveCycle(e) {
     e.preventDefault();
+    if (savingCycle) return;
     if (!isTeamAdmin()) return alert('Apenas o administrador da equipe pode gerenciar períodos.');
 
     const startDate = document.getElementById('cycle-start').value;
@@ -3437,16 +3679,32 @@
       }
     }
 
+    const teamCode = session.teamCode, cycleId = editingCycleId;
+    const holidayWeeks = unit === 'weeks' ? cycleHolidayWeeksDraft.map(x => ({...x})) : [];
+    const conflict = findCycleOverlap(DB.getCycles(), teamCode, startDate, endDate, cycleId);
+    if (conflict) return alert(cycleOverlapMessage(conflict, cycleId != null));
+
+    savingCycle = true;
     try {
+      // Revalida com todos os períodos retornados pelo contrato existente.
+      // A garantia contra concorrência ainda exige validação atômica no servidor.
+      const latest = await api('getTeamBootstrap', { code: teamCode });
+      if (!session || session.teamCode !== teamCode) return;
+      if (!Array.isArray(latest.cycles)) throw new Error('Não foi possível verificar os períodos da equipe. Tente novamente.');
+      const latestCycles = latest.cycles.map(c => ({...c, teamCode}));
+      const latestConflict = findCycleOverlap(latestCycles, teamCode, startDate, endDate, cycleId);
+      if (latestConflict) return alert(cycleOverlapMessage(latestConflict, cycleId != null));
       await api('saveCycle', {
-        code: session.teamCode, cycleId: editingCycleId || undefined, startDate, endDate, unit, goalMinutes,
-        minimumMinutes, holidayWeeks: unit === 'weeks' ? cycleHolidayWeeksDraft : []
+        code: teamCode, cycleId: cycleId || undefined, startDate, endDate, unit, goalMinutes,
+        minimumMinutes, holidayWeeks
       });
+      if (!session || session.teamCode !== teamCode) return;
       await refreshTeamData();
       cancelEditCycle();
       renderCycleView();
       renderCycleBadge();
     } catch (err) { alert(err.message); }
+    finally { savingCycle = false; }
   }
 
   function startEditCycle(id) {
@@ -3497,6 +3755,7 @@
   function fmtDur(ms, wSec = false) { const t = Math.max(0, Math.floor(ms/1000)), h = Math.floor(t/3600), m = Math.floor((t%3600)/60), s = t%60; if (wSec) return [h,m,s].map(v=>String(v).padStart(2,'0')).join(':'); return `${h}h ${String(m).padStart(2,'0')}m`; }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+  preparePetimerVisualRestore();
   document.addEventListener('DOMContentLoaded', init);
 </script>
 
