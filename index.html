@@ -927,6 +927,27 @@
 .cycle-holiday-toggle[hidden]{display:none;}
 .cycle-holiday-toggle input{width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent);cursor:pointer;}
 </style>
+<style>
+  #cycle-status-badge.is-weekly{display:grid;grid-template-columns:24px minmax(0,1fr) 112px;align-items:center;gap:9px;width:440px;max-width:100%;height:60px}
+  #cycle-status-badge.is-weekly .cycle-badge-main,#cycle-status-badge.is-weekly .cycle-badge-sub{white-space:normal;overflow-wrap:anywhere}
+  #cycle-status-badge.is-weekly .cycle-badge-sub{color:#59616c;font-variant-numeric:tabular-nums;margin-top:4px}
+  #cycle-status-badge.is-weekly.is-success{background:#edf8f0;border-color:#c9e3d0}
+  #cycle-status-badge.is-weekly.is-success .cycle-badge-main,#cycle-status-badge.is-weekly.is-success .line-icon{color:#286342}
+  #cycle-status-badge.is-weekly.is-warning{background:#fff8e7;border-color:#eadcb8}
+  #cycle-status-badge.is-weekly.is-warning .cycle-badge-main{color:#65501f}
+  #cycle-status-badge.is-weekly.is-warning .line-icon{color:#957019}
+  #cycle-status-badge.is-weekly.is-danger{background:#fbefea;border-color:#e7cec3}
+  #cycle-status-badge.is-weekly.is-danger .cycle-badge-main,#cycle-status-badge.is-weekly.is-danger .line-icon{color:#98533e}
+  #cycle-status-badge .cycle-week-pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:10px;font-weight:600;line-height:1.35;white-space:nowrap;border:1px solid #e0e5ec;border-radius:9px;padding:7px 8px;background:#f0f3f7;color:#59677d;justify-self:end}
+  #cycle-status-badge .cycle-week-pill svg{width:14px;height:14px;flex:0 0 14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #cycle-status-badge.is-weekly>.line-icon,#cycle-status-badge.is-weekly>.line-icon svg{width:24px;height:24px}
+  #cycle-status-badge.is-weekly .cycle-badge-sub{font-weight:600}
+  #cycle-status-badge.is-success .cycle-week-pill.is-last{background:#e0f0e5;border-color:#c9e3d0;color:#286342}
+  #cycle-status-badge.is-warning .cycle-week-pill.is-last{background:#f7eed6;border-color:#eadcb8;color:#65501f}
+  #cycle-status-badge.is-danger .cycle-week-pill.is-last{background:#f5e3db;border-color:#e7cec3;color:#98533e}
+  #cycle-status-badge .cycle-badge-sr{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  @media(max-width:600px){#cycle-status-badge.is-weekly{grid-template-columns:24px minmax(0,1fr);grid-template-rows:minmax(0,1fr) 30px;width:100%;height:100px}#cycle-status-badge .cycle-week-pill{grid-column:2;max-width:100%;white-space:normal}}
+</style>
 </head>
 <body>
 
@@ -3600,7 +3621,9 @@
       ? weeklyPeriods.reduce((sum, w) => sum + w.goalMinutes * 60000, 0)
       : totalPeriods * basePeriodGoalMs;
     const remainingMs = Math.max(0, goalMs - loggedMs);
-    const balanceTargetMs = Math.max(0, (remainingMs + currentLoggedMs) * weightShare);
+    const loggedBeforeCurrentPeriodMs = loggedMs - currentLoggedMs;
+    const remainingAtPeriodStartMs = Math.max(0, goalMs - loggedBeforeCurrentPeriodMs);
+    const balanceTargetMs = Math.max(0, remainingAtPeriodStartMs * weightShare);
     const targetThisPeriodMs = Math.max(currentMinimumMs, balanceTargetMs);
     const remainingThisPeriodMs = Math.max(0, targetThisPeriodMs - currentLoggedMs);
     const requiredMs = remainingMs / periodsRemaining;
@@ -3702,6 +3725,34 @@
     overlay.hidden = false;
   }
 
+  // Capacidade apenas visual; não participa dos cálculos de meta/média.
+  const MAX_RECOVERY_HOURS_PER_DAY = 4;
+  function weeklyBadgePresentation(cycle, progress) {
+    const {nowMs, countEnd} = getCyclePeriodRange(cycle);
+    let capacityMs = 0;
+    for (let cursor = nowMs; cursor < countEnd;) {
+      const day = new Date(cursor);
+      const next = Math.min(countEnd, new Date(day.getFullYear(), day.getMonth(), day.getDate()+1).getTime());
+      capacityMs += Math.min(MAX_RECOVERY_HOURS_PER_DAY * 3600000, next - cursor);
+      cursor = next;
+    }
+    const status = progress.periodCompleted ? 'success' : progress.remainingThisPeriodMs <= capacityMs ? 'warning' : 'danger';
+    const currentWeek = Math.max(1, Math.min(progress.totalPeriods, progress.totalPeriods - progress.periodsRemaining + 1));
+    const lastWeek = progress.periodsRemaining === 1;
+    return {
+      status, lastWeek,
+      pill: lastWeek ? 'Última semana' : `Semana ${currentWeek} de ${progress.totalPeriods}`,
+      line1: progress.periodCompleted ? 'Média semanal atingida!' : `Faltam ${formatHM(progress.remainingThisPeriodMs)} para bater a média semanal.`,
+      line2: `${formatHM(progress.currentLoggedMs)} de ${formatHM(progress.currentGoalMs)} completas`
+    };
+  }
+  function weeklyBadgeIcon(status) {
+    const path = status === 'success' ? '<circle cx="12" cy="12" r="9"></circle><path d="m7.5 12 3 3 6-6"></path>'
+      : status === 'danger' ? '<path d="M5 21V4m0 0h13l-3 4 3 4H5"></path>'
+      : '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>';
+    return '<svg viewBox="0 0 24 24">' + path + '</svg>';
+  }
+
   function renderCycleBadge() {
     const badge = document.getElementById('cycle-status-badge');
     if (!badge) return;
@@ -3719,12 +3770,15 @@
       if (overlay) overlay.hidden = true;
       return;
     }
-    const { line1, line2, progress } = buildCycleMessage(cycle);
-    let status = progress.alertLevel || 'warning';
+    let { line1, line2, progress } = buildCycleMessage(cycle);
+    const weekly = cycle.unit === 'weeks' ? weeklyBadgePresentation(cycle, progress) : null;
+    if (weekly) { line1 = weekly.line1; line2 = weekly.line2; }
+    const status = weekly ? weekly.status : progress.alertLevel || 'warning';
+    badge.classList.toggle('is-weekly', !!weekly);
     badge.classList.toggle('is-warning', status === 'warning');
     badge.classList.toggle('is-success', status === 'success');
     badge.classList.toggle('is-danger', status === 'danger');
-    badge.innerHTML = `<span class="line-icon" aria-hidden="true">${statusIconSvg(status)}</span><div><div class="cycle-badge-main">${escapeHtml(line1)}</div><div class="cycle-badge-sub">${escapeHtml(line2)}</div></div>`;
+    badge.innerHTML = `<span class="line-icon" aria-hidden="true">${weekly ? weeklyBadgeIcon(status) : statusIconSvg(status)}</span><div class="cycle-badge-copy"><div class="cycle-badge-main">${escapeHtml(line1)}</div>${weekly ? '' : `<div class="cycle-badge-sub">${escapeHtml(line2)}</div>`}</div>${weekly ? `<span class="cycle-week-pill${weekly.lastWeek ? ' is-last' : ''}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M4 10h16"></path></svg>${escapeHtml(weekly.pill)}</span><span class="cycle-badge-sr">${status === 'danger' ? 'Ritmo de recuperação acima de ' + MAX_RECOVERY_HOURS_PER_DAY + ' horas por dia disponível.' : status === 'warning' ? 'Meta viável no tempo disponível.' : ''}</span>` : ''}`;
     badge.hidden = false;
     renderFinalPeriodNotice(cycle, progress);
   }
