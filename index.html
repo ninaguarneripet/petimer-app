@@ -922,6 +922,9 @@
 #view-team> .card:first-child>div{gap:16px;flex-wrap:wrap}
 @media(max-width:1200px){.pc-compact{grid-template-columns:minmax(0,1.6fr) minmax(80px,.7fr) minmax(80px,.7fr);gap:15px}.pc-compact-status{grid-column:1}.pc-compact .cycle-data-btn{grid-column:2 / 4;justify-self:end}}
 @media(max-width:600px){.pc-compact{padding:15px;grid-template-columns:1fr 1fr;gap:13px}.pc-compact-title{grid-column:1 / -1}.pc-compact .pc-compact-range{font-size:16px}.pc-compact-date{border:0;padding:0}.pc-compact .cycle-data-btn{grid-column:1 / -1;justify-self:stretch}.pc-compact-status{grid-column:1 / -1}.cycle-data-history .pc-record-info{grid-template-columns:1fr 1fr}#view-team .list-head{padding:15px}#view-team #admin-add-area{flex-wrap:wrap;max-width:100%}#view-team #manual-add-user{max-width:100%}#view-team .team-list-head{display:none}#view-team .team-member-row{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:12px 15px}#view-team .team-member-identity{grid-column:1 / -1}#view-team .team-member-username{display:block;margin:3px 0 0}#view-team .team-sector{padding-left:50px}#view-team .team-sector-label{display:inline;color:#7b8592}}
+.cycle-holiday-toggle{display:flex;align-items:center;gap:9px;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;width:fit-content;}
+.cycle-holiday-toggle[hidden]{display:none;}
+.cycle-holiday-toggle input{width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent);cursor:pointer;}
 </style>
 </head>
 <body>
@@ -1355,6 +1358,10 @@
               <div class="field"><label for="cycle-goal-hours">Meta de tempo</label><div class="input-icon-wrap goal-wrap"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></svg></span><input type="number" id="cycle-goal-hours" min="0" placeholder="0" aria-label="Meta em horas"><span class="goal-unit">h</span><span class="goal-sep" aria-hidden="true"></span><input type="number" id="cycle-goal-minutes" min="0" max="59" placeholder="0" aria-label="Meta em minutos"><span class="goal-unit">min</span></div></div>
               <div class="field" id="cycle-minimum-field"><label for="cycle-minimum-hours">Mínimo semanal</label><div class="input-icon-wrap goal-wrap"><span class="line-icon" aria-hidden="true"><span style="font-size:12px;font-weight:700">≥</span></span><input type="number" id="cycle-minimum-hours" min="0" placeholder="0" aria-label="Mínimo semanal em horas"><span class="goal-unit">h</span><span class="goal-sep" aria-hidden="true"></span><input type="number" id="cycle-minimum-minutes" min="0" max="59" placeholder="0" aria-label="Mínimo semanal em minutos"><span class="goal-unit">min</span></div></div>
             </div>
+            <label class="cycle-holiday-toggle" id="cycle-holiday-toggle-wrap" hidden>
+              <input type="checkbox" id="cycle-has-holidays" onchange="updateCycleFormUnit()">
+              <span>Este período tem feriados</span>
+            </label>
             <div class="cycle-holiday-config" id="cycle-holiday-config" hidden>
               <div class="cycle-holiday-head"><div><strong>Feriados e semanas com meta diferente</strong><span>Cadastre o feriado antes de salvar o período. A exceção vale para toda a semana em que ele estiver.</span></div></div>
               <div class="cycle-holiday-add">
@@ -2308,6 +2315,38 @@
     input.setCustomValidity('');
     return true;
   }
+
+  async function finishEntryClockEdit(input, id, field) {
+  if (!input || input.dataset.saving === '1') return;
+  const previous = input.dataset.previousValue || '00:00';
+  const raw = String(input.value || '').trim();
+
+  if (!raw) { input.value = previous; return; }
+
+  const normalized = normalizeTime(raw);
+  if (normalized === null) {
+    input.value = previous;
+    alert('Informe um horário válido de 00:00 a 23:59.');
+    return;
+  }
+
+  input.value = normalized;
+  if (normalized === previous) return;
+
+  input.dataset.saving = '1';
+  try { await updateEntry(id, field, normalized); }
+  finally { delete input.dataset.saving; }
+}
+
+  function handleEntryClockKey(event, input, id, field) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    input.blur();
+  } else if (event.key === 'Escape') {
+    input.value = input.dataset.previousValue || input.value;
+    input.blur();
+  }
+}
   function normalizeTimeField(input) {
     const normalized = normalizeTime(input.value);
     input.setCustomValidity(normalized === null ? 'Informe um horário válido de 00:00 a 23:59.' : '');
@@ -2588,38 +2627,39 @@
   }
 
   async function updateEntry(id, field, value) {
-    const entries = DB.getEntries();
-    const entryIndex = entries.findIndex(e => e.id === id);
-    if (entryIndex === -1) return;
+  const entries = DB.getEntries();
+  const entryIndex = entries.findIndex(e => e.id === id);
+  if (entryIndex === -1) return;
 
-    const entry = { ...entries[entryIndex] };
-    entry[field] = value;
-    if (field === 'cargo') entry.cargoColor = getCargoColor(value);
+  const entry = { ...entries[entryIndex] };
+  entry[field] = value;
+  if (field === 'cargo') entry.cargoColor = getCargoColor(value);
 
-    if (field === 'startTime' || field === 'endTime') {
-      if (entry.startTime && entry.endTime) {
-        const s = new Date(`${entry.date}T${entry.startTime}`);
-        const e = new Date(`${entry.date}T${entry.endTime}`);
-        if (e >= s) {
-          entry.duration = e.getTime() - s.getTime();
-        } else {
-          alert("Atenção: A hora de término editada é menor que a hora de início.");
-        }
+  if (field === 'startTime' || field === 'endTime') {
+    if (entry.startTime && entry.endTime) {
+      const s = new Date(`${entry.date}T${entry.startTime}`);
+      const e = new Date(`${entry.date}T${entry.endTime}`);
+      if (e < s) {
+        alert('A hora de término não pode ser anterior à hora de início.');
+        renderEntries();
+        return;
       }
+      entry.duration = e.getTime() - s.getTime();
     }
-
-    try {
-      await api('updateEntry', {
-        entryId: id, activity: entry.activity, cargo: entry.cargo, cargoColor: entry.cargoColor,
-        modalidade: entry.modalidade, date: entry.date, startTime: entry.startTime,
-        endTime: entry.endTime, durationMs: entry.duration
-      });
-      await refreshTeamData();
-      if (field === 'date') refreshAppViews();
-      else { renderEntries(); renderCycleBadge(); }
-      if (field === 'activity') updateSuggestions();
-    } catch (err) { alert('Erro ao salvar alteração: ' + err.message); }
   }
+
+  try {
+    await api('updateEntry', {
+      entryId: id, activity: entry.activity, cargo: entry.cargo, cargoColor: entry.cargoColor,
+      modalidade: entry.modalidade, date: entry.date, startTime: entry.startTime,
+      endTime: entry.endTime, durationMs: entry.duration
+    });
+    await refreshTeamData();
+    if (field === 'date') refreshAppViews();
+    else { renderEntries(); renderCycleBadge(); }
+    if (field === 'activity') updateSuggestions();
+  } catch (err) { alert('Erro ao salvar alteração: ' + err.message); }
+}
 
   // Função para atualizar as sugestões do autocompletar
   function updateSuggestions() {
@@ -3215,19 +3255,22 @@
     return formatHM(total * 60000);
   }
   function updateCycleFormUnit() {
-    const unit = document.getElementById('cycle-unit')?.value;
-    const weekly = unit === 'weeks';
-    const minField = document.getElementById('cycle-minimum-field');
-    const holidayConfig = document.getElementById('cycle-holiday-config');
-    if (minField) minField.hidden = !weekly;
-    if (holidayConfig) holidayConfig.hidden = !weekly;
-    if (!weekly) {
-      cycleHolidayWeeksDraft = [];
-      renderCycleHolidayDraft();
-    } else {
-      renderCycleHolidayDraft();
-    }
+  const unit = document.getElementById('cycle-unit')?.value;
+  const weekly = unit === 'weeks';
+  const minField = document.getElementById('cycle-minimum-field');
+  const holidayConfig = document.getElementById('cycle-holiday-config');
+  const toggleWrap = document.getElementById('cycle-holiday-toggle-wrap');
+  const toggle = document.getElementById('cycle-has-holidays');
+
+  if (minField) minField.hidden = !weekly;
+  if (toggleWrap) toggleWrap.hidden = !weekly;
+  if (!weekly) {
+    if (toggle) toggle.checked = false;
+    cycleHolidayWeeksDraft = [];
   }
+  if (holidayConfig) holidayConfig.hidden = !(weekly && toggle && toggle.checked);
+  renderCycleHolidayDraft();
+}
   function previewCycleHolidayWeek() {
     const date = document.getElementById('cycle-holiday-date')?.value;
     const start = document.getElementById('cycle-start')?.value;
@@ -3768,78 +3811,78 @@
 
   let savingCycle = false;
   async function handleSaveCycle(e) {
-    e.preventDefault();
-    if (savingCycle) return;
-    if (!isTeamAdmin()) return alert('Apenas o administrador da equipe pode gerenciar períodos.');
+  e.preventDefault();
+  if (savingCycle) return;
+  if (!isTeamAdmin()) return alert('Apenas o administrador da equipe pode gerenciar períodos.');
 
-    const startDate = document.getElementById('cycle-start').value;
-    const endDate = document.getElementById('cycle-end').value;
-    const unit = document.getElementById('cycle-unit').value;
-    const goalMinutes = minutesFromFields('cycle-goal-hours','cycle-goal-minutes');
-    const minimumMinutes = unit === 'weeks' ? minutesFromFields('cycle-minimum-hours','cycle-minimum-minutes') : 0;
+  const startDate = document.getElementById('cycle-start').value;
+  const endDate = document.getElementById('cycle-end').value;
+  const unit = document.getElementById('cycle-unit').value;
+  const goalMinutes = minutesFromFields('cycle-goal-hours','cycle-goal-minutes');
+  const minimumMinutes = unit === 'weeks' ? minutesFromFields('cycle-minimum-hours','cycle-minimum-minutes') : 0;
+  const hasHolidays = unit === 'weeks' && !!document.getElementById('cycle-has-holidays')?.checked;
 
-    if (!startDate || !endDate) return alert('Preencha as datas de início e término.');
-    if (endDate < startDate) return alert('A data de término deve ser posterior à data de início.');
-    if (goalMinutes <= 0) return alert('Defina uma meta de tempo maior que zero.');
-    // Se o feriado foi preenchido mas o botão "Adicionar" não foi clicado, inclui agora.
-    if (unit === 'weeks' && document.getElementById('cycle-holiday-date')?.value) {
-      if (!addCycleHolidayWeek()) return;
-    }
-    if (minimumMinutes > goalMinutes) return alert('O mínimo semanal não pode ser maior que a meta semanal.');
-    if (unit === 'weeks') {
-      for (const item of cycleHolidayWeeksDraft) {
-        if (item.holidayDate < startDate || item.holidayDate > endDate) return alert('Existe um feriado cadastrado fora do período.');
-        if (item.minimumMinutes > item.goalMinutes) return alert('O mínimo de uma semana com feriado não pode ser maior que a meta.');
-      }
-    }
-
-    const teamCode = session.teamCode, cycleId = editingCycleId;
-    const holidayWeeks = unit === 'weeks' ? cycleHolidayWeeksDraft.map(x => ({...x})) : [];
-    const conflict = findCycleOverlap(DB.getCycles(), teamCode, startDate, endDate, cycleId);
-    if (conflict) return alert(cycleOverlapMessage(conflict, cycleId != null));
-
-    savingCycle = true;
-    try {
-      // Revalida com todos os períodos retornados pelo contrato existente.
-      // A garantia contra concorrência ainda exige validação atômica no servidor.
-      const latest = await api('getTeamBootstrap', { code: teamCode });
-      if (!session || session.teamCode !== teamCode) return;
-      if (!Array.isArray(latest.cycles)) throw new Error('Não foi possível verificar os períodos da equipe. Tente novamente.');
-      const latestCycles = latest.cycles.map(c => ({...c, teamCode}));
-      const latestConflict = findCycleOverlap(latestCycles, teamCode, startDate, endDate, cycleId);
-      if (latestConflict) return alert(cycleOverlapMessage(latestConflict, cycleId != null));
-      await api('saveCycle', {
-        code: teamCode, cycleId: cycleId || undefined, startDate, endDate, unit, goalMinutes,
-        minimumMinutes, holidayWeeks
-      });
-      if (!session || session.teamCode !== teamCode) return;
-      await refreshTeamData();
-      cancelEditCycle();
-      renderCycleView();
-      renderCycleBadge();
-    } catch (err) { alert(err.message); }
-    finally { savingCycle = false; }
+  if (!startDate || !endDate) return alert('Preencha as datas de início e término.');
+  if (endDate < startDate) return alert('A data de término deve ser posterior à data de início.');
+  if (goalMinutes <= 0) return alert('Defina uma meta de tempo maior que zero.');
+  if (hasHolidays && document.getElementById('cycle-holiday-date')?.value) {
+    if (!addCycleHolidayWeek()) return;
   }
+  if (minimumMinutes > goalMinutes) return alert('O mínimo semanal não pode ser maior que a meta semanal.');
+  if (hasHolidays) {
+    for (const item of cycleHolidayWeeksDraft) {
+      if (item.holidayDate < startDate || item.holidayDate > endDate) return alert('Existe um feriado cadastrado fora do período.');
+      if (item.minimumMinutes > item.goalMinutes) return alert('O mínimo de uma semana com feriado não pode ser maior que a meta.');
+    }
+  }
+
+  const teamCode = session.teamCode, cycleId = editingCycleId;
+  const holidayWeeks = hasHolidays ? cycleHolidayWeeksDraft.map(x => ({...x})) : [];
+  const conflict = findCycleOverlap(DB.getCycles(), teamCode, startDate, endDate, cycleId);
+  if (conflict) return alert(cycleOverlapMessage(conflict, cycleId != null));
+
+  savingCycle = true;
+  try {
+    const latest = await api('getTeamBootstrap', { code: teamCode });
+    if (!session || session.teamCode !== teamCode) return;
+    if (!Array.isArray(latest.cycles)) throw new Error('Não foi possível verificar os períodos da equipe. Tente novamente.');
+    const latestCycles = latest.cycles.map(c => ({...c, teamCode}));
+    const latestConflict = findCycleOverlap(latestCycles, teamCode, startDate, endDate, cycleId);
+    if (latestConflict) return alert(cycleOverlapMessage(latestConflict, cycleId != null));
+    await api('saveCycle', {
+      code: teamCode, cycleId: cycleId || undefined, startDate, endDate, unit, goalMinutes,
+      minimumMinutes, holidayWeeks
+    });
+    if (!session || session.teamCode !== teamCode) return;
+    await refreshTeamData();
+    cancelEditCycle();
+    renderCycleView();
+    renderCycleBadge();
+  } catch (err) { alert(err.message); }
+  finally { savingCycle = false; }
+}
 
   function startEditCycle(id) {
-    if (!isTeamAdmin()) return;
-    const cycle = DB.getCycles().find(c => c.id === id);
-    if (!cycle) return;
-    editingCycleId = id;
-    document.getElementById('cycle-start').value = cycle.startDate;
-    document.getElementById('cycle-end').value = cycle.endDate;
-    document.getElementById('cycle-unit').value = cycle.unit;
-    setDurationFields('cycle-goal-hours','cycle-goal-minutes',cycle.goalMinutes);
-    setDurationFields('cycle-minimum-hours','cycle-minimum-minutes',cycle.minimumMinutes || 0);
-    cycleHolidayWeeksDraft = (cycle.holidayWeeks || []).map(x => ({...x}));
-    updateCycleFormUnit();
-    document.getElementById('cycle-form-title').textContent = 'Editar período';
-    document.getElementById('cycle-form-description').textContent = 'Altere as informações do período e as exceções de feriados antes de salvar.';
-    document.getElementById('cycle-submit-label').textContent = 'Salvar alterações';
-    document.getElementById('cycle-submit-icon').hidden = true;
-    document.getElementById('cycle-cancel-btn').hidden = false;
-    document.getElementById('cycle-form-modal').hidden = false;
-  }
+  if (!isTeamAdmin()) return;
+  const cycle = DB.getCycles().find(c => c.id === id);
+  if (!cycle) return;
+  editingCycleId = id;
+  document.getElementById('cycle-start').value = cycle.startDate;
+  document.getElementById('cycle-end').value = cycle.endDate;
+  document.getElementById('cycle-unit').value = cycle.unit;
+  setDurationFields('cycle-goal-hours','cycle-goal-minutes',cycle.goalMinutes);
+  setDurationFields('cycle-minimum-hours','cycle-minimum-minutes',cycle.minimumMinutes || 0);
+  cycleHolidayWeeksDraft = (cycle.holidayWeeks || []).map(x => ({...x}));
+  const holToggle = document.getElementById('cycle-has-holidays');
+  if (holToggle) holToggle.checked = cycleHolidayWeeksDraft.length > 0;
+  updateCycleFormUnit();
+  document.getElementById('cycle-form-title').textContent = 'Editar período';
+  document.getElementById('cycle-form-description').textContent = 'Altere as informações do período e as exceções de feriados antes de salvar.';
+  document.getElementById('cycle-submit-label').textContent = 'Salvar alterações';
+  document.getElementById('cycle-submit-icon').hidden = true;
+  document.getElementById('cycle-cancel-btn').hidden = false;
+  document.getElementById('cycle-form-modal').hidden = false;
+}
 
   function cancelEditCycle() {
     editingCycleId = null;
@@ -3935,192 +3978,5 @@
   
 </div>
 
-<script>
-/* ===== PATCH PETimer: edição de horário + feriados opcionais ===== */
-(function () {
-  /* --- CSS da caixinha de feriados --- */
-  const st = document.createElement('style');
-  st.textContent = `
-    .cycle-holiday-toggle{display:flex;align-items:center;gap:9px;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;width:fit-content;}
-    .cycle-holiday-toggle[hidden]{display:none;}
-    .cycle-holiday-toggle input{width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent);cursor:pointer;}
-  `;
-  document.head.appendChild(st);
-
-  /* --- Caixinha "Este período tem feriados" --- */
-  const cfg = document.getElementById('cycle-holiday-config');
-  if (cfg && !document.getElementById('cycle-has-holidays')) {
-    const label = document.createElement('label');
-    label.className = 'cycle-holiday-toggle';
-    label.id = 'cycle-holiday-toggle-wrap';
-    label.hidden = true;
-    label.innerHTML = '<input type="checkbox" id="cycle-has-holidays" onchange="updateCycleFormUnit()"><span>Este período tem feriados</span>';
-    cfg.parentNode.insertBefore(label, cfg);
-  }
-})();
-
-/* --- Edição de horário de registros salvos (funções que estavam faltando) --- */
-async function finishEntryClockEdit(input, id, field) {
-  if (!input || input.dataset.saving === '1') return;
-  const previous = input.dataset.previousValue || '00:00';
-  const raw = String(input.value || '').trim();
-
-  if (!raw) { input.value = previous; return; }
-
-  const normalized = normalizeTime(raw);
-  if (normalized === null) {
-    input.value = previous;
-    alert('Informe um horário válido de 00:00 a 23:59.');
-    return;
-  }
-
-  input.value = normalized;
-  if (normalized === previous) return;
-
-  input.dataset.saving = '1';
-  try { await updateEntry(id, field, normalized); }
-  finally { delete input.dataset.saving; }
-}
-
-function handleEntryClockKey(event, input, id, field) {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    input.blur();
-  } else if (event.key === 'Escape') {
-    input.value = input.dataset.previousValue || input.value;
-    input.blur();
-  }
-}
-
-/* --- updateEntry corrigido (não salva se término < início) --- */
-async function updateEntry(id, field, value) {
-  const entries = DB.getEntries();
-  const entryIndex = entries.findIndex(e => e.id === id);
-  if (entryIndex === -1) return;
-
-  const entry = { ...entries[entryIndex] };
-  entry[field] = value;
-  if (field === 'cargo') entry.cargoColor = getCargoColor(value);
-
-  if (field === 'startTime' || field === 'endTime') {
-    if (entry.startTime && entry.endTime) {
-      const s = new Date(`${entry.date}T${entry.startTime}`);
-      const e = new Date(`${entry.date}T${entry.endTime}`);
-      if (e < s) {
-        alert('A hora de término não pode ser anterior à hora de início.');
-        renderEntries();
-        return;
-      }
-      entry.duration = e.getTime() - s.getTime();
-    }
-  }
-
-  try {
-    await api('updateEntry', {
-      entryId: id, activity: entry.activity, cargo: entry.cargo, cargoColor: entry.cargoColor,
-      modalidade: entry.modalidade, date: entry.date, startTime: entry.startTime,
-      endTime: entry.endTime, durationMs: entry.duration
-    });
-    await refreshTeamData();
-    if (field === 'date') refreshAppViews();
-    else { renderEntries(); renderCycleBadge(); }
-    if (field === 'activity') updateSuggestions();
-  } catch (err) { alert('Erro ao salvar alteração: ' + err.message); }
-}
-
-/* --- Feriados: só aparecem se a caixinha estiver marcada --- */
-function updateCycleFormUnit() {
-  const unit = document.getElementById('cycle-unit')?.value;
-  const weekly = unit === 'weeks';
-  const minField = document.getElementById('cycle-minimum-field');
-  const holidayConfig = document.getElementById('cycle-holiday-config');
-  const toggleWrap = document.getElementById('cycle-holiday-toggle-wrap');
-  const toggle = document.getElementById('cycle-has-holidays');
-
-  if (minField) minField.hidden = !weekly;
-  if (toggleWrap) toggleWrap.hidden = !weekly;
-  if (!weekly) {
-    if (toggle) toggle.checked = false;
-    cycleHolidayWeeksDraft = [];
-  }
-  if (holidayConfig) holidayConfig.hidden = !(weekly && toggle && toggle.checked);
-  renderCycleHolidayDraft();
-}
-
-function startEditCycle(id) {
-  if (!isTeamAdmin()) return;
-  const cycle = DB.getCycles().find(c => c.id === id);
-  if (!cycle) return;
-  editingCycleId = id;
-  document.getElementById('cycle-start').value = cycle.startDate;
-  document.getElementById('cycle-end').value = cycle.endDate;
-  document.getElementById('cycle-unit').value = cycle.unit;
-  setDurationFields('cycle-goal-hours','cycle-goal-minutes',cycle.goalMinutes);
-  setDurationFields('cycle-minimum-hours','cycle-minimum-minutes',cycle.minimumMinutes || 0);
-  cycleHolidayWeeksDraft = (cycle.holidayWeeks || []).map(x => ({...x}));
-  const holToggle = document.getElementById('cycle-has-holidays');
-  if (holToggle) holToggle.checked = cycleHolidayWeeksDraft.length > 0;
-  updateCycleFormUnit();
-  document.getElementById('cycle-form-title').textContent = 'Editar período';
-  document.getElementById('cycle-form-description').textContent = 'Altere as informações do período e as exceções de feriados antes de salvar.';
-  document.getElementById('cycle-submit-label').textContent = 'Salvar alterações';
-  document.getElementById('cycle-submit-icon').hidden = true;
-  document.getElementById('cycle-cancel-btn').hidden = false;
-  document.getElementById('cycle-form-modal').hidden = false;
-}
-
-async function handleSaveCycle(e) {
-  e.preventDefault();
-  if (savingCycle) return;
-  if (!isTeamAdmin()) return alert('Apenas o administrador da equipe pode gerenciar períodos.');
-
-  const startDate = document.getElementById('cycle-start').value;
-  const endDate = document.getElementById('cycle-end').value;
-  const unit = document.getElementById('cycle-unit').value;
-  const goalMinutes = minutesFromFields('cycle-goal-hours','cycle-goal-minutes');
-  const minimumMinutes = unit === 'weeks' ? minutesFromFields('cycle-minimum-hours','cycle-minimum-minutes') : 0;
-  const hasHolidays = unit === 'weeks' && !!document.getElementById('cycle-has-holidays')?.checked;
-
-  if (!startDate || !endDate) return alert('Preencha as datas de início e término.');
-  if (endDate < startDate) return alert('A data de término deve ser posterior à data de início.');
-  if (goalMinutes <= 0) return alert('Defina uma meta de tempo maior que zero.');
-  if (hasHolidays && document.getElementById('cycle-holiday-date')?.value) {
-    if (!addCycleHolidayWeek()) return;
-  }
-  if (minimumMinutes > goalMinutes) return alert('O mínimo semanal não pode ser maior que a meta semanal.');
-  if (hasHolidays) {
-    for (const item of cycleHolidayWeeksDraft) {
-      if (item.holidayDate < startDate || item.holidayDate > endDate) return alert('Existe um feriado cadastrado fora do período.');
-      if (item.minimumMinutes > item.goalMinutes) return alert('O mínimo de uma semana com feriado não pode ser maior que a meta.');
-    }
-  }
-
-  const teamCode = session.teamCode, cycleId = editingCycleId;
-  const holidayWeeks = hasHolidays ? cycleHolidayWeeksDraft.map(x => ({...x})) : [];
-  const conflict = findCycleOverlap(DB.getCycles(), teamCode, startDate, endDate, cycleId);
-  if (conflict) return alert(cycleOverlapMessage(conflict, cycleId != null));
-
-  savingCycle = true;
-  try {
-    const latest = await api('getTeamBootstrap', { code: teamCode });
-    if (!session || session.teamCode !== teamCode) return;
-    if (!Array.isArray(latest.cycles)) throw new Error('Não foi possível verificar os períodos da equipe. Tente novamente.');
-    const latestCycles = latest.cycles.map(c => ({...c, teamCode}));
-    const latestConflict = findCycleOverlap(latestCycles, teamCode, startDate, endDate, cycleId);
-    if (latestConflict) return alert(cycleOverlapMessage(latestConflict, cycleId != null));
-    await api('saveCycle', {
-      code: teamCode, cycleId: cycleId || undefined, startDate, endDate, unit, goalMinutes,
-      minimumMinutes, holidayWeeks
-    });
-    if (!session || session.teamCode !== teamCode) return;
-    await refreshTeamData();
-    cancelEditCycle();
-    renderCycleView();
-    renderCycleBadge();
-  } catch (err) { alert(err.message); }
-  finally { savingCycle = false; }
-}
-</script>
-  
 </body>
 </html>
