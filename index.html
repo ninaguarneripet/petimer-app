@@ -948,6 +948,62 @@
   #cycle-status-badge .cycle-badge-sr{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   @media(max-width:600px){#cycle-status-badge.is-weekly{grid-template-columns:24px minmax(0,1fr);grid-template-rows:minmax(0,1fr) 30px;width:100%;height:100px}#cycle-status-badge .cycle-week-pill{grid-column:2;max-width:100%;white-space:normal}}
 </style>
+<style>
+.activity-autocomplete{position:relative;min-width:0;width:100%}
+.activity-suggestions{position:absolute;top:calc(100% + 7px);left:0;width:100%;min-width:min(560px,calc(100vw - 48px));max-width:calc(100vw - 48px);z-index:90;background:#fff;border:1px solid #e2e7ed;border-radius:9px;box-shadow:0 7px 22px rgba(20,40,65,.1);padding:5px;max-height:290px;overflow-y:auto}
+.activity-suggestion{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:5px;cursor:pointer;min-width:0;color:var(--text)}
+.activity-suggestion:hover,.activity-suggestion[aria-selected="true"]{background:#f1f6fa}
+.activity-suggestion-description{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:500}
+.activity-suggestion-meta{display:flex;align-items:center;gap:10px;max-width:55%;min-width:0;font-size:11px;color:#738092}
+.activity-suggestion-cargo{display:flex;gap:5px;align-items:center;min-width:0}
+.activity-suggestion-cargo span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.activity-suggestion-dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px}
+.activity-suggestion-place{background:#f1f3f6;border:1px solid #e6e9ee;border-radius:5px;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;flex-shrink:0}
+@media(max-width:768px){.activity-autocomplete{grid-column:1 / -1}.activity-suggestions{min-width:0;max-width:100%}.activity-suggestion{flex-wrap:wrap;gap:5px}.activity-suggestion-description{flex-basis:100%}.activity-suggestion-meta{max-width:100%}}
+</style>
+<style id="tracker-comfort-spacing">
+/* Ajuste exclusivamente vertical da faixa de entrada. */
+#view-tracker .tracker-bar{padding-top:10px;padding-bottom:10px}
+#view-tracker .tracker-bar .tracker-input{padding-top:9px;padding-bottom:9px}
+#view-tracker .tracker-bar .icon-select-wrap .tracker-select,
+#view-tracker .tracker-bar .cargo-picker-trigger,
+#view-tracker .tracker-bar .tracker-time{padding-top:8px;padding-bottom:8px}
+#view-tracker .tracker-bar .manual-add{padding-top:10px;padding-bottom:10px}
+#view-tracker .tracker-bar #timer-btn{padding-top:11px;padding-bottom:11px}
+#view-tracker .tracker-bar .compact-date,
+#view-tracker .tracker-bar .time-controls .icon-btn-line{height:36px}
+#view-tracker .tracker-bar .time-controls{height:37.59375px}
+@media(max-width:1320px){#view-tracker .tracker-bar .time-controls{height:76.59375px}}
+@media(max-width:768px){#view-tracker .tracker-bar{padding-top:13px;padding-bottom:13px}}
+@media(max-width:640px){#view-tracker .tracker-bar .time-controls{height:153.59375px}}
+</style>
+<style id="timer-digits-size">
+#view-tracker .tracker-bar #timer-digits{font-size:18px;}
+</style>
+<style id="overlay-scroll-containment">
+/* Contém a rolagem nos limites das caixas, sem desativar o scroll interno. */
+.user-select-list,
+.manage-list,
+.cargo-picker-projects,
+.activity-suggestions,
+.cycle-data-table-scroll,
+#cycle-data-modal-body.cycle-data-history,
+.cycle-form-modal-backdrop .cycle-form-card,
+.switch-team-list{
+  overscroll-behavior:contain;
+}
+/* Mantém a mesma proteção nos contêineres das caixas sobrepostas. */
+.user-select-dialog,
+.switch-team-dialog,
+.profile-dialog,
+.manage-modal,
+.cargo-picker-popover,
+.cycle-data-modal,
+.cycle-data-modal-body,
+.admin-cycle-role-dialog{
+  overscroll-behavior:contain;
+}
+</style>
 </head>
 <body>
 
@@ -1200,9 +1256,10 @@
 
     <section class="view" id="view-tracker">
       <div class="card tracker-bar">
-        <!-- Input de atividade com o recurso de autocompletar (list) -->
-        <input type="text" id="activity-input" class="tracker-input" list="activity-suggestions" placeholder="O que você está fazendo agora?" style="min-width:200px;">
-        <datalist id="activity-suggestions"></datalist>
+        <div class="activity-autocomplete" id="activity-autocomplete">
+          <input type="text" id="activity-input" class="tracker-input" placeholder="O que você está fazendo agora?" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="activity-suggestions">
+          <div id="activity-suggestions" class="activity-suggestions" role="listbox" aria-label="Atividades recentes" hidden></div>
+        </div>
         
         <div class="tracker-right-cluster">
         <div class="icon-select-wrap cargo-select-wrap" title="Cargo/Projeto">
@@ -2702,6 +2759,8 @@
         });
 
         grouped[date].forEach(e => {
+          // Mantém o timer nos totais existentes, mas só exibe linhas finalizadas.
+          if (e.isRunning) return;
           const uObj = users[e.user];
           const uName = uObj ? (uObj.name || uObj.username || e.user) : e.user;
 
@@ -2828,19 +2887,91 @@
   } finally { pendingWrites--; }
 }
 
-  // Função para atualizar as sugestões do autocompletar
-  function updateSuggestions() {
-    const entries = DB.getEntries();
-    // Filtra apenas os registros do usuário logado
-    const userEntries = entries.filter(e => e.user === session.username);
-    // Pega atividades únicas
-    const uniqueActivities = [...new Set(userEntries.map(e => e.activity))];
-    const datalist = document.getElementById('activity-suggestions');
-    if(datalist) {
-      datalist.innerHTML = uniqueActivities.map(act => `<option value="${escapeHtml(act)}"></option>`).join('');
+  let activitySuggestionRows = [];
+  let activitySuggestionIndex = -1;
+  function recentActivitySuggestions(query='') {
+    if (!session?.teamCode) return [];
+    const q = query.trim().toLocaleLowerCase('pt-BR');
+    const entries = DB.getEntries().filter(e => e.user === session.username && e.teamCode === session.teamCode)
+      .slice().sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.startTime || '').localeCompare(String(a.startTime || '')));
+    const seen = new Set(), suggestions = [];
+    for (const entry of entries) {
+      if (q && !String(entry.activity || '').toLocaleLowerCase('pt-BR').includes(q)) continue;
+      const key = JSON.stringify([entry.activity, entry.cargo, entry.modalidade]
+        .map(value => String(value || '').trim().toLocaleLowerCase('pt-BR')));
+      if (seen.has(key)) continue;
+      seen.add(key);
+      suggestions.push(entry);
+      if (suggestions.length === 5) break;
     }
+    return suggestions;
   }
-
+  function closeActivitySuggestions() {
+    document.getElementById('activity-suggestions').hidden = true;
+    const input = document.getElementById('activity-input');
+    input.setAttribute('aria-expanded','false');
+    input.removeAttribute('aria-activedescendant');
+    activitySuggestionIndex = -1;
+  }
+  function showActivitySuggestions() {
+    const input=document.getElementById('activity-input'), box=document.getElementById('activity-suggestions');
+    if(input.disabled) return closeActivitySuggestions();
+    activitySuggestionRows=recentActivitySuggestions(input.value);
+    activitySuggestionIndex=-1;
+    input.removeAttribute('aria-activedescendant');
+    box.replaceChildren();
+    activitySuggestionRows.forEach((entry,index)=>{
+      const row=document.createElement('div');
+      row.className='activity-suggestion';row.id='activity-suggestion-'+index;
+      row.dataset.index=String(index);row.setAttribute('role','option');row.setAttribute('aria-selected','false');
+      const description=document.createElement('span');description.className='activity-suggestion-description';description.textContent=entry.activity || '';description.title=entry.activity || '';row.append(description);
+      const meta=document.createElement('span');meta.className='activity-suggestion-meta';
+      if(entry.cargo){
+        const cargo=document.createElement('span');cargo.className='activity-suggestion-cargo';cargo.title=entry.cargo;
+        const dot=document.createElement('span');dot.className='activity-suggestion-dot';dot.style.backgroundColor=entry.cargoColor || getCargoColor(entry.cargo);
+        const name=document.createElement('span');name.textContent=entry.cargo;cargo.append(dot,name);meta.append(cargo);
+      }
+      if(entry.modalidade){const place=document.createElement('span');place.className='activity-suggestion-place';place.textContent=entry.modalidade;place.title=entry.modalidade;meta.append(place);}
+      row.append(meta);box.append(row);
+    });
+    box.hidden=!activitySuggestionRows.length;
+    input.setAttribute('aria-expanded',String(!box.hidden));
+  }
+  function selectActivitySuggestion(index) {
+    const entry=activitySuggestionRows[index],input=document.getElementById('activity-input');
+    if(!entry || input.disabled || !session || entry.teamCode!==session.teamCode || entry.user!==session.username) return closeActivitySuggestions();
+    input.value=entry.activity || '';
+    [['cargo',entry.cargo],['modalidade',entry.modalidade]].forEach(([type,value])=>{
+      const select=document.getElementById(type+'-input'), next=value || '';
+      // Opção local para reproduzir fielmente um valor histórico, sem cadastrar no servidor.
+      if(!Array.from(select.options).some(o=>o.value===next))select.add(new Option(next,next));
+      select.value=next;managedSelectPreviousValue[type]=next;
+    });
+    applyCargoSelectColor(document.getElementById('cargo-input'));syncCargoPickerTrigger();
+    closeActivitySuggestions();
+  }
+  function updateSuggestions() {
+    const input=document.getElementById('activity-input');
+    if(document.activeElement===input)showActivitySuggestions();else closeActivitySuggestions();
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const input=document.getElementById('activity-input'),box=document.getElementById('activity-suggestions'),wrap=document.getElementById('activity-autocomplete');
+    input.addEventListener('focus',showActivitySuggestions);input.addEventListener('click',showActivitySuggestions);input.addEventListener('input',showActivitySuggestions);
+    box.addEventListener('mousedown',e=>e.preventDefault());
+    box.addEventListener('click',e=>{const row=e.target.closest('.activity-suggestion');if(row)selectActivitySuggestion(Number(row.dataset.index));});
+    input.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){closeActivitySuggestions();return;}
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+        e.preventDefault();if(box.hidden)showActivitySuggestions();if(!activitySuggestionRows.length)return;
+        const count=activitySuggestionRows.length;
+        activitySuggestionIndex=e.key==='ArrowDown'?(activitySuggestionIndex+1)%count:(activitySuggestionIndex<0?count-1:(activitySuggestionIndex-1+count)%count);
+        Array.from(box.children).forEach((row,i)=>row.setAttribute('aria-selected',String(i===activitySuggestionIndex)));
+        const row=box.children[activitySuggestionIndex];input.setAttribute('aria-activedescendant',row.id);row.scrollIntoView({block:'nearest'});
+      }else if(e.key==='Enter'&&!box.hidden&&activitySuggestionIndex>=0){e.preventDefault();selectActivitySuggestion(activitySuggestionIndex);}
+    });
+    document.addEventListener('click',e=>{if(!wrap.contains(e.target))closeActivitySuggestions();});
+    wrap.addEventListener('focusout',e=>{if(!wrap.contains(e.relatedTarget))closeActivitySuggestions();});
+  });
 
   let analysisWeekOffset = 0;
   let analysisMode = 'overview';
@@ -3303,7 +3434,10 @@
         .metric-list{border-top:1px solid #e5e9ee}.metric-row{display:grid;grid-template-columns:12px minmax(0,1fr) 90px 70px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #e9edf2;font-size:12px}.dot{width:7px;height:7px;border-radius:50%}.metric-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.metric-time,.metric-pct{text-align:right;font-variant-numeric:tabular-nums}.metric-pct{color:#6b7280}
         table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}th{background:#f3f6f9;text-align:left;padding:9px 8px;border-bottom:1px solid #d8e0e8;color:#52606f}td{padding:8px;border-bottom:1px solid #edf1f4;vertical-align:top}.right{text-align:right;font-variant-numeric:tabular-nums}.foot{margin-top:28px;padding-top:12px;border-top:1px solid #e4e8ed;color:#8b95a3;font-size:10px;display:flex;justify-content:space-between}
         @media print{body{background:#fff}.toolbar{display:none}#report{width:auto;max-width:none;margin:0;box-shadow:none;padding:12mm 12mm 10mm}.section{break-inside:avoid}.details{break-inside:auto}thead{display:table-header-group}tr{break-inside:avoid}.foot{position:relative}@page{size:A4 portrait;margin:0}}
-      </style></head><body>
+      </style><style id="timer-digits-size">
+#view-tracker .tracker-bar #timer-digits{font-size:18px;}
+</style>
+</head><body>
       <div class="toolbar"><button onclick="downloadPng()">BAIXAR IMAGEM (PNG)</button><button class="primary" onclick="printReport()">SALVAR COMO PDF</button></div>
       <main id="report">
         <div class="head"><div><h1 class="title">Relatório resumo</h1><div class="period">${formatDate(start)} - ${formatDate(end)}</div><div class="total-line">Total:<strong>${fmtClock(total)}</strong></div></div><div class="brand"><img id="report-brand-logo" src="${escapeHtml(document.getElementById('brand-logo-source').getAttribute('src'))}" width="1177" height="552" alt="PETimer"></div></div>
