@@ -884,6 +884,45 @@
   }
 }
 </style>
+<style>
+/* Histórico compacto e lista de membros: estilos restritos às áreas solicitadas. */
+#cycle-records-content .pc-records{gap:10px}
+.pc-compact{display:grid;grid-template-columns:minmax(230px,2fr) minmax(95px,.8fr) minmax(95px,.8fr) auto auto;gap:20px;align-items:center;padding:19px 22px;background:#fff;border:1px solid #e4e8ee;border-radius:11px;box-shadow:0 1px 3px rgba(20,40,65,.05)}
+.pc-compact-label{display:block;font-size:11px;color:#778293;margin-bottom:5px;font-weight:500}
+.pc-compact strong{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.pc-compact .pc-compact-range{font-size:17px;font-weight:750;letter-spacing:-.3px}
+.pc-compact-date{border-left:1px solid #e7ebf0;padding-left:20px}
+.pc-compact .status-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;white-space:nowrap;border-radius:20px;padding:4px 9px}
+.pc-compact .status-badge:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.pc-compact .status-neutral{background:#edf2f7;color:#506780;border:1px solid #d9e2ec}
+.pc-compact-ended .status-neutral{background:#f0f1f3;color:#65707c;border-color:#dfe3e7}
+.pc-compact .status-active{background:#eaf7ef;color:#218455;border:1px solid #cce9d8}
+.pc-compact .cycle-data-btn{white-space:nowrap;justify-content:center;font-size:12px;padding:10px 12px}
+#cycle-data-modal-body.cycle-data-history{overflow-y:auto;display:block}
+.cycle-data-history>.pc-record{margin-bottom:16px}
+.cycle-data-history .pc-record-info{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cycle-data-history .cycle-data-table-scroll{max-height:none}
+#view-team .team-members-card{padding:0;overflow:hidden}
+#view-team .list-head{padding:18px 22px;margin:0;flex-wrap:wrap;gap:12px}
+#view-team .team-list-head,#view-team .team-member-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,.32fr) minmax(115px,auto);gap:18px;align-items:center;padding:10px 22px}
+#view-team .team-list-head{background:#f6f8fa;border-block:1px solid #e6ebf0;color:#7a8492;font-size:10px;font-weight:600;text-transform:uppercase}
+#view-team .team-list-head span:last-child{text-align:right}
+#view-team .team-member-row{min-height:62px;border-bottom:1px solid #edf0f4}
+#view-team .team-member-row:nth-child(even){background:#edf7fd}
+#view-team .team-member-row:last-child{border-bottom:0}
+#view-team .team-member-identity{display:flex;align-items:center;gap:12px;min-width:0}
+#view-team .team-avatar{width:38px;height:38px;flex:0 0 38px;border-radius:50%;display:grid;place-items:center;background:#276097;color:#fff;font-size:12px;font-weight:700}
+#view-team .team-member-row:nth-child(even) .team-avatar{background:#59a9d5}
+#view-team .team-member-name{font-size:13px;font-weight:650;color:#18568b;overflow-wrap:anywhere}
+#view-team .team-member-username{font-size:11px;color:#7b8592;font-weight:400;display:inline-block;margin-left:6px;overflow-wrap:anywhere}
+#view-team .team-sector{font-size:12px;overflow-wrap:anywhere}
+#view-team .team-member-actions{display:flex;gap:5px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+#view-team .team-member-actions .badge-admin{margin:0 5px 0 0}
+#view-team .team-sector-label{display:none}
+#view-team> .card:first-child>div{gap:16px;flex-wrap:wrap}
+@media(max-width:1200px){.pc-compact{grid-template-columns:minmax(0,1.6fr) minmax(80px,.7fr) minmax(80px,.7fr);gap:15px}.pc-compact-status{grid-column:1}.pc-compact .cycle-data-btn{grid-column:2 / 4;justify-self:end}}
+@media(max-width:600px){.pc-compact{padding:15px;grid-template-columns:1fr 1fr;gap:13px}.pc-compact-title{grid-column:1 / -1}.pc-compact .pc-compact-range{font-size:16px}.pc-compact-date{border:0;padding:0}.pc-compact .cycle-data-btn{grid-column:1 / -1;justify-self:stretch}.pc-compact-status{grid-column:1 / -1}.cycle-data-history .pc-record-info{grid-template-columns:1fr 1fr}#view-team .list-head{padding:15px}#view-team #admin-add-area{flex-wrap:wrap;max-width:100%}#view-team #manual-add-user{max-width:100%}#view-team .team-list-head{display:none}#view-team .team-member-row{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:12px 15px}#view-team .team-member-identity{grid-column:1 / -1}#view-team .team-member-username{display:block;margin:3px 0 0}#view-team .team-sector{padding-left:50px}#view-team .team-sector-label{display:inline;color:#7b8592}}
+</style>
 </head>
 <body>
 
@@ -1270,7 +1309,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card team-members-card">
         <div class="list-head">
           <h3>Membros da Equipe</h3>
           <div style="display:flex; gap:8px;" id="admin-add-area" hidden>
@@ -1434,14 +1473,31 @@
      Script rejeita a requisição. */
   async function api(action, payload = {}) {
     if (!API_URL || API_URL.indexOf('COLE_AQUI') === 0) throw new Error('Configure a API_URL no topo do arquivo (dentro da tag <script>).');
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, payload: Object.assign({ token: authToken }, payload) })
-    });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'Erro desconhecido.');
-    return json.data;
+    // Durante a restauração da sessão (F5) falhas de rede são repetidas algumas vezes.
+    // Fora disso o comportamento é idêntico ao original (uma única tentativa).
+    const maxAttempts = window.petimerRestoringSession ? 3 : 1;
+    for (let attempt = 1; ; attempt++) {
+      let json;
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action, payload: Object.assign({ token: authToken }, payload) })
+        });
+        json = await res.json();
+      } catch (netErr) {
+        // Falha de rede / resposta não-JSON: NÃO é prova de sessão inválida.
+        netErr.petimerTransient = true;
+        if (attempt < maxAttempts) { await new Promise(r => setTimeout(r, 1200 * attempt)); continue; }
+        throw netErr;
+      }
+      if (!json.ok) {
+        const serverErr = new Error(json.error || 'Erro desconhecido.');
+        serverErr.petimerServerRejected = true; // o servidor respondeu e recusou a chamada
+        throw serverErr;
+      }
+      return json.data;
+    }
   }
 
   // ---------- CACHE LOCAL ----------
@@ -1712,26 +1768,61 @@
     document.documentElement.removeAttribute('data-petimer-restore-view');
   }
 
+  // Mensagens do servidor que indicam indisponibilidade momentânea (e não sessão inválida).
+  function isTransientServerMessage(msg) {
+    return /timeout|tempo esgotado|ocupad|too many|muitas|quota|limite|lock|busy|tente novamente|try again|indispon/i.test(String(msg || ''));
+  }
+
   async function init() {
     if (!authToken) { showScreen('auth-screen'); return; }
     if (!petimerLoadingDepth) showPetimerLoading('Carregando PETimer...');
+    window.petimerRestoringSession = true;
+    let sessionRejected = false;
     try {
-      const d = await api('me');
+      // 1) Valida a sessão com a lógica existente ('me').
+      let d = null;
+      while (!d) {
+        try {
+          d = await api('me');
+        } catch (err) {
+          if (err && err.petimerServerRejected && !isTransientServerMessage(err.message)) {
+            sessionRejected = true; // servidor confirmou: token inválido/expirado
+            throw err;
+          }
+          // Falha de rede/indisponibilidade: mantém token e navegação salvos.
+          if (!confirm('Não foi possível conectar ao PETimer para restaurar sua sessão.\n\nSua sessão foi mantida. Deseja tentar novamente?')) {
+            showScreen('auth-screen');
+            return;
+          }
+        }
+      }
       session = { username: d.user.username, name: d.user.displayName, teamCode: null };
       CACHE.users[session.username] = { username: session.username, name: session.name };
       CACHE.myTeams = d.teams || [];
+      // 2) Restaura a equipe anterior (se ainda for membro); a view/subview já foi restaurada visualmente.
       const lastTeam = localStorage.getItem('petimer_last_team');
       const stillMember = lastTeam && CACHE.myTeams.some(t => t.code === lastTeam);
       if (stillMember) {
         await enterTeam(lastTeam);
       } else {
+        if (lastTeam) { try { localStorage.removeItem('petimer_last_team'); } catch (_) {} }
         showScreen('hub-screen');
         renderHub();
       }
     } catch (err) {
-      showScreen('auth-screen');
-      logout();
+      if (sessionRejected) {
+        // Único caso em que o F5 termina no login: sessão realmente recusada pelo servidor.
+        showScreen('auth-screen');
+        logout();
+      } else {
+        // Erro inesperado que NÃO é sessão inválida: nunca desloga.
+        console.error('PETimer: erro ao restaurar a sessão', err);
+        if (session && document.getElementById('main-app').hidden) {
+          try { showScreen('hub-screen'); renderHub(); } catch (_) {}
+        }
+      }
     } finally {
+      window.petimerRestoringSession = false;
       hidePetimerLoading();
     }
   }
@@ -2997,7 +3088,7 @@
         .toolbar{position:sticky;top:0;z-index:5;display:flex;justify-content:flex-end;gap:10px;padding:12px 18px;background:#fff;border-bottom:1px solid #dbe2ea}
         .toolbar button{height:38px;border-radius:8px;padding:0 15px;border:1px solid #b9cce0;background:#fff;color:#1f5f99;font:600 13px/1 Arial;cursor:pointer}.toolbar button.primary{background:#276097;color:#fff;border-color:#276097}
         #report{width:1120px;max-width:calc(100vw - 32px);margin:20px auto;background:#fff;box-shadow:0 6px 24px rgba(15,23,42,.08);padding:42px 48px 34px}
-        .head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}.brand{font-weight:800;color:#082f53;font-size:25px;letter-spacing:-.02em}.title{font-size:30px;font-weight:700;margin:0 0 8px}.period{font-size:13px;color:#6b7280}.total-line{margin-top:14px;font-size:14px;color:#6b7280}.total-line strong{font-size:20px;color:#111827;margin-left:6px}
+        .head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}.brand{width:190px;flex:0 0 190px}.brand img{display:block;width:100%;height:auto}.title{font-size:30px;font-weight:700;margin:0 0 8px}.period{font-size:13px;color:#6b7280}.total-line{margin-top:14px;font-size:14px;color:#6b7280}.total-line strong{font-size:20px;color:#111827;margin-left:6px}
         .section{margin-top:34px}.section-title{font-size:19px;font-weight:700;margin:0 0 13px;padding-bottom:8px;border-bottom:1px solid #d9e0e7}
         .bars-wrap{height:300px;display:grid;grid-template-columns:54px 1fr;gap:10px;margin-top:10px}.axis{position:relative;border-right:1px solid #e7ebf0}.axis span{position:absolute;right:10px;color:#8792a0;font-size:11px;transform:translateY(50%)}
         .bars{display:grid;grid-template-columns:repeat(7,1fr);align-items:end;gap:18px;border-bottom:1px solid #dfe5eb;background:repeating-linear-gradient(to top,transparent 0,transparent 24.7%,#eef2f6 25%,transparent 25.3%);padding:0 14px}.day{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}.bar{width:72%;min-width:42px;max-width:78px;background:#7facd2;border-radius:3px 3px 0 0;position:relative}.bar-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:11px;color:#66717f;white-space:nowrap}.day-label{height:34px;padding-top:9px;font-size:11px;color:#586473;white-space:nowrap}
@@ -3006,9 +3097,9 @@
         table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}th{background:#f3f6f9;text-align:left;padding:9px 8px;border-bottom:1px solid #d8e0e8;color:#52606f}td{padding:8px;border-bottom:1px solid #edf1f4;vertical-align:top}.right{text-align:right;font-variant-numeric:tabular-nums}.foot{margin-top:28px;padding-top:12px;border-top:1px solid #e4e8ed;color:#8b95a3;font-size:10px;display:flex;justify-content:space-between}
         @media print{body{background:#fff}.toolbar{display:none}#report{width:auto;max-width:none;margin:0;box-shadow:none;padding:12mm 12mm 10mm}.section{break-inside:avoid}.details{break-inside:auto}thead{display:table-header-group}tr{break-inside:avoid}.foot{position:relative}@page{size:A4 portrait;margin:0}}
       </style></head><body>
-      <div class="toolbar"><button onclick="downloadPng()">BAIXAR IMAGEM (PNG)</button><button class="primary" onclick="window.print()">SALVAR COMO PDF</button></div>
+      <div class="toolbar"><button onclick="downloadPng()">BAIXAR IMAGEM (PNG)</button><button class="primary" onclick="printReport()">SALVAR COMO PDF</button></div>
       <main id="report">
-        <div class="head"><div><h1 class="title">Relatório resumo</h1><div class="period">${formatDate(start)} - ${formatDate(end)}</div><div class="total-line">Total:<strong>${fmtClock(total)}</strong></div></div><div class="brand">PETimer</div></div>
+        <div class="head"><div><h1 class="title">Relatório resumo</h1><div class="period">${formatDate(start)} - ${formatDate(end)}</div><div class="total-line">Total:<strong>${fmtClock(total)}</strong></div></div><div class="brand"><img id="report-brand-logo" src="${escapeHtml(document.getElementById('brand-logo-source').getAttribute('src'))}" width="1177" height="552" alt="PETimer"></div></div>
         <section class="section"><h2 class="section-title">Horas por dia</h2><div class="bars-wrap"><div class="axis"><span style="bottom:0">0h</span><span style="bottom:25%">${(maxDaily/3600000*.25).toFixed(1).replace('.',',')}h</span><span style="bottom:50%">${(maxDaily/3600000*.5).toFixed(1).replace('.',',')}h</span><span style="bottom:75%">${(maxDaily/3600000*.75).toFixed(1).replace('.',',')}h</span><span style="bottom:100%">${(maxDaily/3600000).toFixed(1).replace('.',',')}h</span></div><div class="bars">${daily.map((d,i)=>`<div class="day"><div class="bar" style="height:${Math.max(d.total?4:0,d.total/maxDaily*88)}%"><span class="bar-label">${fmtClock(d.total)}</span></div><div class="day-label">${dayNames[i]}, ${shortDate(d.date)}</div></div>`).join('')}</div></div></section>
         <section class="section"><h2 class="section-title">Cargo / Projeto</h2><div class="split"><div class="donut" style="background:${donutStyle(cargoRows)}"><div class="donut-center">${fmtClock(total)}</div></div><div class="metric-list">${rowsHtml(cargoRows)}</div></div></section>
         <section class="section"><h2 class="section-title">Descrição</h2><div class="split"><div class="donut" style="background:${donutStyle(descRows)}"><div class="donut-center">${fmtClock(total)}</div></div><div class="metric-list">${rowsHtml(descRows)}</div></div></section>
@@ -3016,10 +3107,19 @@
         <div class="foot"><span>PETimer - ${escapeHtml(session.teamCode||'Equipe')}</span><span>Gerado em ${new Date().toLocaleString('pt-BR')}</span></div>
       </main>
       <script>
+        async function ensureReportLogo(){
+          const logo=document.getElementById('report-brand-logo');
+          await logo.decode();
+        }
+        async function printReport(){
+          try{await ensureReportLogo();window.print();}
+          catch(e){alert('Não foi possível carregar a logo do relatório. Tente novamente.');}
+        }
         async function downloadPng(){
           if(typeof html2canvas!=='function'){alert('Não foi possível carregar o gerador de imagem. Verifique sua conexão e tente novamente.');return;}
           const btns=document.querySelector('.toolbar'); btns.style.display='none';
           try{
+            await ensureReportLogo();
             const canvas=await html2canvas(document.getElementById('report'),{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
             const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='PETimer_relatorio_${localDateStr(new Date())}.png';a.click();
           }catch(e){alert('Não foi possível gerar a imagem deste relatório.');}
@@ -3034,7 +3134,7 @@
 
   function renderTeamMembers() {
     const teams = DB.getTeams(), users = DB.getUsers(), team = teams[session.teamCode], isAdmin = team.admin === session.username, el = document.getElementById('team-members-list');
-    el.innerHTML = Object.keys(team.members).map(memberUser => {
+    const rows = Object.keys(team.members).map(memberUser => {
       const uData = users[memberUser] || { name: memberUser };
       const realMemName = uData.name || uData.username || memberUser;
       const sector = team.members[memberUser].sector || 'Geral';
@@ -3045,8 +3145,9 @@
         actions = `<button class="icon-btn" onclick="editSector('${memberUser}', '${sector}')" title="Editar Setor" aria-label="Editar setor"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>`;
         if (!isMemAdmin) actions += `<button class="icon-btn" style="color:var(--danger)" onclick="removeMember('${memberUser}')" title="Remover">✕</button>`;
       }
-      return `<div class="row-item"><div class="flex-1"><div style="font-weight:600; font-size:14px; margin-bottom:2px;">${escapeHtml(realMemName)} <span style="font-size:11px; color:var(--muted)">@${memberUser}</span> ${isMemAdmin ? '<span class="badge-user badge-admin">Admin</span>' : ''}</div><div style="font-size:12px; color:var(--muted)">Setor: <strong style="color:var(--text)">${escapeHtml(sector)}</strong></div></div><div style="display:flex; gap:4px;">${actions}</div></div>`;
+      return `<div class="team-member-row"><div class="team-member-identity"><span class="team-avatar" aria-hidden="true">${escapeHtml(cycleMemberInitials(realMemName))}</span><div><span class="team-member-name">${escapeHtml(realMemName)}</span><span class="team-member-username">@${escapeHtml(memberUser)}</span></div></div><div class="team-sector"><span class="team-sector-label">Setor: </span>${escapeHtml(sector)}</div><div class="team-member-actions">${isMemAdmin ? '<span class="badge-user badge-admin">Admin</span>' : ''}${actions}</div></div>`;
     }).join('');
+    el.innerHTML = '<div class="team-list-head"><span>Membro</span><span>Setor</span><span>Ações</span></div><div class="team-list-body">' + rows + '</div>';
   }
 
   async function editSector(u, cur) {
@@ -3506,16 +3607,17 @@
     return `<div class="cycle-data-summary"><div class="cycle-data-summary-item"><span>Período</span><strong>${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</strong></div><div class="cycle-data-summary-item"><span>Divisão</span><strong>${escapeHtml(CYCLE_UNIT_TEXT[cycle.unit].label)}</strong></div><div class="cycle-data-summary-item"><span>Meta</span><strong>${escapeHtml(cycleGoalText(cycle))}</strong></div><div class="cycle-data-summary-item"><span>Tempo restante</span><strong>${escapeHtml(cycleTimeLeft(cycle))}</strong></div></div><div class="cycle-data-table-card"><div class="cycle-data-table-head"><h4>Médias dos membros no período</h4><label class="cycle-data-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" id="cycle-data-search-input" placeholder="Buscar membro..." autocomplete="off" aria-label="Buscar membro" oninput="filterCycleDataMembers(this.value)"></label></div><div class="cycle-data-table-scroll"><table class="cycle-data-table"><thead><tr><th>Membro</th><th>Tempo registrado</th><th>Média no período</th><th>Tempo restante</th></tr></thead><tbody>${rows||'<tr><td class="cycle-data-empty" colspan="4">Nenhum participante encontrado.</td></tr>'}</tbody></table></div></div>`;
   }
   let activeCycleDataModalId=null;
+  let activeCycleDataShowHistory=false;
   function filterCycleDataMembers(value){
     if(!activeCycleDataModalId)return;
     const cycle=DB.getCycles().find(c=>c.id===activeCycleDataModalId&&c.teamCode===session.teamCode);
     const body=document.getElementById('cycle-data-modal-body');
     if(!cycle||!body)return;
-    body.innerHTML=renderCycleMembersTable(cycle,value);
+    body.innerHTML=activeCycleDataShowHistory ? renderCycleHistoryData(cycle,value) : renderCycleMembersTable(cycle,value);
     const input=document.getElementById('cycle-data-search-input');
     if(input){input.value=value;input.focus();try{input.setSelectionRange(value.length,value.length)}catch(e){}}
   }
-  function openCycleDataModal(cycleId){
+  function openCycleDataModal(cycleId, showHistory=false){
     const cycle=DB.getCycles().find(c=>c.id===cycleId&&c.teamCode===session.teamCode);
     if(!cycle)return;
     const modal=document.getElementById('cycle-data-modal');
@@ -3524,8 +3626,10 @@
     const count=document.getElementById('cycle-data-member-count');
     if(!modal||!period||!body)return;
     activeCycleDataModalId=cycleId;
+    activeCycleDataShowHistory=showHistory;
+    body.classList.toggle('cycle-data-history', showHistory);
     period.textContent=`${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)} · ${cycleGoalText(cycle)}`;
-    body.innerHTML=renderCycleMembersTable(cycle);
+    body.innerHTML=showHistory ? renderCycleHistoryData(cycle) : renderCycleMembersTable(cycle);
     const total=cycleParticipants(cycle).length;
     if(count)count.textContent=`${total} ${total===1?'membro':'membros'} no período`;
     modal.hidden=false;
@@ -3613,13 +3717,23 @@
     el.innerHTML=`<div class="cycle-page-head"><div><h3>Período</h3><p>Visão geral do período atualmente em andamento.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Novo período</button></div>':''}</div>${renderCycleDetail(cycle)}`;
   }
   function selectCycleRecord(id){ selectedCycleDetailId=id; renderCycleRecordsPage(); }
+  function renderCycleRecordCompact(cycle){
+    const ended = cycle.endDate < localDateStr(new Date());
+    return `<article class="pc-compact${ended?' pc-compact-ended':''}"><div class="pc-compact-title"><span class="pc-compact-label">Período</span><strong class="pc-compact-range">${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</strong></div><div class="pc-compact-date"><span class="pc-compact-label">Início</span><strong>${fmtDateBR(cycle.startDate)}</strong></div><div class="pc-compact-date"><span class="pc-compact-label">Fim</span><strong>${fmtDateBR(cycle.endDate)}</strong></div><div class="pc-compact-status"><span class="pc-compact-label">Status</span>${cycleStatusLabel(cycle)}</div><button type="button" class="btn-outline cycle-data-btn pc-data-btn" onclick="openCycleDataModal('${cycle.id}',true)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>Dados sobre o período</button></article>`;
+  }
+  function renderCycleHistoryData(cycle, filter=''){
+    // Reutiliza o detalhe existente para preservar metas, feriados e ações.
+    const detail = renderCycleDetail(cycle,{history:true})
+      .replace(/<button[^>]*onclick="openCycleDataModal[^>]*>[\s\S]*?<\/button>/, '')
+      .replaceAll('onclick="startEditCycle(', 'onclick="closeCycleDataModal();startEditCycle(')
+      .replaceAll('onclick="deleteCycle(', 'onclick="closeCycleDataModal();deleteCycle(');
+    return detail + renderCycleMembersTable(cycle,filter);
+  }
   function renderCycleRecordsPage(){
     const el=document.getElementById('cycle-records-content'); if(!el)return;
     const cycles=DB.getCycles().filter(c=>c.teamCode===session.teamCode).sort((a,b)=>b.startDate.localeCompare(a.startDate));
     if(!cycles.length){el.innerHTML='<div class="card cycle-empty-state">Nenhum período cadastrado.</div>';return;}
-    // Exibe cada registro diretamente no card completo de detalhes, evitando
-    // repetir as datas em uma caixa lateral menor.
-    el.innerHTML=`<div class="pc-records">${cycles.map(c=>renderCycleDetail(c,{history:true})).join('')}</div>`;
+    el.innerHTML=`<div class="pc-records">${cycles.map(renderCycleRecordCompact).join('')}</div>`;
   }
   function renderCycleMemberArea(){ renderCycleCurrentPage(); }
   function renderAdminCycleSummary(){ /* conteúdo integrado às páginas internas do período */ }
@@ -3755,7 +3869,15 @@
   function fmtDur(ms, wSec = false) { const t = Math.max(0, Math.floor(ms/1000)), h = Math.floor(t/3600), m = Math.floor((t%3600)/60), s = t%60; if (wSec) return [h,m,s].map(v=>String(v).padStart(2,'0')).join(':'); return `${h}h ${String(m).padStart(2,'0')}m`; }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-  preparePetimerVisualRestore();
+  try {
+    preparePetimerVisualRestore();
+  } catch (err) {
+    // Falha na pré-restauração visual nunca pode impedir a init() de rodar.
+    console.error('PETimer: falha na pré-restauração visual', err);
+    document.documentElement.classList.remove('petimer-restoring');
+    document.documentElement.removeAttribute('data-petimer-restore-view');
+    try { if (authToken && !petimerLoadingDepth) showPetimerLoading('Carregando PETimer...'); } catch (_) {}
+  }
   document.addEventListener('DOMContentLoaded', init);
 </script>
 
