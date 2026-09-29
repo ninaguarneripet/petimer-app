@@ -1478,7 +1478,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbyVHsJWatDP5xhThpB6yW9XSghwdHLVNdd9IJ19k1zMPcJjQkz4fFFGidakwzcSvyS2/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbw8mVEHrWpYMncPPYW7ttZaPI651TdGPUyrWXE31SpZ9YMHcszpuq4axv2hXYwo9rA/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -1588,9 +1588,17 @@
   }
 
   // Busca o estado completo da equipe atual na planilha e atualiza o cache.
+  // Controle de gravações otimistas: enquanto houver gravação em andamento (ou se
+  // uma começar durante a busca), o resultado da busca é descartado para não
+  // "desfazer" na tela algo que o servidor ainda não terminou de salvar.
+  let writeSeq = 0;
+  let pendingWrites = 0;
   async function refreshTeamData() {
     if (!session || !session.teamCode) return;
+    if (pendingWrites > 0) return;
+    const seq = writeSeq;
     const d = await api('getTeamBootstrap', { code: session.teamCode });
+    if (pendingWrites > 0 || seq !== writeSeq) return;
     CACHE.teams[session.teamCode] = mapTeamFromServer(d.team, d.members);
     CACHE.entries = (d.entries || []).map(mapEntryFromServer);
     CACHE.cycles = (d.cycles || []).map(mapCycleFromServer);
@@ -1791,7 +1799,7 @@
   function startPolling() {
     stopPolling();
     pollInterval = setInterval(async () => {
-      if (!session || !session.teamCode) return;
+      if (!session || !session.teamCode || document.hidden || pendingWrites > 0) return;
       try {
         const wasRunning = !!DB.getRunning();
         await refreshTeamData();
@@ -1800,7 +1808,7 @@
         if (wasRunning && !DB.getRunning()) { clearInterval(tickInterval); setTimerUI(false); }
         refreshAppViews();
       } catch (err) { /* silencioso: erro de rede não deve interromper o uso */ }
-    }, 20000);
+    }, 30000);
   }
   function stopPolling() { if (pollInterval) clearInterval(pollInterval); pollInterval = null; }
   let currentView = 'tracker';
@@ -2483,22 +2491,31 @@
     if (dur < 0) return alert('A hora de término não pode ser anterior à hora de início.');
 
     if (!btn) btn = document.querySelector('button.manual-add');
-    return runOnce('add-entry', btn, 'Adicionando...', async () => {
-    try {
-      await api('addEntry', {
-        code: session.teamCode, activity, cargo, cargoColor: getCargoColor(cargo), modalidade,
-        date, startTime: startT, endTime: endT, durationMs: dur
-      });
-      await refreshTeamData();
+    // Atualização otimista: o registro aparece na hora e o servidor salva em segundo plano.
+    const tempId = 'tmp-' + Date.now();
+    DB.saveEntries([...DB.getEntries(), {
+      id: tempId, user: session.username, teamCode: session.teamCode, activity, cargo,
+      cargoColor: getCargoColor(cargo), modalidade, date, startTime: startT, endTime: endT, duration: dur
+    }]);
+    document.getElementById('time-start').value = endT;
+    document.getElementById('time-end').value = '00:00';
+    document.getElementById('activity-input').value = '';
+    refreshAppViews();
+    updateSuggestions();
 
-      // Usa o horário de término desta atividade como início da próxima.
-      document.getElementById('time-start').value = endT;
-      document.getElementById('time-end').value = '00:00';
-      document.getElementById('activity-input').value = '';
+    writeSeq++; pendingWrites++;
+    api('addEntry', {
+      code: session.teamCode, activity, cargo, cargoColor: getCargoColor(cargo), modalidade,
+      date, startTime: startT, endTime: endT, durationMs: dur
+    }).then(r => {
+      const e = DB.getEntries().find(x => x.id === tempId);
+      if (e && r && r.entryId) e.id = r.entryId;
+      renderEntries();
+    }).catch(err => {
+      DB.saveEntries(DB.getEntries().filter(x => x.id !== tempId));
       refreshAppViews();
-      updateSuggestions();
-    } catch (err) { alert('Erro ao salvar: ' + err.message); }
-    });
+      alert('Erro ao salvar: ' + err.message);
+    }).finally(() => { pendingWrites--; });
   }
 
   async function startTimer() {
@@ -2516,11 +2533,6 @@
     const startH = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
 
     return runOnce('start-timer', document.getElementById('timer-btn'), 'Iniciando...', async () => {
-    try {
-      await api('startTimer', {
-        code: session.teamCode, activity, cargo, cargoColor: getCargoColor(cargo), modalidade,
-        date, startTime: startH, start: now.toISOString()
-      });
       DB.saveRunning({
         id: 'running', activity, cargo, cargoColor: getCargoColor(cargo), modalidade, date,
         user: session.username, teamCode: session.teamCode,
@@ -2528,7 +2540,19 @@
       });
       document.getElementById('activity-input').disabled = true;
       setTimerUI(true); startTick(); refreshAppViews();
-    } catch (err) { alert('Erro ao iniciar: ' + err.message); }
+      writeSeq++; pendingWrites++;
+      try {
+        await api('startTimer', {
+          code: session.teamCode, activity, cargo, cargoColor: getCargoColor(cargo), modalidade,
+          date, startTime: startH, start: now.toISOString()
+        });
+      } catch (err) {
+        DB.saveRunning(null); clearInterval(tickInterval);
+        document.getElementById('activity-input').disabled = false;
+        document.getElementById('timer-digits').textContent = '00:00:00';
+        setTimerUI(false); refreshAppViews();
+        alert('Erro ao iniciar: ' + err.message);
+      } finally { pendingWrites--; }
     });
   }
 
@@ -2536,17 +2560,33 @@
     // Chamadas repetidas (cliques ou logout/troca de equipe) reaproveitam a parada em andamento.
     return runOnce('stop-timer', document.getElementById('timer-btn'), 'Parando...', async () => {
       const run = DB.getRunning(); if (!run) return;
-      try {
-        await api('stopTimer', {});
-        await refreshTeamData();
-      } catch (err) { alert('Erro ao parar: ' + err.message); }
-
+      const end = new Date();
+      const tempId = 'tmp-' + end.getTime();
+      const endH = String(end.getHours()).padStart(2, '0') + ':' + String(end.getMinutes()).padStart(2, '0');
+      DB.saveEntries([...DB.getEntries(), {
+        id: tempId, user: run.user || session.username, teamCode: run.teamCode || session.teamCode,
+        activity: run.activity, cargo: run.cargo, cargoColor: run.cargoColor, modalidade: run.modalidade,
+        date: run.date, startTime: run.startTime, endTime: endH,
+        duration: Math.max(0, end.getTime() - new Date(run.start).getTime())
+      }]);
       DB.saveRunning(null); clearInterval(tickInterval);
       document.getElementById('activity-input').disabled = false;
       document.getElementById('activity-input').value = '';
       document.getElementById('timer-digits').textContent = '00:00:00';
       setTimerUI(false); refreshAppViews();
       updateSuggestions();
+
+      writeSeq++; pendingWrites++;
+      try {
+        const r = await api('stopTimer', { end: end.toISOString() });
+        const e = DB.getEntries().find(x => x.id === tempId);
+        if (e && r && r.entryId) e.id = r.entryId;
+        renderEntries();
+      } catch (err) {
+        DB.saveEntries(DB.getEntries().filter(x => x.id !== tempId));
+        refreshAppViews();
+        alert('Erro ao parar: ' + err.message);
+      } finally { pendingWrites--; }
     });
   }
 
@@ -2706,14 +2746,19 @@
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
     if (!confirm('Tem certeza que deseja apagar este horário registrado?')) return;
-    return runOnce(key, btn, null, async () => {
-      try {
-        await api('deleteEntry', { entryId: id });
-        await refreshTeamData();
-        refreshAppViews();
-        updateSuggestions();
-      } catch (err) { alert('Erro ao excluir: ' + err.message); }
-    });
+    if (String(id).startsWith('tmp-')) return alert('Aguarde o registro terminar de salvar e tente de novo.');
+    const removedIndex = entries.findIndex(e => e.id === id);
+    DB.saveEntries(entries.filter(e => e.id !== id));
+    refreshAppViews();
+    updateSuggestions();
+    writeSeq++; pendingWrites++;
+    api('deleteEntry', { entryId: id }).catch(err => {
+      const list = [...DB.getEntries()];
+      list.splice(Math.max(0, removedIndex), 0, entry);
+      DB.saveEntries(list);
+      refreshAppViews();
+      alert('Erro ao excluir: ' + err.message);
+    }).finally(() => { pendingWrites--; });
   }
 
   async function updateEntry(id, field, value) {
@@ -2740,19 +2785,26 @@
     }
   }
 
-  return runOnce(key, null, null, async () => {
+  if (String(id).startsWith('tmp-')) { alert('Aguarde o registro terminar de salvar e tente de novo.'); renderEntries(); return; }
+  const previous = entries[entryIndex];
+  entries[entryIndex] = entry;
+  if (field === 'date') refreshAppViews();
+  else { renderEntries(); renderCycleBadge(); }
+  if (field === 'activity') updateSuggestions();
+
+  writeSeq++; pendingWrites++;
   try {
     await api('updateEntry', {
       entryId: id, activity: entry.activity, cargo: entry.cargo, cargoColor: entry.cargoColor,
       modalidade: entry.modalidade, date: entry.date, startTime: entry.startTime,
       endTime: entry.endTime, durationMs: entry.duration
     });
-    await refreshTeamData();
-    if (field === 'date') refreshAppViews();
-    else { renderEntries(); renderCycleBadge(); }
-    if (field === 'activity') updateSuggestions();
-  } catch (err) { alert('Erro ao salvar alteração: ' + err.message); }
-  });
+  } catch (err) {
+    const i = DB.getEntries().findIndex(e => e.id === id);
+    if (i >= 0) DB.getEntries()[i] = previous;
+    refreshAppViews();
+    alert('Erro ao salvar alteração: ' + err.message);
+  } finally { pendingWrites--; }
 }
 
   // Função para atualizar as sugestões do autocompletar
