@@ -2710,27 +2710,42 @@
     const currentWeekStart = new Date(today);
     const dayNum = (today.getDay() + 6) % 7; // segunda = 0
     currentWeekStart.setDate(today.getDate() - dayNum);
+    const isoKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const currentWeekKey = isoKey(currentWeekStart);
     const previousWeekStart = new Date(currentWeekStart);
     previousWeekStart.setDate(currentWeekStart.getDate() - 7);
+    const previousWeekKey = isoKey(previousWeekStart);
 
-    function weekBucket(dateStr){
+    // Chave da semana (segunda-feira) à qual a data pertence; semanas futuras têm a própria seção.
+    function weekKeyOf(dateStr){
       const d = new Date(dateStr + 'T12:00:00');
-      if (d >= currentWeekStart) return 'current';
-      if (d >= previousWeekStart && d < currentWeekStart) return 'previous';
-      return 'older';
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      return isoKey(d);
     }
 
-    function sectionLabel(bucket){
-      if (bucket === 'current') return 'Esta semana';
-      if (bucket === 'previous') return 'Semana passada';
-      return 'Anteriores';
+    // "14 set - 20 set" (com o ano quando a semana cruza anos diferentes do atual).
+    function weekRangeLabel(key){
+      const start = new Date(key + 'T12:00:00');
+      const end = new Date(start); end.setDate(start.getDate() + 6);
+      const fmt = (d, withYear) => d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' }).replace('.', '') + (withYear ? ' ' + d.getFullYear() : '');
+      const withYear = start.getFullYear() !== now.getFullYear() || end.getFullYear() !== now.getFullYear();
+      return `${fmt(start, withYear)} - ${fmt(end, withYear)}`;
     }
 
-    const sections = { current:[], previous:[], older:[] };
-    sortedDates.forEach(date => sections[weekBucket(date)].push(date));
+    function sectionLabel(key){
+      if (key === currentWeekKey) return 'Esta semana';
+      if (key === previousWeekKey) return 'Semana passada';
+      return weekRangeLabel(key);
+    }
+
+    const sections = {};
+    sortedDates.forEach(date => {
+      const k = weekKeyOf(date);
+      (sections[k] = sections[k] || []).push(date);
+    });
 
     let html = '';
-    ['current','previous','older'].forEach(bucket => {
+    Object.keys(sections).sort().reverse().forEach(bucket => {
       const dates = sections[bucket];
       if (!dates.length) return;
       const weekTotal = dates.reduce((sum,date) => sum + grouped[date].reduce((s,e)=>s+(Number(e.duration)||0),0), 0);
