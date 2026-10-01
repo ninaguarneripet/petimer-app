@@ -127,6 +127,14 @@
   .profile-edit-trigger svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
   .profile-edit-note{margin:0 0 14px;padding:10px 11px;border:1px solid #dce7f1;border-radius:8px;background:#f6f9fc;color:#66717f;font-size:10.5px;line-height:1.4;}
   .profile-edit-note strong{color:#276097;}
+  .btn-delete-team{background:rgba(232,86,79,.12);color:#a32622;border:1px solid rgba(232,86,79,.18);border-radius:8px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
+  .btn-delete-team:hover:not(button:disabled){background:rgba(232,86,79,.2);border-color:rgba(232,86,79,.3);}
+  .delete-team-dialog{width:min(400px,calc(100vw - 32px));background:#fff;border:1px solid #e4e6ec;border-radius:14px;box-shadow:0 18px 50px rgba(8,47,83,.20);overflow:hidden;overscroll-behavior:contain;}
+  .delete-team-body{padding:18px 22px 20px;}
+  .delete-team-body p{margin:0;font-size:13.5px;line-height:1.5;color:#2b303b;}
+  .delete-team-body .delete-team-warning{margin-top:10px;font-size:12px;color:#818796;}
+  .profile-btn-danger{background:#e8564f;border:1px solid #e8564f;color:#fff;}
+  .profile-btn-danger:hover:not(button:disabled){background:#d44a43;border-color:#d44a43;}
   .switch-team-dialog{width:min(430px,calc(100vw - 32px));background:#fff;border:1px solid #e4e6ec;border-radius:14px;box-shadow:0 18px 50px rgba(8,47,83,.20);overflow:hidden;}
   .switch-team-list{display:flex;flex-direction:column;gap:9px;padding:18px 20px 20px;}
   .switch-team-intro{padding:0 20px 2px;color:#818796;font-size:12px;line-height:1.45;}
@@ -229,6 +237,11 @@
   .hub-section-title{margin:0 0 14px;font-size:16px;color:var(--text);}
   .team-grid { display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:16px;}
   .team-card-btn { position:relative; background:var(--surface); border:1px solid var(--border); padding:16px 56px 16px 18px; border-radius:10px; cursor:pointer; text-align:left; transition:border-color .15s ease, box-shadow .15s ease, background .15s ease; box-shadow:none; display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"title role" "sub role"; column-gap:18px; row-gap:4px; align-items:center; min-height:88px; }
+  .team-card-wrap{position:relative;display:flex;}
+  .team-card-wrap .team-card-btn{width:100%;}
+  .team-card-delete{position:absolute;top:8px;right:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;border-radius:7px;color:#c84a43;cursor:pointer;transition:background .15s ease;z-index:2;}
+  .team-card-delete:hover:not(button:disabled){background:rgba(232,86,79,.14);}
+  .team-card-delete svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
   .team-card-btn:hover:not(button:disabled) { border-color:#cbd0d9; box-shadow:0 3px 10px rgba(20,22,30,.05); background:#fcfdff; }
   .team-card-title { grid-area:title; font-weight:700; font-size:16px; color:var(--text); margin:0;}
   .team-card-sub { grid-area:sub; font-size:12px; color:var(--muted); font-family:monospace; }
@@ -1402,14 +1415,8 @@
         <div id="team-members-list"><div class="empty">Carregando...</div></div>
       </div>
 
-      <div class="card" id="delete-team-area" hidden style="border-color:#edc5c1;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
-          <div>
-            <h3 style="margin:0 0 4px 0; font-size:16px; color:var(--danger);">Excluir equipe</h3>
-            <p style="margin:0; font-size:12px; color:var(--muted);">Apaga a equipe, todos os registros e os períodos de todos os membros. Não dá para desfazer.</p>
-          </div>
-          <button class="btn-outline" style="color:var(--danger); border-color:#edc5c1;" onclick="deleteTeamAction(this)">Excluir equipe</button>
-        </div>
+      <div id="delete-team-area" hidden style="text-align:right; margin-top:14px;">
+        <button type="button" class="btn-delete-team" onclick="deleteTeamAction()">Excluir equipe</button>
       </div>
     </section>
 
@@ -2171,13 +2178,19 @@
         const roleBadge = t.isAdmin
           ? `<span class="badge-role badge-role-admin"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px;margin-right:5px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M3 7l4 4 5-7 5 7 4-4-2 10H5L3 7z"></path><path d="M6 20h12"></path></svg>Admin (Criador)</span>`
           : `<span class="badge-role badge-role-member">Membro</span>`;
+        const trashBtn = t.isAdmin
+          ? `<button type="button" class="team-card-delete" title="Excluir equipe" aria-label="Excluir equipe ${escapeHtml(t.name)}" onclick="deleteTeamAction('${t.code}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg></button>`
+          : '';
         return `
-          <button class="team-card-btn" onclick="enterTeam('${t.code}')">
-            <div class="team-card-title">${escapeHtml(t.name)}</div>
-            <div class="team-card-sub">Código: ${t.code}</div>
-            ${roleBadge}
-            <span class="team-card-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></span>
-          </button>
+          <div class="team-card-wrap">
+            <button class="team-card-btn" onclick="enterTeam('${t.code}')">
+              <div class="team-card-title">${escapeHtml(t.name)}</div>
+              <div class="team-card-sub">Código: ${t.code}</div>
+              ${roleBadge}
+              <span class="team-card-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></span>
+            </button>
+            ${trashBtn}
+          </div>
         `;
       }).join('');
       teamsSection.hidden = false;
@@ -2198,6 +2211,8 @@
     const btn = actionButton(e);
     const name = document.getElementById('new-team-name').value.trim();
     if (!name) return alert('Dê um nome para a equipe.');
+    const ownedTeams = (CACHE.myTeams || []).filter(t => t.isAdmin).length;
+    if (ownedTeams >= 3) return alert('Você já atingiu o limite de 3 equipes criadas por pessoa.');
     return runOnce('create-team', btn, 'Criando...', async () => {
       try {
         const created = await api('createTeam', { name });
@@ -3554,25 +3569,50 @@
       } catch (err) { alert(err.message); }
     });
   }
-  async function deleteTeamAction(btn) {
+  let deleteTeamTargetCode = null;
+  function deleteTeamAction(code) {
+    code = code || session.teamCode;
+    const t = (CACHE.myTeams || []).find(x => x.code === code);
+    if (!t || !t.isAdmin) return;
+    deleteTeamTargetCode = code;
+    document.getElementById('delete-team-name').textContent = t.name;
+    document.getElementById('delete-team-overlay').hidden = false;
+  }
+  function closeDeleteTeamModal() {
     if (isActionPending('delete-team')) return;
-    const team = DB.getTeams()[session.teamCode];
-    if (!team || team.admin !== session.username) return;
-    if (!confirm(`Você tem certeza que deseja apagar a equipe ${team.name}?\n\nTodos os registros e períodos dela serão excluídos para todos os membros. Esta ação não pode ser desfeita.`)) return;
+    document.getElementById('delete-team-overlay').hidden = true;
+    deleteTeamTargetCode = null;
+  }
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && !document.getElementById('delete-team-overlay').hidden) closeDeleteTeamModal();
+  });
+  async function confirmDeleteTeam(btn) {
+    if (isActionPending('delete-team')) return;
+    const code = deleteTeamTargetCode;
+    const t = (CACHE.myTeams || []).find(x => x.code === code);
+    if (!code || !t || !t.isAdmin) return closeDeleteTeamModal();
     return runOnce('delete-team', btn, 'Excluindo...', async () => {
-      const code = session.teamCode;
       pendingWrites++;
       try {
         await api('deleteTeam', { code });
-        stopPolling();
-        clearInterval(tickInterval);
-        DB.saveRunning(null);
-        session.teamCode = null;
-        try { localStorage.removeItem('petimer_last_team'); } catch (_) {}
+        const wasCurrent = session.teamCode === code;
+        if (wasCurrent) {
+          stopPolling();
+          clearInterval(tickInterval);
+          DB.saveRunning(null);
+          session.teamCode = null;
+        }
+        try { if (localStorage.getItem('petimer_last_team') === code) localStorage.removeItem('petimer_last_team'); } catch (_) {}
         const meData = await api('me');
         CACHE.myTeams = meData.teams || [];
-        goToHub();
-      } catch (err) { alert(err.message); }
+        document.getElementById('delete-team-overlay').hidden = true;
+        deleteTeamTargetCode = null;
+        if (wasCurrent) goToHub(); else renderHub();
+      } catch (err) {
+        document.getElementById('delete-team-overlay').hidden = true;
+        deleteTeamTargetCode = null;
+        alert(err.message);
+      }
       finally { pendingWrites--; }
     });
   }
@@ -4374,6 +4414,20 @@
   </div>
 </div>
 
+<div class="profile-popover-card" id="delete-team-overlay" hidden onclick="if(event.target===this) closeDeleteTeamModal()">
+  <div class="delete-team-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-team-title">
+    <div class="profile-dialog-head"><h3 id="delete-team-title">Excluir equipe</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeDeleteTeamModal()">×</button></div>
+    <div class="delete-team-body">
+      <p>Você tem certeza que deseja apagar a equipe <strong id="delete-team-name"></strong>?</p>
+      <p class="delete-team-warning">Todos os registros e períodos dela serão excluídos para todos os membros. Esta ação não pode ser desfeita.</p>
+      <div class="profile-dialog-actions">
+        <button class="profile-btn profile-btn-secondary" type="button" onclick="closeDeleteTeamModal()">Cancelar</button>
+        <button class="profile-btn profile-btn-danger" type="button" id="delete-team-confirm-btn" onclick="confirmDeleteTeam(this)">Excluir equipe</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="profile-popover-card" id="user-select-overlay" hidden onclick="if(event.target===this) closeUserSelectModal()">
   <div class="user-select-dialog" role="dialog" aria-modal="true" aria-labelledby="user-select-title">
     <div class="profile-dialog-head"><h3 id="user-select-title">Selecionar usuário</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeUserSelectModal()">×</button></div>
@@ -4392,4 +4446,3 @@
 </body>
 </html>
 
-        
