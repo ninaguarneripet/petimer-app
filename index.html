@@ -1401,6 +1401,16 @@
         </div>
         <div id="team-members-list"><div class="empty">Carregando...</div></div>
       </div>
+
+      <div class="card" id="delete-team-area" hidden style="border-color:#edc5c1;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+          <div>
+            <h3 style="margin:0 0 4px 0; font-size:16px; color:var(--danger);">Excluir equipe</h3>
+            <p style="margin:0; font-size:12px; color:var(--muted);">Apaga a equipe, todos os registros e os períodos de todos os membros. Não dá para desfazer.</p>
+          </div>
+          <button class="btn-outline" style="color:var(--danger); border-color:#edc5c1;" onclick="deleteTeamAction(this)">Excluir equipe</button>
+        </div>
+      </div>
     </section>
 
     <section class="view" id="view-cycle" hidden>
@@ -1556,7 +1566,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbw8mVEHrWpYMncPPYW7ttZaPI651TdGPUyrWXE31SpZ9YMHcszpuq4axv2hXYwo9rA/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxQIUZeS6EQKfsXrSK5AAl-E8i4Z5UJb-r3d9qyW5x2OYUAgCTtrqzS_UtOPMOylGhY/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -1885,7 +1895,19 @@
         // valor do servidor a cada poll — apenas os dados da equipe.
         if (wasRunning && !DB.getRunning()) { clearInterval(tickInterval); setTimerUI(false); }
         refreshAppViews();
-      } catch (err) { /* silencioso: erro de rede não deve interromper o uso */ }
+      } catch (err) {
+        // Equipe apagada pelo administrador (ou membro removido): volta para o início.
+        if (/Equipe não encontrada|não faz parte dessa equipe/i.test(String(err.message || err))) {
+          stopPolling(); clearInterval(tickInterval);
+          DB.saveRunning(null);
+          session.teamCode = null;
+          try { localStorage.removeItem('petimer_last_team'); } catch (_) {}
+          try { const m = await api('me'); CACHE.myTeams = m.teams || []; } catch (_) {}
+          alert('Esta equipe não está mais disponível (foi excluída ou você foi removido).');
+          goToHub();
+        }
+        /* demais erros (rede) ficam em silêncio para não interromper o uso */
+      }
     }, 30000);
   }
   function stopPolling() { if (pollInterval) clearInterval(pollInterval); pollInterval = null; }
@@ -2380,6 +2402,7 @@
     document.getElementById('sidebar-profile-trigger').textContent = initials || 'U';
     document.getElementById('manage-code-display').textContent = session.teamCode;
     document.getElementById('admin-add-area').hidden = (team.admin !== session.username);
+    document.getElementById('delete-team-area').hidden = (team.admin !== session.username);
     document.getElementById('nav-cycle').hidden = false;
     updateCycleRoleControl();
     notifyEndedCycle();
@@ -3531,6 +3554,28 @@
       } catch (err) { alert(err.message); }
     });
   }
+  async function deleteTeamAction(btn) {
+    if (isActionPending('delete-team')) return;
+    const team = DB.getTeams()[session.teamCode];
+    if (!team || team.admin !== session.username) return;
+    if (!confirm(`Você tem certeza que deseja apagar a equipe ${team.name}?\n\nTodos os registros e períodos dela serão excluídos para todos os membros. Esta ação não pode ser desfeita.`)) return;
+    return runOnce('delete-team', btn, 'Excluindo...', async () => {
+      const code = session.teamCode;
+      pendingWrites++;
+      try {
+        await api('deleteTeam', { code });
+        stopPolling();
+        clearInterval(tickInterval);
+        DB.saveRunning(null);
+        session.teamCode = null;
+        try { localStorage.removeItem('petimer_last_team'); } catch (_) {}
+        const meData = await api('me');
+        CACHE.myTeams = meData.teams || [];
+        goToHub();
+      } catch (err) { alert(err.message); }
+      finally { pendingWrites--; }
+    });
+  }
   async function addMemberManually(btn) {
     if (isActionPending('add-member')) return;
     const i = document.getElementById('manual-add-user'), u = i.value.trim().toLowerCase();
@@ -4346,3 +4391,5 @@
 
 </body>
 </html>
+
+        
