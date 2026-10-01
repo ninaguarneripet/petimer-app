@@ -234,14 +234,30 @@
   .hub-logout{display:inline-flex;align-items:center;gap:7px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer;padding:4px 0;margin:0;transition:color .15s ease;}
   .hub-logout svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
   .hub-logout:hover:not(button:disabled){color:var(--danger);}
-  .hub-section-title{margin:0 0 14px;font-size:16px;color:var(--text);}
+  .hub-section-title{margin:0;font-size:16px;color:var(--text);}
+  .hub-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;}
+  .hub-manage-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--muted);cursor:pointer;transition:background .15s ease,color .15s ease;}
+  .hub-manage-btn:hover:not(button:disabled){background:rgba(39,96,151,.1);color:var(--accent-dark);}
+  .hub-manage-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .manage-team-back{align-self:flex-start;background:none;border:none;padding:0;font:600 12px/1 inherit;color:var(--accent-dark);cursor:pointer;}
+  .manage-team-back:hover:not(button:disabled){text-decoration:underline;}
+  .manage-team-current{margin:0;font-size:15px;font-weight:700;color:var(--text);}
   .team-grid { display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:16px;}
   .team-card-btn { position:relative; background:var(--surface); border:1px solid var(--border); padding:16px 56px 16px 18px; border-radius:10px; cursor:pointer; text-align:left; transition:border-color .15s ease, box-shadow .15s ease, background .15s ease; box-shadow:none; display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"title role" "sub role"; column-gap:18px; row-gap:4px; align-items:center; min-height:88px; }
   .team-card-wrap{position:relative;display:flex;}
   .team-card-wrap .team-card-btn{width:100%;}
-  .team-card-delete{position:absolute;top:8px;right:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;border-radius:7px;color:#c84a43;cursor:pointer;transition:background .15s ease;z-index:2;}
-  .team-card-delete:hover:not(button:disabled){background:rgba(232,86,79,.14);}
-  .team-card-delete svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .team-card-manage{position:absolute;top:8px;right:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;border-radius:7px;color:var(--muted);cursor:pointer;transition:background .15s ease,color .15s ease;z-index:2;}
+  .team-card-manage:hover:not(button:disabled){background:rgba(39,96,151,.1);color:var(--accent-dark);}
+  .team-card-manage svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .profile-popover-card.hub-modal{z-index:1200;}
+  .manage-team-dialog{width:min(420px,calc(100vw - 32px));background:#fff;border:1px solid #e4e6ec;border-radius:14px;box-shadow:0 18px 50px rgba(8,47,83,.20);overflow:hidden;overscroll-behavior:contain;}
+  .manage-team-body{padding:18px 22px 22px;display:flex;flex-direction:column;gap:14px;}
+  .manage-team-body label{display:block;font-size:12px;font-weight:600;color:#555c6a;margin-bottom:6px;}
+  .manage-team-body input[type="text"]{width:100%;border:1px solid var(--border);border-radius:7px;padding:9px 10px;font:inherit;outline:none;}
+  .manage-team-body input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(39,96,151,.12);}
+  .manage-team-row{display:flex;gap:8px;}
+  .manage-team-sep{border:0;border-top:1px solid #eef0f4;margin:2px 0;}
+  .manage-team-note{margin:0;font-size:12px;color:#818796;line-height:1.5;}
   .team-card-btn:hover:not(button:disabled) { border-color:#cbd0d9; box-shadow:0 3px 10px rgba(20,22,30,.05); background:#fcfdff; }
   .team-card-title { grid-area:title; font-weight:700; font-size:16px; color:var(--text); margin:0;}
   .team-card-sub { grid-area:sub; font-size:12px; color:var(--muted); font-family:monospace; }
@@ -1137,7 +1153,10 @@
 
     <!-- ÁREA: EQUIPES QUE VOCÊ JÁ ESTÁ -->
     <div id="hub-existing-teams-section" hidden>
-      <h3 class="hub-section-title">Suas Equipes</h3>
+      <div class="hub-section-head">
+        <h3 class="hub-section-title">Suas Equipes</h3>
+        <button type="button" class="hub-manage-btn" title="Gerenciar equipes" aria-label="Gerenciar equipes" onclick="openManageTeams()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>
+      </div>
       
       <div class="team-grid" id="hub-team-list"></div>
       
@@ -1573,7 +1592,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbyFBNNoWnAEQUQTs4Q2Z3FE18XZ4juw9WEJ0004wGQvQrIqacp_nNN3vHy87q21XlBA/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbz3TfI7lvbUHM739tu4iekdG56c4LD24v7X6iXggcpBmX5r6ZApEK1gZhBs45Y-ctP7/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2178,9 +2197,6 @@
         const roleBadge = t.isAdmin
           ? `<span class="badge-role badge-role-admin"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px;margin-right:5px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M3 7l4 4 5-7 5 7 4-4-2 10H5L3 7z"></path><path d="M6 20h12"></path></svg>Admin (Criador)</span>`
           : `<span class="badge-role badge-role-member">Membro</span>`;
-        const trashBtn = t.isAdmin
-          ? `<button type="button" class="team-card-delete" title="Excluir equipe" aria-label="Excluir equipe ${escapeHtml(t.name)}" onclick="deleteTeamAction('${t.code}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg></button>`
-          : '';
         return `
           <div class="team-card-wrap">
             <button class="team-card-btn" onclick="enterTeam('${t.code}')">
@@ -2189,7 +2205,6 @@
               ${roleBadge}
               <span class="team-card-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></span>
             </button>
-            ${trashBtn}
           </div>
         `;
       }).join('');
@@ -3570,6 +3585,111 @@
       } catch (err) { alert(err.message); }
     });
   }
+  // ---------- GERENCIAR EQUIPES (tela de equipes) ----------
+  let manageTeamCode = null;
+  let leaveTeamTargetCode = null;
+  function openManageTeams() {
+    renderManagePicker();
+    document.getElementById('manage-team-overlay').hidden = false;
+  }
+  function renderManagePicker() {
+    manageTeamCode = null;
+    const list = document.getElementById('manage-team-list');
+    const mine = CACHE.myTeams || [];
+    list.innerHTML = mine.length ? mine.map(team => `<button type="button" class="switch-team-item" onclick="selectManageTeam('${team.code}')">
+        <span class="switch-team-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7.5" r="3.5"></circle><path d="M21 20v-2a4 4 0 0 0-3-3.85"></path><path d="M15.5 4.15a3.5 3.5 0 0 1 0 6.7"></path></svg></span>
+        <span class="switch-team-info"><span class="switch-team-name">${escapeHtml(team.name)}</span><span class="switch-team-meta">Código: ${escapeHtml(team.code)} <span class="switch-team-role ${team.isAdmin ? 'admin' : ''}">${team.isAdmin ? 'Admin (Criador)' : 'Membro'}</span></span></span>
+        <svg class="switch-team-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
+      </button>`).join('') : '<div style="padding:10px 2px;color:#8a909e;font-size:12px;">Nenhuma equipe disponível.</div>';
+    document.getElementById('manage-team-picker').hidden = false;
+    document.getElementById('manage-team-detail').hidden = true;
+    document.getElementById('manage-team-title').textContent = 'Gerenciar equipes';
+  }
+  function selectManageTeam(code) {
+    const t = (CACHE.myTeams || []).find(x => x.code === code);
+    if (!t) return;
+    manageTeamCode = code;
+    document.getElementById('manage-team-current').textContent = t.name;
+    document.getElementById('manage-team-admin').hidden = !t.isAdmin;
+    document.getElementById('manage-team-member').hidden = !!t.isAdmin;
+    document.getElementById('manage-team-name').value = t.name;
+    document.getElementById('manage-team-picker').hidden = true;
+    document.getElementById('manage-team-detail').hidden = false;
+    document.getElementById('manage-team-title').textContent = 'Gerenciar equipe';
+    if (t.isAdmin) setTimeout(() => document.getElementById('manage-team-name').focus(), 30);
+  }
+  function closeManageTeam() {
+    if (isActionPending('rename-team')) return;
+    document.getElementById('manage-team-overlay').hidden = true;
+    manageTeamCode = null;
+  }
+  async function saveTeamName(btn) {
+    const code = manageTeamCode;
+    const t = (CACHE.myTeams || []).find(x => x.code === code);
+    if (!t || !t.isAdmin) return;
+    const name = document.getElementById('manage-team-name').value.trim();
+    if (!name) return alert('Dê um nome para a equipe.');
+    if (name === t.name) return closeManageTeam();
+    return runOnce('rename-team', btn, 'Salvando...', async () => {
+      try {
+        const r = await api('renameTeam', { code, name });
+        t.name = (r && r.name) || name;
+        if (CACHE.teams && CACHE.teams[code]) CACHE.teams[code].name = t.name;
+        document.getElementById('manage-team-overlay').hidden = true;
+        manageTeamCode = null;
+        renderHub();
+      } catch (err) { alert(err.message); }
+    });
+  }
+  function manageTeamDelete() {
+    const code = manageTeamCode;
+    document.getElementById('manage-team-overlay').hidden = true;
+    manageTeamCode = null;
+    deleteTeamAction(code);
+  }
+  function manageTeamLeave() {
+    const code = manageTeamCode;
+    const t = (CACHE.myTeams || []).find(x => x.code === code);
+    if (!t) return;
+    document.getElementById('manage-team-overlay').hidden = true;
+    manageTeamCode = null;
+    leaveTeamTargetCode = code;
+    document.getElementById('leave-team-name').textContent = t.name;
+    document.getElementById('leave-team-overlay').hidden = false;
+  }
+  function closeLeaveTeamModal() {
+    if (isActionPending('leave-team')) return;
+    document.getElementById('leave-team-overlay').hidden = true;
+    leaveTeamTargetCode = null;
+  }
+  async function confirmLeaveTeam(btn) {
+    const code = leaveTeamTargetCode;
+    const t = (CACHE.myTeams || []).find(x => x.code === code);
+    if (!code || !t) return closeLeaveTeamModal();
+    return runOnce('leave-team', btn, 'Saindo...', async () => {
+      pendingWrites++;
+      try {
+        await api('leaveTeam', { code });
+        if (session.teamCode === code) {
+          stopPolling(); clearInterval(tickInterval);
+          DB.saveRunning(null);
+          session.teamCode = null;
+        }
+        try { if (localStorage.getItem('petimer_last_team') === code) localStorage.removeItem('petimer_last_team'); } catch (_) {}
+        const meData = await api('me');
+        CACHE.myTeams = meData.teams || [];
+        document.getElementById('leave-team-overlay').hidden = true;
+        leaveTeamTargetCode = null;
+        renderHub();
+      } catch (err) {
+        document.getElementById('leave-team-overlay').hidden = true;
+        leaveTeamTargetCode = null;
+        alert(err.message);
+      }
+      finally { pendingWrites--; }
+    });
+  }
+
   let deleteTeamTargetCode = null;
   function deleteTeamAction(code) {
     code = code || session.teamCode;
@@ -3585,7 +3705,10 @@
     deleteTeamTargetCode = null;
   }
   document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape' && !document.getElementById('delete-team-overlay').hidden) closeDeleteTeamModal();
+    if (ev.key !== 'Escape') return;
+    if (!document.getElementById('delete-team-overlay').hidden) closeDeleteTeamModal();
+    else if (!document.getElementById('leave-team-overlay').hidden) closeLeaveTeamModal();
+    else if (!document.getElementById('manage-team-overlay').hidden) closeManageTeam();
   });
   async function confirmDeleteTeam(btn) {
     if (isActionPending('delete-team')) return;
@@ -4415,7 +4538,49 @@
   </div>
 </div>
 
-<div class="profile-popover-card" id="delete-team-overlay" hidden onclick="if(event.target===this) closeDeleteTeamModal()">
+<div class="profile-popover-card hub-modal" id="manage-team-overlay" hidden onclick="if(event.target===this) closeManageTeam()">
+  <div class="manage-team-dialog" role="dialog" aria-modal="true" aria-labelledby="manage-team-title">
+    <div class="profile-dialog-head"><h3 id="manage-team-title">Gerenciar equipes</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeManageTeam()">×</button></div>
+    <div id="manage-team-picker">
+      <p class="switch-team-intro">Selecione a equipe que você quer gerenciar.</p>
+      <div class="switch-team-list" id="manage-team-list"></div>
+    </div>
+    <div class="manage-team-body" id="manage-team-detail" hidden>
+      <button type="button" class="manage-team-back" onclick="renderManagePicker()">‹ Escolher outra equipe</button>
+      <p class="manage-team-current" id="manage-team-current"></p>
+      <div id="manage-team-admin" hidden>
+        <label for="manage-team-name">Nome da equipe</label>
+        <div class="manage-team-row">
+          <input type="text" id="manage-team-name" maxlength="60" onkeydown="if(event.key==='Enter'){event.preventDefault();saveTeamName(document.getElementById('manage-team-save-btn'));}">
+          <button class="profile-btn profile-btn-primary" type="button" id="manage-team-save-btn" onclick="saveTeamName(this)">Salvar</button>
+        </div>
+        <hr class="manage-team-sep" style="margin-top:16px;">
+        <p class="manage-team-note" style="margin-bottom:10px;">Excluir apaga a equipe, os registros e os períodos de todos os membros.</p>
+        <button type="button" class="btn-delete-team" onclick="manageTeamDelete()">Excluir equipe</button>
+      </div>
+      <div id="manage-team-member" hidden>
+        <p class="manage-team-note" style="margin-bottom:10px;">Você é membro desta equipe. Ao sair, ela some da sua lista e você só volta com o código de convite. Seus registros ficam guardados e voltam se você entrar de novo.</p>
+        <button type="button" class="btn-delete-team" onclick="manageTeamLeave()">Sair da equipe</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="profile-popover-card hub-modal" id="leave-team-overlay" hidden onclick="if(event.target===this) closeLeaveTeamModal()">
+  <div class="delete-team-dialog" role="alertdialog" aria-modal="true" aria-labelledby="leave-team-title">
+    <div class="profile-dialog-head"><h3 id="leave-team-title">Sair da equipe</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeLeaveTeamModal()">×</button></div>
+    <div class="delete-team-body">
+      <p>Você tem certeza que deseja sair da equipe <strong id="leave-team-name"></strong>?</p>
+      <p class="delete-team-warning">Para voltar, você vai precisar do código de convite da equipe.</p>
+      <div class="profile-dialog-actions">
+        <button class="profile-btn profile-btn-secondary" type="button" onclick="closeLeaveTeamModal()">Cancelar</button>
+        <button class="profile-btn profile-btn-danger" type="button" onclick="confirmLeaveTeam(this)">Sair da equipe</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="profile-popover-card hub-modal" id="delete-team-overlay" hidden onclick="if(event.target===this) closeDeleteTeamModal()">
   <div class="delete-team-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-team-title">
     <div class="profile-dialog-head"><h3 id="delete-team-title">Excluir equipe</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeDeleteTeamModal()">×</button></div>
     <div class="delete-team-body">
