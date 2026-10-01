@@ -1573,7 +1573,7 @@
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbwsdpRYpPyCZGJTnUjuJ2lfRNAPJBo5qcRrYvXMgJOifTF0KZwAXBd2dLsQ_LdOKyrp/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyFBNNoWnAEQUQTs4Q2Z3FE18XZ4juw9WEJ0004wGQvQrIqacp_nNN3vHy87q21XlBA/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2211,8 +2211,7 @@
     const btn = actionButton(e);
     const name = document.getElementById('new-team-name').value.trim();
     if (!name) return alert('Dê um nome para a equipe.');
-    const ownedTeams = (CACHE.myTeams || []).filter(t => t.isAdmin).length;
-    if (ownedTeams >= 3) return alert('Você já atingiu o limite de 3 equipes criadas por pessoa.');
+    if ((CACHE.myTeams || []).length >= 3) return alert('Você já participa de 3 equipes, que é o limite por pessoa.');
     return runOnce('create-team', btn, 'Criando...', async () => {
       try {
         const created = await api('createTeam', { name });
@@ -2229,6 +2228,8 @@
     const btn = actionButton(e);
     const code = document.getElementById('join-team-code').value.trim().toUpperCase();
     if (!code) return alert('Informe o código de convite.');
+    const alreadyIn = (CACHE.myTeams || []).some(t => t.code === code);
+    if (!alreadyIn && (CACHE.myTeams || []).length >= 3) return alert('Você já participa de 3 equipes, que é o limite por pessoa.');
     return runOnce('join-team', btn, 'Entrando...', async () => {
       try {
         await api('joinTeam', { code });
@@ -4445,4 +4446,3 @@
 
 </body>
 </html>
-
