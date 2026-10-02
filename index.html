@@ -2545,7 +2545,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     document.querySelectorAll('.view').forEach(v => v.hidden = true);
     document.getElementById('view-' + view).hidden = false;
     currentView = view;
-    const titles = { 'tracker': 'Registro de atividade', 'analysis': 'Análise', 'team': DB.getTeams()[session?.teamCode]?.name || 'Gestão da Equipe', 'cycle': 'Período' };
+    const titles = { 'tracker': 'Registro de atividade', 'analysis': 'Análise', 'team': (DB.getTeams()[session?.teamCode]?.name ? 'Equipe - ' + DB.getTeams()[session.teamCode].name : 'Gestão da Equipe'), 'cycle': 'Período' };
     document.getElementById('view-title').textContent = titles[view];
     savePetimerVisualNavigation();
     if (!render) return;
@@ -3620,7 +3620,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   }
 
   function renderTeamMembers() {
-    if (currentView === 'team') document.getElementById('view-title').textContent = DB.getTeams()[session?.teamCode]?.name || 'Gestão da Equipe';
+    if (currentView === 'team') document.getElementById('view-title').textContent = (DB.getTeams()[session?.teamCode]?.name ? 'Equipe - ' + DB.getTeams()[session.teamCode].name : 'Gestão da Equipe');
     const teams = DB.getTeams(), users = DB.getUsers(), team = teams[session.teamCode], isAdmin = team.admin === session.username, el = document.getElementById('team-members-list');
     document.getElementById('team-leave-access').hidden = isAdmin;
     document.getElementById('team-admin-manage-access').hidden = !isAdmin;
@@ -3888,7 +3888,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     document.getElementById('manage-team-member').hidden = !!t.isAdmin;
     document.getElementById('manage-team-name').value = name;
     document.getElementById('manage-team-detail').hidden = false;
-    document.getElementById('manage-team-title').textContent = 'Gerenciar equipe — ' + name;
+    document.getElementById('manage-team-title').textContent = 'Gerenciar equipe - ' + name;
     if (t.isAdmin) setTimeout(() => document.getElementById('manage-team-name').focus(), 30);
   }
   async function copyManagedTeamCode(btn) {
