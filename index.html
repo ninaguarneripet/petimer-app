@@ -250,7 +250,7 @@
   .team-card-manage:hover:not(button:disabled){background:rgba(39,96,151,.1);color:var(--accent-dark);}
   .team-card-manage svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
   .profile-popover-card.hub-modal{z-index:1200;}
-  .manage-team-dialog{width:min(420px,calc(100vw - 32px));background:#fff;border:1px solid #e4e6ec;border-radius:14px;box-shadow:0 18px 50px rgba(8,47,83,.20);overflow:hidden;overscroll-behavior:contain;}
+  .manage-team-dialog{width:min(600px,calc(100vw - 32px));background:#fff;border:1px solid #e4e6ec;border-radius:14px;box-shadow:0 18px 50px rgba(8,47,83,.20);overflow:hidden;overscroll-behavior:contain;}
   .manage-team-body{padding:18px 22px 22px;display:flex;flex-direction:column;gap:14px;}
   .manage-team-body label{display:block;font-size:12px;font-weight:600;color:#555c6a;margin-bottom:6px;}
   .manage-team-body input[type="text"]{width:100%;border:1px solid var(--border);border-radius:7px;padding:9px 10px;font:inherit;outline:none;}
@@ -946,6 +946,19 @@
 #view-team .team-member-name{font-size:13px;font-weight:650;color:#18568b;overflow-wrap:anywhere}
 #view-team .team-member-username{font-size:11px;color:#7b8592;font-weight:400;display:inline-block;margin-left:6px;overflow-wrap:anywhere}
 #view-team .team-sector{font-size:12px;overflow-wrap:anywhere}
+#view-team .team-sector-select{width:min(190px,100%);text-overflow:ellipsis;white-space:nowrap;max-width:100%;min-width:0;padding:6px 24px 6px 9px;border:1px solid #e2e6ec;border-radius:8px;background-color:#fff;color:inherit;font:inherit;cursor:pointer}
+#view-team .team-sector-select:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+#view-team .team-sector-select:disabled{opacity:.65;cursor:wait}
+#team-sector-modal .manage-delete:disabled{opacity:.4}
+#hub-screen .card-modal.team-create-mode{width:min(460px,100%)}
+#form-hub-create{margin-top:0}
+#form-hub-create .team-create-title{margin:0;font-size:24px}
+#form-hub-create .team-create-description{margin:0 0 8px;color:var(--muted);font-size:14px}
+#form-hub-create .team-create-actions{display:flex;gap:12px;margin-top:12px}
+#form-hub-create .team-create-actions button{flex:1}
+.team-flow-error{color:var(--danger);font-size:13px;margin:8px 0}
+#team-sector-modal .manage-item-name{min-width:0;overflow-wrap:anywhere}
+@media(max-width:600px){#view-team .team-sector-select{width:100%}}
 #view-team .team-member-actions{display:flex;gap:5px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
 #view-team .team-member-actions .badge-admin{margin:0 5px 0 0}
 #view-team .team-sector-label{display:none}
@@ -1032,6 +1045,27 @@
 .admin-cycle-role-dialog{
   overscroll-behavior:contain;
 }
+</style>
+<style id="async-button-feedback">
+button:disabled{
+  background:#e2e5e9 !important;
+  color:#747d89 !important;
+  border-color:#d3d8df !important;
+  opacity:1 !important;
+  cursor:default !important;
+}
+button:disabled svg,button:disabled span{color:inherit !important;}
+</style>
+<style id="manage-team-invite-style">
+#manage-team-overlay .profile-dialog-head h3{min-width:0;overflow-wrap:anywhere;}
+#manage-team-overlay .profile-dialog-close{flex-shrink:0;}
+.manage-team-invite{padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);}
+.manage-team-invite label{display:block;margin-bottom:8px;color:var(--muted);font-size:12px;}
+.manage-team-invite-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+#manage-team-invite-code{min-width:0;overflow-wrap:anywhere;font-size:18px;font-weight:700;letter-spacing:1px;color:var(--accent-dark);}
+#manage-team-copy-btn{flex-shrink:0;}
+#manage-team-copy-status{display:block;color:var(--muted);font-size:12px;}
+#manage-team-copy-status:not(:empty){margin-top:6px;}
 </style>
 </head>
 <body>
@@ -1142,6 +1176,7 @@
     <div class="logo-header hub-logo-header">
       <img class="brand-logo-img auth-logo-img" alt="PETimer">
     </div>
+    <div id="hub-list-view">
     <div class="hub-head">
       <h2 style="margin:0; font-size:22px;">Olá, <span id="hub-user-name" style="color:var(--accent-dark)"></span></h2>
       <button class="hub-logout" onclick="logout()" aria-label="Sair da conta">
@@ -1155,7 +1190,6 @@
     <div id="hub-existing-teams-section" hidden>
       <div class="hub-section-head">
         <h3 class="hub-section-title">Suas Equipes</h3>
-        <button type="button" class="hub-manage-btn" title="Gerenciar equipes" aria-label="Gerenciar equipes" onclick="openManageTeams()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>
       </div>
       
       <div class="team-grid" id="hub-team-list"></div>
@@ -1173,12 +1207,14 @@
       </button>
     </div>
 
-    <form class="form-col form-hub" id="form-hub-create" onsubmit="handleCreateTeam(event)" hidden>
-      <label>Nome da Nova Equipe</label>
-      <div style="display:flex; gap:8px;">
-        <input type="text" id="new-team-name" placeholder="Ex: Marketing Digital" required>
-        <button type="submit" class="btn-solid" style="width:auto;">Criar</button>
-      </div>
+    </div>
+    <form class="form-col" id="form-hub-create" onsubmit="handleCreateTeam(event)" hidden>
+      <h2 class="team-create-title">Criar nova equipe</h2>
+      <p class="team-create-description">Escolha um nome para identificar sua equipe.</p>
+      <label for="new-team-name">Nome da equipe</label>
+      <input type="text" id="new-team-name" placeholder="Ex: PET Engenharia" required>
+      <p class="team-flow-error" id="create-team-error" role="alert" hidden></p>
+      <div class="team-create-actions"><button type="button" class="btn-outline" onclick="cancelCreateTeam()">Cancelar</button><button type="submit" class="btn-solid">Criar equipe</button></div>
     </form>
 
     <form class="form-col form-hub" id="form-hub-join" onsubmit="handleJoinTeam(event)" hidden>
@@ -1204,6 +1240,39 @@
       <button class="manage-add-btn" type="button" onclick="addManagedOption(this)">ADICIONAR</button>
     </div>
     <div class="manage-list" id="manage-options-list"></div>
+  </div>
+</div>
+
+<!-- MODAIS DA GESTÃO DA EQUIPE -->
+<div class="manage-modal-backdrop" id="team-sector-modal" hidden onclick="if(event.target===this) closeTeamSectorModal()">
+  <div class="manage-modal" role="dialog" aria-modal="true" aria-labelledby="team-sector-title">
+    <div class="manage-modal-head"><h3 id="team-sector-title">Adicionar ou excluir setor</h3><button class="manage-modal-close" type="button" onclick="closeTeamSectorModal()" aria-label="Fechar">✕</button></div>
+    <form class="manage-create-row no-color" onsubmit="event.preventDefault();addTeamSector(document.getElementById('team-sector-add'))">
+      <input type="text" id="team-sector-name" placeholder="Nome do setor" aria-label="Nome do setor" required>
+      <button class="manage-add-btn" id="team-sector-add" type="submit">ADICIONAR</button>
+    </form>
+    <p id="team-sector-error" role="alert" hidden style="color:var(--danger);font-size:12px"></p>
+    <div class="manage-list" id="team-sector-options"></div>
+    <p style="color:var(--muted);font-size:12px;margin:12px 0 0">Ao excluir um setor, seus membros serão movidos para Geral.</p>
+  </div>
+</div>
+<div class="profile-popover-card hub-modal" id="remove-member-overlay" hidden onclick="if(event.target===this) closeRemoveMemberModal()">
+  <div class="delete-team-dialog" role="alertdialog" aria-modal="true" aria-labelledby="remove-member-title">
+    <div class="profile-dialog-head"><h3 id="remove-member-title">Remover membro</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeRemoveMemberModal()">×</button></div>
+    <div class="delete-team-body">
+      <p>Tem certeza que deseja remover <strong id="remove-member-name"></strong> desta equipe?</p>
+      <p id="remove-member-error" role="alert" hidden style="color:var(--danger)"></p>
+      <div class="profile-dialog-actions"><button class="profile-btn profile-btn-secondary" id="remove-member-cancel" type="button" onclick="closeRemoveMemberModal()">Cancelar</button><button class="profile-btn profile-btn-danger" id="remove-member-confirm" type="button" onclick="confirmRemoveMember(this)">Remover</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="profile-popover-card hub-modal" id="team-action-confirm-overlay" style="z-index:1300" hidden onclick="if(event.target===this) closeTeamActionConfirm()">
+  <div class="delete-team-dialog" role="alertdialog" aria-modal="true" aria-labelledby="team-action-confirm-title">
+    <div class="profile-dialog-head"><h3 id="team-action-confirm-title"></h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeTeamActionConfirm()">×</button></div>
+    <div class="delete-team-body"><p id="team-action-confirm-text"></p><p class="team-flow-error" id="team-action-confirm-error" role="alert" hidden></p>
+      <div class="profile-dialog-actions"><button class="profile-btn profile-btn-secondary" id="team-action-confirm-cancel" type="button" onclick="closeTeamActionConfirm()">Cancelar</button><button class="profile-btn profile-btn-danger" id="team-action-confirm-submit" type="button" onclick="submitTeamActionConfirm(this)">Excluir</button></div>
+    </div>
   </div>
 </div>
 
@@ -1411,18 +1480,6 @@
     </section>
 
     <section class="view" id="view-team" hidden>
-      <div class="card" style="margin-bottom:20px; padding:18px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <h3 style="margin:0 0 4px 0; font-size:16px;">Convide Pessoas</h3>
-            <p style="margin:0; font-size:12px; color:var(--muted);">Compartilhe o código abaixo para que outros entrem.</p>
-          </div>
-          <div style="background:var(--surface-2); border:1px dashed var(--accent); padding:8px 16px; border-radius:8px; font-family:monospace; font-size:18px; font-weight:700; color:var(--accent-dark);" id="manage-code-display">
-            ------
-          </div>
-        </div>
-      </div>
-
       <div class="card team-members-card">
         <div class="list-head">
           <h3>Membros da Equipe</h3>
@@ -1434,8 +1491,9 @@
         <div id="team-members-list"><div class="empty">Carregando...</div></div>
       </div>
 
-      <div id="delete-team-area" hidden style="text-align:right; margin-top:14px;">
-        <button type="button" class="btn-delete-team" onclick="deleteTeamAction()">Excluir equipe</button>
+      <div id="team-management-access" style="text-align:right; margin-top:14px;">
+        <button type="button" class="btn-delete-team" id="team-leave-access" onclick="manageTeamCode=session.teamCode;manageTeamLeave()" hidden>Sair da equipe</button>
+        <button type="button" class="btn-outline" id="team-admin-manage-access" style="width:auto" onclick="selectManageTeam(session.teamCode);document.getElementById('manage-team-overlay').hidden=false" hidden>Gerenciar equipe</button>
       </div>
     </section>
 
@@ -2185,6 +2243,8 @@
     const nameDisplay = document.getElementById('hub-user-name');
     if (nameDisplay) nameDisplay.textContent = escapeHtml(displayName);
 
+    document.getElementById('hub-list-view').hidden = false;
+    document.querySelector('#hub-screen .card-modal').classList.remove('team-create-mode');
     document.getElementById('form-hub-create').hidden = true;
     document.getElementById('form-hub-join').hidden = true;
 
@@ -2216,24 +2276,38 @@
   }
 
   function showHubForm(type) {
+    document.getElementById('hub-list-view').hidden = type === 'create';
+    document.querySelector('#hub-screen .card-modal').classList.toggle('team-create-mode', type === 'create');
+    document.getElementById('create-team-error').hidden = true;
+    if (type === 'create') requestAnimationFrame(() => document.getElementById('new-team-name').focus());
     document.getElementById('form-hub-create').hidden = (type !== 'create');
     document.getElementById('form-hub-join').hidden = (type !== 'join');
   }
 
+  function cancelCreateTeam() {
+    if (isActionPending('create-team')) return;
+    document.getElementById('new-team-name').value = '';
+    showHubForm(null);
+  }
+  function showCreateTeamError(message) {
+    const error = document.getElementById('create-team-error');
+    error.textContent = message; error.hidden = false;
+  }
   async function handleCreateTeam(e) {
     e.preventDefault();
     if (isActionPending('create-team')) return;
     const btn = actionButton(e);
     const name = document.getElementById('new-team-name').value.trim();
-    if (!name) return alert('Dê um nome para a equipe.');
-    if ((CACHE.myTeams || []).length >= 3) return alert('Você já participa de 3 equipes, que é o limite por pessoa.');
+    if (!name) return showCreateTeamError('Dê um nome para a equipe.');
+    if ((CACHE.myTeams || []).length >= 3) return showCreateTeamError('Você já participa de 3 equipes, que é o limite por pessoa.');
+    document.getElementById('create-team-error').hidden = true;
     return runOnce('create-team', btn, 'Criando...', async () => {
       try {
         const created = await api('createTeam', { name });
         const meData = await api('me');
         CACHE.myTeams = meData.teams || [];
         await enterTeam(created.team.code);
-      } catch (err) { alert(err.message); }
+      } catch (err) { showCreateTeamError(err.message); }
     });
   }
 
@@ -2431,9 +2505,7 @@
 
     const initials = String(currentName || session.username || 'U').trim().split(/\s+/).filter(Boolean).slice(0,2).map(p => p[0]).join('').toUpperCase();
     document.getElementById('sidebar-profile-trigger').textContent = initials || 'U';
-    document.getElementById('manage-code-display').textContent = session.teamCode;
     document.getElementById('admin-add-area').hidden = (team.admin !== session.username);
-    document.getElementById('delete-team-area').hidden = (team.admin !== session.username);
     document.getElementById('nav-cycle').hidden = false;
     updateCycleRoleControl();
     notifyEndedCycle();
@@ -2473,7 +2545,7 @@
     document.querySelectorAll('.view').forEach(v => v.hidden = true);
     document.getElementById('view-' + view).hidden = false;
     currentView = view;
-    const titles = { 'tracker': 'Registro de atividade', 'analysis': 'Análise', 'team': 'Gestão da Equipe', 'cycle': 'Período' };
+    const titles = { 'tracker': 'Registro de atividade', 'analysis': 'Análise', 'team': DB.getTeams()[session?.teamCode]?.name || 'Gestão da Equipe', 'cycle': 'Período' };
     document.getElementById('view-title').textContent = titles[view];
     savePetimerVisualNavigation();
     if (!render) return;
@@ -2888,26 +2960,31 @@
     el.innerHTML = html;
   }
 
-  async function deleteEntry(id, btn) {
+  async function deleteEntry(id, btn, confirmed = false) {
     const key = `delete-entry:${id}`;
     if (isActionPending(key)) return;
     const entries = DB.getEntries();
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
-    if (!confirm('Tem certeza que deseja apagar este horário registrado?')) return;
+    if (!confirmed) {
+      openTeamActionConfirm({type:'entry', id, code:session.teamCode, actor:session.username, trigger:btn}, 'Apagar horário', 'Tem certeza que deseja apagar este horário?', 'Apagar');
+      return;
+    }
     if (String(id).startsWith('tmp-')) return alert('Aguarde o registro terminar de salvar e tente de novo.');
+    return runOnce(key, btn, null, async () => {
     const removedIndex = entries.findIndex(e => e.id === id);
     DB.saveEntries(entries.filter(e => e.id !== id));
     refreshAppViews();
     updateSuggestions();
     writeSeq++; pendingWrites++;
-    api('deleteEntry', { entryId: id }).catch(err => {
+    return api('deleteEntry', { entryId: id }).catch(err => {
       const list = [...DB.getEntries()];
       list.splice(Math.max(0, removedIndex), 0, entry);
       DB.saveEntries(list);
       refreshAppViews();
       alert('Erro ao excluir: ' + err.message);
     }).finally(() => { pendingWrites--; });
+    });
   }
 
   async function updateEntry(id, field, value) {
@@ -3543,7 +3620,12 @@
   }
 
   function renderTeamMembers() {
+    if (currentView === 'team') document.getElementById('view-title').textContent = DB.getTeams()[session?.teamCode]?.name || 'Gestão da Equipe';
     const teams = DB.getTeams(), users = DB.getUsers(), team = teams[session.teamCode], isAdmin = team.admin === session.username, el = document.getElementById('team-members-list');
+    document.getElementById('team-leave-access').hidden = isAdmin;
+    document.getElementById('team-admin-manage-access').hidden = !isAdmin;
+    syncTeamManagementModals();
+    const sectors = [...new Set(['Geral', ...getTeamSectors()])];
     const rows = Object.keys(team.members).map(memberUser => {
       const uData = users[memberUser] || { name: memberUser };
       const realMemName = uData.name || uData.username || memberUser;
@@ -3552,39 +3634,235 @@
       
       let actions = '';
       if (isAdmin) {
-        actions = `<button class="icon-btn" onclick="editSector('${memberUser}', '${sector}', this)" title="Editar Setor" aria-label="Editar setor"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>`;
+        // O setor é editado diretamente na coluna Setor.
         if (!isMemAdmin) actions += `<button class="icon-btn" style="color:var(--danger)" onclick="removeMember('${memberUser}', this)" title="Remover">✕</button>`;
       }
-      return `<div class="team-member-row"><div class="team-member-identity"><span class="team-avatar" aria-hidden="true">${escapeHtml(cycleMemberInitials(realMemName))}</span><div><span class="team-member-name">${escapeHtml(realMemName)}</span><span class="team-member-username">@${escapeHtml(memberUser)}</span></div></div><div class="team-sector"><span class="team-sector-label">Setor: </span>${escapeHtml(sector)}</div><div class="team-member-actions">${isMemAdmin ? '<span class="badge-user badge-admin">Admin</span>' : ''}${actions}</div></div>`;
+      const sectorControl = isAdmin ? `<select class="team-sector-select" data-member="${escapeHtml(memberUser)}" aria-label="Setor de ${escapeHtml(realMemName)}" onchange="changeTeamSector(this)" ${(isActionPending('update-sector:' + session.teamCode + ':' + memberUser) || isActionPending('delete-sector:' + session.teamCode)) ? 'disabled' : ''}><option value="add">＋ Adicionar</option>${sectors.map((name, index) => `<option value="${index}" ${name === sector ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}</select>` : escapeHtml(sector);
+      return `<div class="team-member-row"><div class="team-member-identity"><span class="team-avatar" aria-hidden="true">${escapeHtml(cycleMemberInitials(realMemName))}</span><div><span class="team-member-name">${escapeHtml(realMemName)}</span><span class="team-member-username">@${escapeHtml(memberUser)}</span></div></div><div class="team-sector"><span class="team-sector-label">Setor: </span>${sectorControl}</div><div class="team-member-actions">${isMemAdmin ? '<span class="badge-user badge-admin">Admin</span>' : ''}${actions}</div></div>`;
     }).join('');
     el.innerHTML = '<div class="team-list-head"><span>Membro</span><span>Setor</span><span>Ações</span></div><div class="team-list-body">' + rows + '</div>';
   }
 
-  async function editSector(u, cur, btn) {
-    const key = `update-sector:${u}`;
-    if (isActionPending(key)) return;
-    const n = prompt(`Digite o novo setor para @${u}:`, cur);
-    if (!n || n.trim() === cur) return;
-    return runOnce(key, btn, null, async () => {
+  async function changeTeamSector(select) {
+    const code = session?.teamCode, actor = session?.username;
+    const team = DB.getTeams()[code], u = select.dataset.member;
+    if (!team || team.admin !== actor || !team.members[u]) { renderTeamMembers(); return; }
+    const key = 'update-sector:' + code + ':' + u;
+    if (isActionPending(key) || isActionPending('delete-sector:' + code)) { renderTeamMembers(); return; }
+    const member = team.members[u], previous = member.sector;
+    const current = previous || 'Geral';
+    const sectors = [...new Set(['Geral', ...getTeamSectors()])];
+    let next;
+    if (select.value === 'add') {
+      renderTeamMembers();
+      openTeamSectorModal(u, select);
+      return;
+    } else next = sectors[Number(select.value)];
+    if (!next || next === current) { renderTeamMembers(); return; }
+    return runOnce(key, select, null, async () => {
+      writeSeq++; pendingWrites++;
+      member.sector = next;
+      renderTeamMembers();
       try {
-        await api('updateSector', { code: session.teamCode, username: u, sector: n.trim() });
-        await refreshTeamData();
-        renderTeamMembers();
-      } catch (err) { alert(err.message); }
+        await api('updateSector', { code, username: u, sector: next });
+      } catch (err) {
+        member.sector = previous;
+        alert(err.message);
+      } finally {
+        pendingWrites--;
+        // Uma resposta da equipe anterior não altera a equipe agora aberta.
+        if (session?.teamCode === code && session?.username === actor) {
+          renderTeamMembers();
+          renderAnalysis();
+        }
+      }
+    }).finally(() => {
+      if (session?.teamCode === code && session?.username === actor) renderTeamMembers();
     });
   }
-  async function removeMember(u, btn) {
-    const key = `remove-member:${u}`;
+  let teamActionConfirmTarget = null;
+  function openTeamActionConfirm(target, title, text, label) {
+    if (teamActionConfirmTarget?.busy) return;
+    teamActionConfirmTarget = target;
+    document.getElementById('team-action-confirm-title').textContent = title;
+    document.getElementById('team-action-confirm-text').textContent = text;
+    document.getElementById('team-action-confirm-submit').textContent = label;
+    document.getElementById('team-action-confirm-error').hidden = true;
+    document.getElementById('team-action-confirm-overlay').hidden = false;
+    document.getElementById('team-action-confirm-cancel').focus();
+  }
+  function closeTeamActionConfirm() {
+    if (teamActionConfirmTarget?.busy) return;
+    const target = teamActionConfirmTarget;
+    teamActionConfirmTarget = null;
+    document.getElementById('team-action-confirm-overlay').hidden = true;
+    if (target?.type === 'sector' && !document.getElementById('team-sector-modal').hidden) document.getElementById('team-sector-name').focus();
+    else if (target?.trigger?.isConnected) target.trigger.focus();
+  }
+  function requestDeleteTeamSector(btn) {
+    const code = session?.teamCode, actor = session?.username, name = btn.dataset.sector;
+    const team = DB.getTeams()[code];
+    if (!team || team.admin !== actor || name === 'Geral' || isActionPending('delete-sector:' + code)) return;
+    const count = Object.values(team.members).filter(m => (m.sector || 'Geral') === name).length;
+    const text = count ? 'O setor “' + name + '” está sendo usado por ' + count + ' membro(s). Ao excluí-lo, esses membros serão movidos para o setor Geral.' : 'Tem certeza que deseja excluir o setor “' + name + '”?';
+    openTeamActionConfirm({type:'sector', code, actor, name, trigger:btn}, 'Excluir setor', text, 'Excluir');
+  }
+  async function submitTeamActionConfirm(btn) {
+    const target = teamActionConfirmTarget;
+    if (!target || target.busy) return;
+    if (session?.teamCode !== target.code || session?.username !== target.actor) { closeTeamActionConfirm(); return; }
+    if (target.type === 'entry') {
+      closeTeamActionConfirm();
+      return deleteEntry(target.id, btn, true);
+    }
+    const team = DB.getTeams()[target.code];
+    if (!team || team.admin !== target.actor || target.name === 'Geral') { closeTeamActionConfirm(); return; }
+    const affected = Object.keys(team.members).filter(u => (team.members[u].sector || 'Geral') === target.name);
+    const error = document.getElementById('team-action-confirm-error');
+    if (Object.keys(team.members).some(u => isActionPending('update-sector:' + target.code + ':' + u))) {
+      error.textContent = 'Aguarde as alterações de setor terminarem e tente novamente.'; error.hidden = false; return;
+    }
+    const key = 'delete-sector:' + target.code;
     if (isActionPending(key)) return;
-    if (!confirm(`Remover @${u} da equipe?`)) return;
+    target.busy = true; error.hidden = true;
     return runOnce(key, btn, null, async () => {
+      writeSeq++; pendingWrites++;
+      renderTeamMembers();
       try {
-        await api('removeMember', { code: session.teamCode, username: u });
-        await refreshTeamData();
-        renderTeamMembers();
-      } catch (err) { alert(err.message); }
+        // Cada sucesso é refletido localmente. Se uma chamada falhar, o setor
+        // permanece pelos membros ainda não movidos, sem referências órfãs.
+        for (const u of affected) {
+          if (session?.teamCode !== target.code || session?.username !== target.actor || team.admin !== target.actor) throw new Error('A equipe ou permissão mudou. Confira os membros antes de continuar.');
+          await api('updateSector', {code:target.code, username:u, sector:'Geral'});
+          if (team.members[u]) team.members[u].sector = 'Geral';
+        }
+        target.busy = false;
+        closeTeamActionConfirm();
+      } catch (err) {
+        error.textContent = 'Não foi possível concluir a exclusão. Membros já movidos permanecem em Geral; os demais continuam no setor. ' + err.message;
+        error.hidden = false;
+      } finally {
+        target.busy = false;
+        pendingWrites--;
+        if (session?.teamCode === target.code && session?.username === target.actor) { renderTeamMembers(); renderAnalysis(); }
+      }
+    }).finally(() => {
+      if (session?.teamCode === target.code && session?.username === target.actor) renderTeamMembers();
     });
   }
+
+  let teamSectorTarget = null, removeMemberTarget = null;
+  function teamModalTargetValid(target) {
+    const team = target && DB.getTeams()[target.code];
+    return !!(target && session?.teamCode === target.code && session?.username === target.actor && team?.admin === target.actor && team.members[target.user]);
+  }
+  function syncTeamManagementModals() {
+    if (teamSectorTarget && !teamModalTargetValid(teamSectorTarget)) closeTeamSectorModal();
+    else if (teamSectorTarget) renderTeamSectorOptions();
+    if (removeMemberTarget && !teamModalTargetValid(removeMemberTarget)) closeRemoveMemberModal();
+  }
+  function openTeamSectorModal(user, trigger) {
+    const target = {code:session?.teamCode, actor:session?.username, user, trigger};
+    if (!teamModalTargetValid(target)) return;
+    teamSectorTarget = target;
+    document.getElementById('team-sector-name').value = '';
+    document.getElementById('team-sector-error').hidden = true;
+    renderTeamSectorOptions();
+    document.getElementById('team-sector-modal').hidden = false;
+    document.getElementById('team-sector-name').focus();
+  }
+  function closeTeamSectorModal() {
+    document.getElementById('team-sector-modal').hidden = true;
+    const target = teamSectorTarget;
+    teamSectorTarget = null;
+    if (target?.trigger?.isConnected) target.trigger.focus();
+  }
+  function renderTeamSectorOptions() {
+    const sectors = [...new Set(['Geral', ...getTeamSectors()])];
+    document.getElementById('team-sector-options').innerHTML = sectors.map(name =>
+      '<div class="manage-item"><span class="manage-item-name">' + escapeHtml(name) + '</span>' + (name === 'Geral' ? '' : '<button class="manage-delete" type="button" data-sector="' + escapeHtml(name) + '" onclick="requestDeleteTeamSector(this)" title="Excluir" aria-label="Excluir ' + escapeHtml(name) + '"><svg viewBox="0 0 24 24"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 7V4h6v3"></path><path d="M6 7l1 14h10l1-14"></path></svg></button>') + '</div>'
+    ).join('');
+  }
+  async function addTeamSector(btn) {
+    const target = teamSectorTarget;
+    if (!teamModalTargetValid(target)) { closeTeamSectorModal(); return; }
+    const input = document.getElementById('team-sector-name');
+    let name = input.value.trim();
+    if (!name) { input.focus(); return; }
+    name = getTeamSectors().find(s => s.toLocaleLowerCase('pt-BR') === name.toLocaleLowerCase('pt-BR')) || name;
+    const key = 'update-sector:' + target.code + ':' + target.user;
+    if (isActionPending(key) || isActionPending('delete-sector:' + target.code)) return;
+    const member = DB.getTeams()[target.code].members[target.user], previous = member.sector;
+    const error = document.getElementById('team-sector-error');
+    error.hidden = true;
+    return runOnce(key, btn, null, async () => {
+      writeSeq++; pendingWrites++;
+      input.disabled = true;
+      member.sector = name;
+      renderTeamMembers();
+      try {
+        await api('updateSector', {code:target.code, username:target.user, sector:name});
+        if (teamSectorTarget === target) input.value = '';
+      } catch (err) {
+        member.sector = previous;
+        if (teamSectorTarget === target) { error.textContent = err.message; error.hidden = false; }
+        else alert(err.message);
+      } finally {
+        pendingWrites--;
+        input.disabled = false;
+        if (session?.teamCode === target.code && session?.username === target.actor) { renderTeamMembers(); renderAnalysis(); }
+      }
+    }).finally(() => {
+      if (session?.teamCode === target.code && session?.username === target.actor) renderTeamMembers();
+    });
+  }
+  function removeMember(u, btn) {
+    const target = {code:session?.teamCode, actor:session?.username, user:u, trigger:btn};
+    if (!teamModalTargetValid(target) || u === target.actor || isActionPending('remove-member:' + u)) return;
+    removeMemberTarget = target;
+    document.getElementById('remove-member-name').textContent = '@' + u;
+    document.getElementById('remove-member-error').hidden = true;
+    document.getElementById('remove-member-overlay').hidden = false;
+    document.getElementById('remove-member-cancel').focus();
+  }
+  function closeRemoveMemberModal() {
+    document.getElementById('remove-member-overlay').hidden = true;
+    const target = removeMemberTarget;
+    removeMemberTarget = null;
+    if (target?.trigger?.isConnected) target.trigger.focus();
+  }
+  async function confirmRemoveMember(btn) {
+    const target = removeMemberTarget;
+    if (!teamModalTargetValid(target) || target.user === target.actor) { closeRemoveMemberModal(); return; }
+    const key = 'remove-member:' + target.user;
+    if (isActionPending(key)) return;
+    return runOnce(key, btn, null, async () => {
+      try {
+        await api('removeMember', {code:target.code, username:target.user});
+        if (removeMemberTarget === target) closeRemoveMemberModal();
+        if (session?.teamCode === target.code && session?.username === target.actor) {
+          await refreshTeamData();
+          renderTeamMembers();
+        }
+      } catch (err) {
+        if (removeMemberTarget === target) {
+          const error = document.getElementById('remove-member-error');
+          error.textContent = err.message; error.hidden = false;
+        } else alert(err.message);
+      }
+    });
+  }
+  document.addEventListener('keydown', event => {
+    const modal = !document.getElementById('team-action-confirm-overlay').hidden ? document.getElementById('team-action-confirm-overlay') : !document.getElementById('team-sector-modal').hidden ? document.getElementById('team-sector-modal') : !document.getElementById('remove-member-overlay').hidden ? document.getElementById('remove-member-overlay') : null;
+    if (!modal) return;
+    if (event.key === 'Escape') { event.preventDefault(); if (modal.id === 'team-action-confirm-overlay') closeTeamActionConfirm(); else if (modal.id === 'team-sector-modal') closeTeamSectorModal(); else closeRemoveMemberModal(); }
+    if (event.key === 'Tab') {
+      const items = [...modal.querySelectorAll('button:not(:disabled),input:not(:disabled)')];
+      const first = items[0], last = items[items.length-1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    }
+  });
   // ---------- GERENCIAR EQUIPES (tela de equipes) ----------
   let manageTeamCode = null;
   let leaveTeamTargetCode = null;
@@ -3593,30 +3871,48 @@
     document.getElementById('manage-team-overlay').hidden = false;
   }
   function renderManagePicker() {
-    manageTeamCode = null;
-    const list = document.getElementById('manage-team-list');
-    const mine = CACHE.myTeams || [];
-    list.innerHTML = mine.length ? mine.map(team => `<button type="button" class="switch-team-item" onclick="selectManageTeam('${team.code}')">
-        <span class="switch-team-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7.5" r="3.5"></circle><path d="M21 20v-2a4 4 0 0 0-3-3.85"></path><path d="M15.5 4.15a3.5 3.5 0 0 1 0 6.7"></path></svg></span>
-        <span class="switch-team-info"><span class="switch-team-name">${escapeHtml(team.name)}</span><span class="switch-team-meta">Código: ${escapeHtml(team.code)} <span class="switch-team-role ${team.isAdmin ? 'admin' : ''}">${team.isAdmin ? 'Admin (Criador)' : 'Membro'}</span></span></span>
-        <svg class="switch-team-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
-      </button>`).join('') : '<div style="padding:10px 2px;color:#8a909e;font-size:12px;">Nenhuma equipe disponível.</div>';
-    document.getElementById('manage-team-picker').hidden = false;
-    document.getElementById('manage-team-detail').hidden = true;
-    document.getElementById('manage-team-title').textContent = 'Gerenciar equipes';
+    // O gerenciamento se limita à equipe atualmente aberta.
+    selectManageTeam(session?.teamCode);
   }
   function selectManageTeam(code) {
+    if (!code || code !== session?.teamCode) return;
     const t = (CACHE.myTeams || []).find(x => x.code === code);
     if (!t) return;
     manageTeamCode = code;
-    document.getElementById('manage-team-current').textContent = t.name;
+    const currentTeam = DB.getTeams()[code];
+    const name = currentTeam?.name || t.name;
+    document.getElementById('manage-team-invite-code').textContent = code;
+    document.getElementById('manage-team-copy-status').textContent = '';
+    document.getElementById('manage-team-copy-btn').textContent = 'Copiar';
     document.getElementById('manage-team-admin').hidden = !t.isAdmin;
     document.getElementById('manage-team-member').hidden = !!t.isAdmin;
-    document.getElementById('manage-team-name').value = t.name;
-    document.getElementById('manage-team-picker').hidden = true;
+    document.getElementById('manage-team-name').value = name;
     document.getElementById('manage-team-detail').hidden = false;
-    document.getElementById('manage-team-title').textContent = 'Gerenciar equipe';
+    document.getElementById('manage-team-title').textContent = 'Gerenciar equipe — ' + name;
     if (t.isAdmin) setTimeout(() => document.getElementById('manage-team-name').focus(), 30);
+  }
+  async function copyManagedTeamCode(btn) {
+    const code = manageTeamCode;
+    if (!code || code !== session?.teamCode) return;
+    const status = document.getElementById('manage-team-copy-status');
+    return runOnce('copy-team-code', btn, null, async () => {
+      try {
+        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(code);
+        else {
+          const field = document.createElement('textarea');
+          field.value = code;
+          field.style.cssText = 'position:fixed;left:-9999px;top:0;';
+          document.getElementById('manage-team-overlay').appendChild(field);
+          try {
+            field.select();
+            if (!document.execCommand('copy')) throw new Error('Cópia indisponível');
+          } finally { field.remove(); btn.focus(); }
+        }
+        if (manageTeamCode === code) { btn.textContent = 'Copiado'; status.textContent = 'Código copiado.'; }
+      } catch (err) {
+        if (manageTeamCode === code) status.textContent = 'Não foi possível copiar. Selecione o código e copie manualmente.';
+      }
+    });
   }
   function closeManageTeam() {
     if (isActionPending('rename-team')) return;
@@ -4541,13 +4837,12 @@
 <div class="profile-popover-card hub-modal" id="manage-team-overlay" hidden onclick="if(event.target===this) closeManageTeam()">
   <div class="manage-team-dialog" role="dialog" aria-modal="true" aria-labelledby="manage-team-title">
     <div class="profile-dialog-head"><h3 id="manage-team-title">Gerenciar equipes</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeManageTeam()">×</button></div>
-    <div id="manage-team-picker">
-      <p class="switch-team-intro">Selecione a equipe que você quer gerenciar.</p>
-      <div class="switch-team-list" id="manage-team-list"></div>
-    </div>
     <div class="manage-team-body" id="manage-team-detail" hidden>
-      <button type="button" class="manage-team-back" onclick="renderManagePicker()">‹ Escolher outra equipe</button>
-      <p class="manage-team-current" id="manage-team-current"></p>
+      <section class="manage-team-invite" aria-labelledby="manage-team-invite-label">
+        <label id="manage-team-invite-label">Código de convite</label>
+        <div class="manage-team-invite-row"><code id="manage-team-invite-code"></code><button class="profile-btn profile-btn-secondary" type="button" id="manage-team-copy-btn" onclick="copyManagedTeamCode(this)">Copiar</button></div>
+        <span id="manage-team-copy-status" role="status" aria-live="polite"></span>
+      </section>
       <div id="manage-team-admin" hidden>
         <label for="manage-team-name">Nome da equipe</label>
         <div class="manage-team-row">
