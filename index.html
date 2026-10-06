@@ -1824,7 +1824,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzXX1dupkQ1lBzz12MnhG2aMk3yrmCfZGA6NB9pNouYjFaQtYj2uowukMQPnuTZAody/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwm40ZC-i4BEb7s3bzwxHkcv4UggXeGCOmkgk2cTSlf4E8vtfUFyNliJmR8-j4zKaQc/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -1929,8 +1929,12 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   }
   function mapTeamFromServer(team, members) {
     const membersObj = {};
-    (members || []).forEach(m => { membersObj[m.username] = { sector: m.sector }; });
-    return { name: team.name, admin: team.admin, cargos: team.cargos, modalidades: team.modalidades, adminParticipatesInCycle: team.adminParticipatesInCycle, members: membersObj };
+    (members || []).forEach(m => { membersObj[m.username] = { sector: m.sector || 'Geral' }; });
+    const sectors = normalizeTeamSectors(team.sectors, membersObj);
+    Object.values(membersObj).forEach(member => {
+      member.sector = sectors.find(name => name.toLocaleLowerCase('pt-BR') === String(member.sector).trim().toLocaleLowerCase('pt-BR')) || 'Geral';
+    });
+    return { name: team.name, admin: team.admin, cargos: team.cargos, modalidades: team.modalidades, adminParticipatesInCycle: team.adminParticipatesInCycle, sectors, members: membersObj };
   }
 
   // Busca o estado completo da equipe atual na planilha e atualiza o cache.
@@ -2376,7 +2380,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     return runOnce('login', btn, 'Entrando...', async () => {
       try {
         const d = await api('login', { username: user, password: pass });
-        applySession(d.token, d.user);
+        await applySession(d.token, d.user);
       } catch (err) { alert(err.message || 'Usuário ou senha incorretos!'); }
     });
   }
@@ -2433,7 +2437,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
           : `<span class="badge-role badge-role-member">Membro</span>`;
         return `
           <div class="team-card-wrap">
-            <button class="team-card-btn" onclick="enterTeam('${t.code}')">
+            <button class="team-card-btn" onclick="enterTeam('${t.code}', this)">
               <div class="team-card-title">${escapeHtml(t.name)}</div>
               <div class="team-card-sub">Código: ${t.code}</div>
               ${roleBadge}
@@ -2503,7 +2507,17 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     });
   }
 
-  async function enterTeam(code) {
+  const enteringTeams = new Set();
+  async function enterTeam(code, button = null) {
+    if (enteringTeams.has(code)) return;
+    enteringTeams.add(code);
+    const disabledByUs = !!button && !button.disabled;
+    if (button) button.disabled = true;
+    let succeeded = false;
+    const releaseEntry = () => {
+      enteringTeams.delete(code);
+      if (disabledByUs) button.disabled = false;
+    };
     showPetimerLoading('Carregando equipe...');
     try {
       if (session.teamCode && session.teamCode !== code) { if (DB.getRunning()) await stopTimer(); }
@@ -2520,8 +2534,11 @@ button:disabled svg,button:disabled span{color:inherit !important;}
       showScreen('main-app');
       setupApp();
       startPolling();
+      succeeded = true;
     } finally {
       hidePetimerLoading();
+      if (succeeded) setTimeout(releaseEntry, 3000);
+      else releaseEntry();
     }
   }
 
@@ -3433,12 +3450,20 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   }
 
   // ---------- Filtros: pessoas (eu / eu+colegas / equipe / setor), setor, cargo, local ----------
+  function normalizeTeamSectors(sectors, members = {}) {
+    const names = ['Geral'];
+    const seen = new Set(['geral']);
+    // Dados antigos sem cadastro independente mantêm os setores dos membros.
+    const source = Array.isArray(sectors) ? sectors : Object.values(members).map(m => m.sector);
+    source.forEach(value => {
+      const name = String(value || '').trim(), key = name.toLocaleLowerCase('pt-BR');
+      if (name && !seen.has(key)) { seen.add(key); names.push(name); }
+    });
+    return names;
+  }
   function getTeamSectors() {
     const team = DB.getTeams()[session.teamCode];
-    if (!team) return [];
-    const set = new Set();
-    Object.values(team.members || {}).forEach(m => set.add(m.sector || 'Geral'));
-    return [...set].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    return team ? normalizeTeamSectors(team.sectors, team.members) : ['Geral'];
   }
 
   function usersInSector(sector) {
@@ -3969,9 +3994,8 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     }
     const team = DB.getTeams()[target.code];
     if (!team || team.admin !== target.actor || target.name === 'Geral') { closeTeamActionConfirm(); return; }
-    const affected = Object.keys(team.members).filter(u => (team.members[u].sector || 'Geral') === target.name);
     const error = document.getElementById('team-action-confirm-error');
-    if (Object.keys(team.members).some(u => isActionPending('update-sector:' + target.code + ':' + u))) {
+    if (isActionPending('add-sector:' + target.code) || Object.keys(team.members).some(u => isActionPending('update-sector:' + target.code + ':' + u))) {
       error.textContent = 'Aguarde as alterações de setor terminarem e tente novamente.'; error.hidden = false; return;
     }
     const key = 'delete-sector:' + target.code;
@@ -3981,17 +4005,16 @@ button:disabled svg,button:disabled span{color:inherit !important;}
       writeSeq++; pendingWrites++;
       renderTeamMembers();
       try {
-        // Cada sucesso é refletido localmente. Se uma chamada falhar, o setor
-        // permanece pelos membros ainda não movidos, sem referências órfãs.
-        for (const u of affected) {
-          if (session?.teamCode !== target.code || session?.username !== target.actor || team.admin !== target.actor) throw new Error('A equipe ou permissão mudou. Confira os membros antes de continuar.');
-          await api('updateSector', {code:target.code, username:u, sector:'Geral'});
-          if (team.members[u]) team.members[u].sector = 'Geral';
-        }
+        const result = await api('deleteSector', {code:target.code, sector:target.name});
+        Object.values(team.members).forEach(member => {
+          if ((member.sector || 'Geral').toLocaleLowerCase('pt-BR') === target.name.toLocaleLowerCase('pt-BR')) member.sector = 'Geral';
+        });
+        team.sectors = normalizeTeamSectors(result.sectors, team.members);
+        if (teamSectorTarget?.code === target.code) renderTeamSectorOptions();
         target.busy = false;
         closeTeamActionConfirm();
       } catch (err) {
-        error.textContent = 'Não foi possível concluir a exclusão. Membros já movidos permanecem em Geral; os demais continuam no setor. ' + err.message;
+        error.textContent = 'Não foi possível excluir o setor. ' + err.message;
         error.hidden = false;
       } finally {
         target.busy = false;
@@ -4039,35 +4062,33 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     const target = teamSectorTarget;
     if (!teamModalTargetValid(target)) { closeTeamSectorModal(); return; }
     const input = document.getElementById('team-sector-name');
-    let name = input.value.trim();
+    const name = input.value.trim();
     if (!name) { input.focus(); return; }
-    name = getTeamSectors().find(s => s.toLocaleLowerCase('pt-BR') === name.toLocaleLowerCase('pt-BR')) || name;
-    const key = 'update-sector:' + target.code + ':' + target.user;
-    if (isActionPending(key) || isActionPending('delete-sector:' + target.code)) return;
-    const member = DB.getTeams()[target.code].members[target.user], previous = member.sector;
     const error = document.getElementById('team-sector-error');
+    if (getTeamSectors().some(s => s.toLocaleLowerCase('pt-BR') === name.toLocaleLowerCase('pt-BR'))) {
+      error.textContent = 'Esse setor já existe.'; error.hidden = false; input.focus(); return;
+    }
+    const key = 'add-sector:' + target.code;
+    if (isActionPending(key) || isActionPending('delete-sector:' + target.code)) return;
     error.hidden = true;
     return runOnce(key, btn, null, async () => {
-      writeSeq++; pendingWrites++;
-      input.disabled = true;
-      member.sector = name;
-      renderTeamMembers();
+      writeSeq++; pendingWrites++; input.disabled = true;
       try {
-        await api('updateSector', {code:target.code, username:target.user, sector:name});
-        if (teamSectorTarget === target) input.value = '';
+        const result = await api('addSector', {code:target.code, sector:name});
+        const team = DB.getTeams()[target.code];
+        if (team) team.sectors = normalizeTeamSectors(result.sectors, team.members);
+        if (teamSectorTarget === target) { input.value = ''; renderTeamSectorOptions(); }
       } catch (err) {
-        member.sector = previous;
         if (teamSectorTarget === target) { error.textContent = err.message; error.hidden = false; }
         else alert(err.message);
       } finally {
-        pendingWrites--;
-        input.disabled = false;
+        pendingWrites--; input.disabled = false;
         if (session?.teamCode === target.code && session?.username === target.actor) { renderTeamMembers(); renderAnalysis(); }
+        if (teamSectorTarget === target) input.focus();
       }
-    }).finally(() => {
-      if (session?.teamCode === target.code && session?.username === target.actor) renderTeamMembers();
     });
   }
+
   function removeMember(u, btn) {
     const target = {code:session?.teamCode, actor:session?.username, user:u, trigger:btn};
     if (!teamModalTargetValid(target) || u === target.actor || isActionPending('remove-member:' + u)) return;
