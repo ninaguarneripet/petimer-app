@@ -1394,6 +1394,11 @@ button:disabled svg,button:disabled span{color:inherit !important;}
             <button class="icon-btn-line" type="button" onclick="setEntryMode('timer')" title="Usar cronômetro" aria-label="Usar cronômetro"><svg viewBox="0 0 24 24"><path d="M9 2h6M12 2v3M18 6l2-2"/><circle cx="12" cy="14" r="8"/><path d="M12 9v5l3 2"/></svg></button>
           </div>
           <div id="timer-controls" class="entry-mode" hidden>
+            <input type="text" id="timer-start-input" class="tracker-time" hidden
+              inputmode="numeric" maxlength="5" autocomplete="off"
+              aria-label="Hora de início do cronômetro" title="Hora em que você realmente começou (clique para alterar)"
+              onfocus="beginClockEdit(this)" oninput="sanitizeTimeTyping(this)"
+              onblur="commitTimerStart(this)" onkeydown="handleTimerStartKey(event,this)">
             <div class="timer-readout" id="timer-digits">00:00:00</div>
             <button class="btn-pill btn-start" id="timer-btn" onclick="toggleTimer()">INICIAR</button>
             <button class="icon-btn-line" type="button" onclick="setEntryMode('manual')" title="Inserir horário manualmente" aria-label="Inserir horário manualmente"><svg viewBox="0 0 24 24"><path d="M12 17a7 7 0 1 1 5-10M9 5v5l3 2M13 20l1-4 6-6 3 3-6 6-4 1ZM18 12l3 3"/></svg></button>
@@ -1647,10 +1652,26 @@ button:disabled svg,button:disabled span{color:inherit !important;}
       if(!img.getAttribute('src')) img.setAttribute('src', src);
     });
   });
+
+  // Favicon: recorta o relógio da logo oficial e usa como ícone da aba
+  document.addEventListener('DOMContentLoaded', function(){
+    var img = new Image();
+    img.onload = function(){
+      var c = document.createElement('canvas');
+      c.width = c.height = 128;
+      // x, y, largura, altura do recorte dentro da logo (1177x552)
+      c.getContext('2d').drawImage(img, 146, 112, 360, 360, 0, 0, 128, 128);
+      var link = document.querySelector('link[rel="icon"]');
+      if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+      link.type = 'image/png';
+      link.href = c.toDataURL('image/png');
+    };
+    img.src = document.getElementById('brand-logo-source').getAttribute('src');
+  });
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbz3TfI7lvbUHM739tu4iekdG56c4LD24v7X6iXggcpBmX5r6ZApEK1gZhBs45Y-ctP7/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzXX1dupkQ1lBzz12MnhG2aMk3yrmCfZGA6NB9pNouYjFaQtYj2uowukMQPnuTZAody/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2524,7 +2545,6 @@ button:disabled svg,button:disabled span{color:inherit !important;}
       if(run.cargo) { document.getElementById('cargo-input').value = run.cargo; applyCargoSelectColor(document.getElementById('cargo-input')); syncCargoPickerTrigger(); }
       if(run.modalidade) document.getElementById('modalidade-input').value = run.modalidade;
       if(run.date) document.getElementById('date-input').value = run.date;
-      document.getElementById('activity-input').disabled = true;
       setTimerUI(true); startTick(); setEntryMode('timer'); updateSelectedDate();
     } else {
       document.getElementById('activity-input').value = '';
@@ -2731,7 +2751,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     if (!modalidade || modalidade === '__manage__') return alert('Selecione ou adicione um local de trabalho.');
     const date = localDateStr(new Date());
 
-    if (!activity) return alert('Descreva o que está fazendo.');
+    
 
     const now = new Date();
     const startH = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
@@ -2742,7 +2762,6 @@ button:disabled svg,button:disabled span{color:inherit !important;}
         user: session.username, teamCode: session.teamCode,
         start: now.toISOString(), startTime: startH
       });
-      document.getElementById('activity-input').disabled = true;
       setTimerUI(true); startTick(); refreshAppViews();
       writeSeq++; pendingWrites++;
       try {
@@ -2761,15 +2780,16 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   }
 
   async function stopTimer() {
-    // Chamadas repetidas (cliques ou logout/troca de equipe) reaproveitam a parada em andamento.
     return runOnce('stop-timer', document.getElementById('timer-btn'), 'Parando...', async () => {
       const run = DB.getRunning(); if (!run) return;
+      clearTimeout(timerActivitySaveTimeout);
+      const finalActivity = document.getElementById('activity-input').value.trim();
       const end = new Date();
       const tempId = 'tmp-' + end.getTime();
       const endH = String(end.getHours()).padStart(2, '0') + ':' + String(end.getMinutes()).padStart(2, '0');
       DB.saveEntries([...DB.getEntries(), {
         id: tempId, user: run.user || session.username, teamCode: run.teamCode || session.teamCode,
-        activity: run.activity, cargo: run.cargo, cargoColor: run.cargoColor, modalidade: run.modalidade,
+        activity: finalActivity, cargo: run.cargo, cargoColor: run.cargoColor, modalidade: run.modalidade,
         date: run.date, startTime: run.startTime, endTime: endH,
         duration: Math.max(0, end.getTime() - new Date(run.start).getTime())
       }]);
@@ -2782,7 +2802,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
 
       writeSeq++; pendingWrites++;
       try {
-        const r = await api('stopTimer', { end: end.toISOString() });
+        const r = await api('stopTimer', { end: end.toISOString(), activity: finalActivity });
         const e = DB.getEntries().find(x => x.id === tempId);
         if (e && r && r.entryId) e.id = r.entryId;
         renderEntries();
@@ -2794,18 +2814,77 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     });
   }
 
+  function handleTimerStartKey(event, input) {
+    if (event.key === 'Enter') { event.preventDefault(); input.blur(); }
+    else if (event.key === 'Escape') {
+      const run = DB.getRunning();
+      input.value = run ? run.startTime : '';
+      input.blur();
+    }
+  }
+
+  async function commitTimerStart(input) {
+    const run = DB.getRunning();
+    if (!run) return;
+    const raw = String(input.value || '').trim();
+    if (!raw) { input.value = run.startTime; return; }
+    const normalized = normalizeTime(raw);
+    if (normalized === null) {
+      input.value = run.startTime;
+      alert('Informe um horário válido de 00:00 a 23:59.');
+      return;
+    }
+    input.value = normalized;
+    if (normalized === run.startTime) return;
+
+    const newStart = new Date(`${run.date}T${normalized}`);
+    if (isNaN(newStart.getTime()) || newStart.getTime() > Date.now()) {
+      input.value = run.startTime;
+      alert('O horário de início não pode estar no futuro.');
+      return;
+    }
+
+    const previous = { start: run.start, startTime: run.startTime };
+    run.start = newStart.toISOString();
+    run.startTime = normalized;
+    document.getElementById('timer-digits').textContent = fmtDur(Date.now() - newStart.getTime(), true);
+    renderCycleBadge();
+
+    writeSeq++; pendingWrites++;
+    try {
+      await api('updateTimerStart', { start: run.start, startTime: normalized });
+    } catch (err) {
+      if (DB.getRunning() === run) {
+        run.start = previous.start;
+        run.startTime = previous.startTime;
+        input.value = previous.startTime;
+        document.getElementById('timer-digits').textContent = fmtDur(Date.now() - new Date(run.start).getTime(), true);
+        renderCycleBadge();
+      }
+      alert('Erro ao alterar o início: ' + err.message);
+    } finally { pendingWrites--; }
+  }
+
   function startTick() {
     clearInterval(tickInterval);
     tickInterval = setInterval(() => {
       const r = DB.getRunning(); if (!r) return;
       document.getElementById('timer-digits').textContent = fmtDur(Date.now() - new Date(r.start).getTime(), true);
+      syncTimerStartInput();
       renderCycleBadge();
     }, 1000);
   }
 
+  function syncTimerStartInput() {
+    const input = document.getElementById('timer-start-input');
+    const run = DB.getRunning();
+    if (input && run && document.activeElement !== input) input.value = run.startTime || '';
+  }
   function setTimerUI(isRun) {
     const btn = document.getElementById('timer-btn');
-    if (isRun) { btn.textContent = 'PARAR'; btn.className = 'btn-pill btn-stop'; }
+    const startInput = document.getElementById('timer-start-input');
+    if (startInput) startInput.hidden = !isRun;
+    if (isRun) { btn.textContent = 'PARAR'; btn.className = 'btn-pill btn-stop'; syncTimerStartInput(); }
     else { btn.textContent = 'INICIAR'; btn.className = 'btn-pill btn-start'; }
   }
 
@@ -3033,6 +3112,25 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   } finally { pendingWrites--; }
 }
 
+  let timerActivitySaveTimeout = null;
+  function flushRunningActivity() {
+    clearTimeout(timerActivitySaveTimeout);
+    const run = DB.getRunning(); if (!run) return;
+    const activity = document.getElementById('activity-input').value.trim();
+    run.activity = activity;
+    writeSeq++; pendingWrites++;
+    api('updateTimerActivity', { activity }).catch(() => {}).finally(() => { pendingWrites--; });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('activity-input');
+    input.addEventListener('input', () => {
+      const run = DB.getRunning(); if (!run) return;
+      run.activity = input.value.trim();
+      clearTimeout(timerActivitySaveTimeout);
+      timerActivitySaveTimeout = setTimeout(flushRunningActivity, 600);
+    });
+    input.addEventListener('blur', () => { if (DB.getRunning()) flushRunningActivity(); });
+  });
   let activitySuggestionRows = [];
   let activitySuggestionIndex = -1;
   function recentActivitySuggestions(query='') {
@@ -3087,6 +3185,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     const entry=activitySuggestionRows[index],input=document.getElementById('activity-input');
     if(!entry || input.disabled || !session || entry.teamCode!==session.teamCode || entry.user!==session.username) return closeActivitySuggestions();
     input.value=entry.activity || '';
+    if (DB.getRunning()) { closeActivitySuggestions(); flushRunningActivity(); return; }
     [['cargo',entry.cargo],['modalidade',entry.modalidade]].forEach(([type,value])=>{
       const select=document.getElementById(type+'-input'), next=value || '';
       // Opção local para reproduzir fielmente um valor histórico, sem cadastrar no servidor.
