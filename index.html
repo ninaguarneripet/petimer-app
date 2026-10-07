@@ -2920,7 +2920,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
 
   if (!raw) { input.value = previous; return; }
 
-  const normalized = normalizeTime(raw);
+  const normalized = normalizeTime(raw, true);
   if (normalized === null) {
     input.value = previous;
     alert('Informe um horário válido de 00:00 a 23:59.');
