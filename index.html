@@ -836,6 +836,16 @@
   .cycle-data-member-name{font-weight:600;color:#0b4f95;}
   .cycle-data-table tbody tr:nth-child(even) .cycle-data-member-name{color:#357dad;}
   .cycle-data-empty{padding:28px 16px!important;text-align:center;color:#7d8796!important;background:#fff!important;}
+
+  .cdm-tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin:0 0 16px;flex:0 0 auto;}
+  .cdm-tab{appearance:none;background:transparent;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 14px;font:600 13px inherit;color:var(--muted);cursor:pointer;width:auto;border-radius:0;}
+  .cdm-tab:hover{color:var(--text);}
+  .cdm-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .cdm-panel{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;}
+  .cdm-panel .pc-metrics{margin-bottom:16px;}
+  .cdm-panel .pc-block{margin-bottom:8px;}
+  .cdm-info-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  @media(max-width:700px){.cdm-tab{padding:10px 10px;}}
   .cycle-data-modal-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px 18px;flex:0 0 auto;}
   .cycle-data-count{font-size:11.5px;color:#778092;}
   .cycle-data-close-btn{width:auto;padding:8px 16px;border:1px solid #dfe4ea;border-radius:8px;background:#f7f8fa;color:#1e2630;font:600 12px inherit;cursor:pointer;}
@@ -1577,7 +1587,10 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
 .analysis-scope-btn{flex:1 1 auto;width:auto;min-width:0}
 @media(min-width:640px) and (max-width:1023px){.analysis-scope-wrap{flex-basis:260px;width:260px;min-width:260px}}
 @media(max-width:900px){.analysis-scope-wrap{flex:1 1 280px;width:auto;min-width:min(280px,100%)}}
-</style></head>
+</style><style id="observer-toggle-style">
+.profile-menu #observer-mode-toggle.is-on{color:var(--accent,#276097);background:color-mix(in srgb,var(--accent,#276097) 10%,transparent);}
+</style>
+</head>
 <body>
 
 <!-- 1. TELA DE LOGIN / CADASTRO -->
@@ -1807,6 +1820,10 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
         <button type="button" onclick="openTeamSwitcher()">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11"></path><path d="m15 4 3 3-3 3"></path><path d="M17 17H6"></path><path d="m9 14-3 3 3 3"></path></svg>
           <span>Trocar de equipe</span>
+        </button>
+        <button type="button" id="observer-mode-toggle" onclick="toggleObserverMode()" aria-pressed="false" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          <span id="observer-mode-toggle-label">Modo observador</span>
         </button>
         <button type="button" id="cycle-role-toggle" onclick="openAdminCycleRoleDialog()" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12h8M12 8v8"></path></svg>
@@ -3510,9 +3527,37 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
 
   // RENDER ENTRIES AGRUPADO POR DATA E COM EDIÇÃO INLINE 
   let trackerObservedUser = null, trackerObservedTeam = null;
-  function isTrackerObserver() {
+  // Modo observador "fixo": o criador da equipe que NÃO participa do período só observa.
+  function isForcedTrackerObserver() {
     const team = DB.getTeams()[session?.teamCode];
     return !!(team && team.admin === session?.username && team.adminParticipatesInCycle === false);
+  }
+  // Modo observador ligado manualmente pelo menu do perfil (só administradores; vale só para a equipe em que foi ligado).
+  let trackerObserverManualTeam = null;
+  function isManualTrackerObserver() {
+    if (trackerObserverManualTeam && trackerObserverManualTeam !== session?.teamCode) trackerObserverManualTeam = null;
+    return !!trackerObserverManualTeam && isTeamAdmin();
+  }
+  function isTrackerObserver() { return isForcedTrackerObserver() || isManualTrackerObserver(); }
+  function toggleObserverMode() {
+    closeProfileMenu();
+    if (!session?.teamCode || !isTeamAdmin() || isForcedTrackerObserver()) return;
+    trackerObserverManualTeam = isManualTrackerObserver() ? null : session.teamCode;
+    // leva direto para os registros (a barra de registro some e aparece o seletor de pessoa)
+    const trackerNav = document.querySelector('.nav-item[onclick*="\'tracker\'"]');
+    switchView('tracker', trackerNav);
+    renderEntries();
+  }
+  function updateObserverModeToggle() {
+    const btn = document.getElementById('observer-mode-toggle');
+    if (!btn) return;
+    const available = isTeamAdmin() && !isForcedTrackerObserver();
+    btn.hidden = !available;
+    const on = available && isManualTrackerObserver();
+    btn.classList.toggle('is-on', on);
+    btn.setAttribute('aria-pressed', String(on));
+    const label = document.getElementById('observer-mode-toggle-label');
+    if (label) label.textContent = on ? 'Sair do modo observador' : 'Modo observador';
   }
   function filterTrackerMembers() {
     const input = document.getElementById('tracker-member-search');
@@ -3560,16 +3605,17 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   }
   function selectTrackerMember(user) {
     const team = DB.getTeams()[session?.teamCode];
-    if (!isTrackerObserver() || user === team.admin || !team.members[user]) return;
-    trackerObservedUser = user; closeTrackerMemberMenu(); renderEntries();
+    if (!isTrackerObserver() || user === session.username || !team.members[user]) return;
+    trackerObservedUser = user; closeTrackerMemberMenu(); renderEntries(); renderCycleBadge();
     document.getElementById('tracker-member-trigger').focus();
   }
   function syncTrackerObserver() {
     const observer = isTrackerObserver(), team = DB.getTeams()[session?.teamCode];
     const controls = document.getElementById('tracker-observer-controls');
     controls.hidden = !observer || currentView !== 'tracker';
+    updateObserverModeToggle();
     if (trackerObservedTeam !== session?.teamCode) { trackerObservedUser = null; trackerObservedTeam = session?.teamCode; closeTrackerMemberMenu(); }
-    const members = observer ? Object.keys(team.members || {}).filter(u => u !== team.admin) : [];
+    const members = observer ? Object.keys(team.members || {}).filter(u => u !== session.username) : [];
     if (!members.includes(trackerObservedUser)) trackerObservedUser = members[0] || null;
     const users = DB.getUsers();
     const observedName = users[trackerObservedUser]?.name || trackerObservedUser || '';
@@ -5248,16 +5294,16 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     return result;
   }
 
-  function computeCycleProgress(cycle) {
+  function computeCycleProgress(cycle, username = session.username) {
     const { periodStart, countStart, countEnd } = getCyclePeriodRange(cycle);
     const first = new Date(cycle.startDate + 'T00:00:00');
     if (cycle.unit === 'weeks') first.setDate(first.getDate() - (first.getDay() + 6) % 7);
     const weeklyPeriods = cycle.unit === 'weeks' ? getCycleWeeklyPeriods(cycle) : [];
     const totalPeriods = cycle.unit === 'weeks' ? weeklyPeriods.length : countRemainingPeriods(cycle, first.getTime());
     const periodsRemaining = countRemainingPeriods(cycle, periodStart);
-    const all = DB.getEntries().filter(e => e.teamCode === session.teamCode && e.user === session.username);
+    const all = DB.getEntries().filter(e => e.teamCode === session.teamCode && e.user === username);
     const run = DB.getRunning();
-    if (run && run.teamCode === session.teamCode && run.user === session.username) all.push({...run, isRunning:true});
+    if (run && run.teamCode === session.teamCode && run.user === username) all.push({...run, isRunning:true});
     let loggedMs = 0, currentLoggedMs = 0;
     all.forEach(e => {
       const date = e.date || (e.start ? localDateStr(new Date(e.start)) : '');
@@ -5318,8 +5364,8 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     return 'média semanal';
   }
 
-  function buildCycleMessage(cycle) {
-    const progress = computeCycleProgress(cycle);
+  function buildCycleMessage(cycle, username = session.username) {
+    const progress = computeCycleProgress(cycle, username);
     const { remainingMs, remainingThisPeriodMs, periodsRemaining, periodCompleted, targetThisPeriodMs } = progress;
     const u = CYCLE_UNIT_TEXT[cycle.unit];
     const avgLabel = cycleAverageLabel(cycle.unit);
@@ -5432,7 +5478,15 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
       if (overlay) overlay.hidden = true;
       return;
     }
-    if (isTeamAdmin() && !adminParticipatesInCycle()) { badge.hidden = true; badge.innerHTML = ''; return; }
+    // Modo observador: o cartão mostra o progresso de quem está sendo visualizado, não o do administrador.
+    const observing = isTrackerObserver();
+    if (observing) syncTrackerObserver();
+    const progressUser = observing ? trackerObservedUser : session.username;
+    if (observing) {
+      const obsTeam = DB.getTeams()[session.teamCode];
+      const observedIsIdleOwner = !!obsTeam && progressUser === obsTeam.admin && obsTeam.adminParticipatesInCycle === false;
+      if (!progressUser || observedIsIdleOwner) { badge.hidden = true; badge.innerHTML = ''; return; }
+    } else if (isTeamAdmin() && !adminParticipatesInCycle()) { badge.hidden = true; badge.innerHTML = ''; return; }
     const cycle = getActiveCycle();
     if (!cycle) {
       badge.hidden = true; badge.innerHTML = '';
@@ -5440,7 +5494,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
       if (overlay) overlay.hidden = true;
       return;
     }
-    let { line1, line2, progress } = buildCycleMessage(cycle);
+    let { line1, line2, progress } = buildCycleMessage(cycle, progressUser);
     const weekly = cycle.unit === 'weeks' ? weeklyBadgePresentation(cycle, progress) : null;
     if (weekly) { line1 = weekly.line1; line2 = weekly.line2; }
     const status = weekly ? weekly.status : progress.alertLevel || 'warning';
@@ -5450,7 +5504,12 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     badge.classList.toggle('is-danger', status === 'danger');
     badge.innerHTML = `<span class="line-icon" aria-hidden="true">${weekly ? weeklyBadgeIcon(status) : statusIconSvg(status)}</span><div class="cycle-badge-copy"><div class="cycle-badge-main">${escapeHtml(line1)}</div>${weekly ? '' : `<div class="cycle-badge-sub">${escapeHtml(line2)}</div>`}</div>${weekly ? `<span class="cycle-week-pill${weekly.lastWeek ? ' is-last' : ''}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M4 10h16"></path></svg>${escapeHtml(weekly.pill)}</span><span class="cycle-badge-sr">${status === 'danger' ? 'Ritmo de recuperação acima de ' + MAX_RECOVERY_HOURS_PER_DAY + ' horas por dia disponível.' : status === 'warning' ? 'Meta viável no tempo disponível.' : ''}</span>` : ''}`;
     badge.hidden = false;
-    renderFinalPeriodNotice(cycle, progress);
+    if (observing) {
+      const overlay = document.getElementById('final-period-overlay');
+      if (overlay) overlay.hidden = true; // o aviso de "última semana" é pessoal, não aparece ao observar outra pessoa
+    } else {
+      renderFinalPeriodNotice(cycle, progress);
+    }
   }
 
 
@@ -5531,16 +5590,36 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     const q=String(filter||'').trim().toLocaleLowerCase('pt-BR');
     const filtered=q?participants.filter(x=>String(x.name||'').toLocaleLowerCase('pt-BR').includes(q)||String(x.username||'').toLocaleLowerCase('pt-BR').includes(q)):participants;
     const rows=filtered.map(x=>`<tr><td><div class="cycle-data-member"><span class="cycle-data-avatar">${escapeHtml(cycleMemberInitials(x.name))}</span><span class="cycle-data-member-name">${escapeHtml(x.name)}</span></div></td><td>${formatHM(x.progress.loggedMs)}</td><td><strong>${formatHM(x.avg)}</strong></td><td>${formatHM(x.progress.remainingMs)}</td></tr>`).join('');
-    return `<div class="cycle-data-summary"><div class="cycle-data-summary-item"><span>Período</span><strong>${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</strong></div><div class="cycle-data-summary-item"><span>Divisão</span><strong>${escapeHtml(CYCLE_UNIT_TEXT[cycle.unit].label)}</strong></div><div class="cycle-data-summary-item"><span>Meta</span><strong>${escapeHtml(cycleGoalText(cycle))}</strong></div><div class="cycle-data-summary-item"><span>Tempo restante</span><strong>${escapeHtml(cycleTimeLeft(cycle))}</strong></div></div><div class="cycle-data-table-card"><div class="cycle-data-table-head"><h4>Médias dos membros no período</h4><label class="cycle-data-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" id="cycle-data-search-input" placeholder="Buscar membro..." autocomplete="off" aria-label="Buscar membro" oninput="filterCycleDataMembers(this.value)"></label></div><div class="cycle-data-table-scroll"><table class="cycle-data-table"><thead><tr><th>Membro</th><th>Tempo registrado</th><th>Média no período</th><th>Tempo restante</th></tr></thead><tbody>${rows||'<tr><td class="cycle-data-empty" colspan="4">Nenhum participante encontrado.</td></tr>'}</tbody></table></div></div>`;
+    return `<div class="cycle-data-table-card"><div class="cycle-data-table-head"><h4>Médias dos membros no período</h4><label class="cycle-data-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" id="cycle-data-search-input" placeholder="Buscar membro..." autocomplete="off" aria-label="Buscar membro" oninput="filterCycleDataMembers(this.value)"></label></div><div class="cycle-data-table-scroll"><table class="cycle-data-table"><thead><tr><th>Membro</th><th>Tempo registrado</th><th>Média no período</th><th>Tempo restante</th></tr></thead><tbody>${rows||'<tr><td class="cycle-data-empty" colspan="4">Nenhum participante encontrado.</td></tr>'}</tbody></table></div></div>`;
   }
   let activeCycleDataModalId=null;
   let activeCycleDataShowHistory=false;
+  let activeCycleDataTab='info';
+  function renderCycleDataBody(cycle,filter=''){
+    const tab=activeCycleDataTab;
+    const tabs=`<div class="cdm-tabs" role="tablist"><button type="button" role="tab" class="cdm-tab${tab==='info'?' active':''}" aria-selected="${tab==='info'}" onclick="setCycleDataTab('info')">Informações</button><button type="button" role="tab" class="cdm-tab${tab==='members'?' active':''}" aria-selected="${tab==='members'}" onclick="setCycleDataTab('members')">Membros</button></div>`;
+    const panel=tab==='info' ? renderCycleInfoPanel(cycle,{history:activeCycleDataShowHistory}) : renderCycleMembersTable(cycle,filter);
+    const count=document.getElementById('cycle-data-member-count');
+    if(count){
+      const total=cycleParticipants(cycle).length;
+      count.textContent=tab==='members' ? `${total} ${total===1?'membro':'membros'} no período` : '';
+    }
+    return `${tabs}<div class="cdm-panel" role="tabpanel">${panel}</div>`;
+  }
+  function setCycleDataTab(tab){
+    if(!activeCycleDataModalId||activeCycleDataTab===tab)return;
+    const cycle=DB.getCycles().find(c=>c.id===activeCycleDataModalId&&c.teamCode===session.teamCode);
+    const body=document.getElementById('cycle-data-modal-body');
+    if(!cycle||!body)return;
+    activeCycleDataTab=tab;
+    body.innerHTML=renderCycleDataBody(cycle);
+  }
   function filterCycleDataMembers(value){
     if(!activeCycleDataModalId)return;
     const cycle=DB.getCycles().find(c=>c.id===activeCycleDataModalId&&c.teamCode===session.teamCode);
     const body=document.getElementById('cycle-data-modal-body');
     if(!cycle||!body)return;
-    body.innerHTML=activeCycleDataShowHistory ? renderCycleHistoryData(cycle,value) : renderCycleMembersTable(cycle,value);
+    body.innerHTML=renderCycleDataBody(cycle,value);
     const input=document.getElementById('cycle-data-search-input');
     if(input){input.value=value;input.focus();try{input.setSelectionRange(value.length,value.length)}catch(e){}}
   }
@@ -5554,11 +5633,10 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     if(!modal||!period||!body)return;
     activeCycleDataModalId=cycleId;
     activeCycleDataShowHistory=showHistory;
-    body.classList.toggle('cycle-data-history', showHistory);
+    body.classList.remove('cycle-data-history');
+    activeCycleDataTab='info';
     period.textContent=`${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)} · ${cycleGoalText(cycle)}`;
-    body.innerHTML=showHistory ? renderCycleHistoryData(cycle) : renderCycleMembersTable(cycle);
-    const total=cycleParticipants(cycle).length;
-    if(count)count.textContent=`${total} ${total===1?'membro':'membros'} no período`;
+    body.innerHTML=renderCycleDataBody(cycle);
     modal.hidden=false;
   }
   function closeCycleDataModal(){
@@ -5568,6 +5646,35 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   }
   function handleCycleDataModalBackdrop(event){
     if(event.target===event.currentTarget)closeCycleDataModal();
+  }
+  const CYCLE_ICONS = {
+    cal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg>',
+    target:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><circle cx="12" cy="12" r="1"></circle></svg>',
+    clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>',
+    layers:'<svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg>',
+    bars:'<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>',
+    flag:'<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"></path></svg>'
+  };
+  // Aba "Informações" do modal "Dados sobre o período": cartões + semanas com feriado.
+  function renderCycleInfoPanel(cycle,{history=false}={}){
+    const ico=CYCLE_ICONS, u=CYCLE_UNIT_TEXT[cycle.unit];
+    const holidays = cycle.unit === 'weeks' ? (cycle.holidayWeeks || []) : [];
+    const isoToUtc = iso => { const [y,m,d]=iso.split('-').map(Number); return Date.UTC(y,m-1,d); };
+    const totalDays = Math.max(1, Math.round((isoToUtc(cycle.endDate)-isoToUtc(cycle.startDate))/86400000)+1);
+    const ended = cycle.endDate < localDateStr(new Date());
+    const metric = (icon,label,value) => `<div class="pc-metric"><span class="pc-mi" aria-hidden="true">${icon}</span><div class="pc-metric-text"><span>${label}</span><strong>${value}</strong></div></div>`;
+    const lastMetric = ended ? metric(ico.clock,'Duração',`${totalDays} ${totalDays===1?'dia':'dias'}`) : metric(ico.clock,'Tempo restante',cycleTimeLeft(cycle));
+    const row2 = metric(ico.layers,'Divisão',u.label)
+      + (cycle.unit==='weeks' ? metric(ico.bars,'Mínimo semanal',formatCycleDraftMinutes(cycle.minimumMinutes || 0)) + metric(ico.flag,'Semanas com feriado',holidays.length) : '');
+    const holidayRows = holidays.map(x => `<div class="pc-hol"><div class="pc-hol-main"><span class="pc-hol-icon" aria-hidden="true">${ico.cal}</span><div class="pc-hol-text"><strong>Feriado: ${fmtDateBR(x.holidayDate)}</strong><span>Semana de ${fmtDateBR(x.weekStart)} a ${fmtDateBR(getWeekEndIso(x.weekStart))}</span></div></div><div class="pc-hol-goal">Meta: ${formatCycleDraftMinutes(x.goalMinutes)}<i>•</i>Mínimo: ${formatCycleDraftMinutes(x.minimumMinutes)}</div></div>`).join('');
+    const holBlock = holidays.length ? `<div class="card pc-block"><div class="pc-block-head"><h4>Semanas com feriado</h4><p>Semanas que possuem feriados e suas metas ajustadas.</p></div><div class="pc-hol-list">${holidayRows}</div></div>` : '';
+    let top = '';
+    if (history) {
+      const editable = isTeamAdmin() && !ended;
+      const actions = editable ? `<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="closeCycleDataModal();startEditCycle('${cycle.id}')">Editar período</button><button type="button" class="btn-outline" onclick="closeCycleDataModal();deleteCycle('${cycle.id}', this)">Excluir</button></div>` : '';
+      top = `<div class="cdm-info-top">${cycleStatusLabel(cycle)}${actions}</div>`;
+    }
+    return `${top}<div class="pc-metrics">${metric(ico.cal,'Início',fmtDateBR(cycle.startDate))}${metric(ico.cal,'Fim',fmtDateBR(cycle.endDate))}${metric(ico.target,'Meta',cycleGoalText(cycle))}${lastMetric}${row2}</div>${holBlock}`;
   }
   function renderCycleDetail(cycle,{history=false}={}){
     if(!cycle) return '';
@@ -5603,7 +5710,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     const row2 = metric(ico.layers,'Divisão',u.label)
       + (cycle.unit==='weeks' ? metric(ico.bars,'Mínimo semanal',formatCycleDraftMinutes(cycle.minimumMinutes || 0)) + metric(ico.flag,'Semanas com feriado',holidays.length) : '');
     const holBlock = holidays.length ? `<div class="card pc-block"><div class="pc-block-head"><h4>Semanas com feriado</h4><p>Semanas que possuem feriados e suas metas ajustadas.</p></div><div class="pc-hol-list">${holidayRows}</div></div>` : '';
-    return `<div class="card pc-hero"><div class="pc-hero-top"><div class="pc-hero-id"><span class="pc-hero-icon" aria-hidden="true">${ico.cal}</span><div><div class="pc-hero-titlerow"><h3>Período atual</h3>${cycleStatusLabel(cycle)}</div><p class="pc-hero-range">${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div class="pc-hero-actions">${actions}${dataBtn}</div></div><div class="pc-progress"><div class="pc-progress-label"><strong>${pct}%</strong> do período</div><div class="pc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div class="pc-bar-fill" style="width:${pct}%"></div></div><div class="pc-progress-foot"><span><strong>${elapsedDays}</strong> ${elapsedDays===1?'dia decorrido':'dias decorridos'}</span><span><strong>${leftDays}</strong> ${leftDays===1?'dia restante':'dias restantes'}</span></div></div></div><div class="pc-metrics">${metric(ico.cal,'Início',fmtDateBR(cycle.startDate))}${metric(ico.cal,'Fim',fmtDateBR(cycle.endDate))}${metric(ico.target,'Meta',cycleGoalText(cycle))}${metric(ico.clock,'Tempo restante',remaining)}${row2}</div>${holBlock}`;
+    return `<div class="card pc-hero"><div class="pc-hero-top"><div class="pc-hero-id"><span class="pc-hero-icon" aria-hidden="true">${ico.cal}</span><div><div class="pc-hero-titlerow"><h3>Período atual</h3>${cycleStatusLabel(cycle)}</div><p class="pc-hero-range">${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div class="pc-hero-actions">${actions}${dataBtn}</div></div><div class="pc-progress"><div class="pc-progress-label"><strong>${pct}%</strong> do período</div><div class="pc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div class="pc-bar-fill" style="width:${pct}%"></div></div><div class="pc-progress-foot"><span><strong>${elapsedDays}</strong> ${elapsedDays===1?'dia decorrido':'dias decorridos'}</span><span><strong>${leftDays}</strong> ${leftDays===1?'dia restante':'dias restantes'}</span></div></div></div>`;
   }
   function openNewCycleForm(){
     if(!isTeamAdmin()) return;
