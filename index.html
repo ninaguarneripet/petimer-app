@@ -639,11 +639,11 @@
   .reports-period button svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
   .reports-export{height:38px;padding:0 14px;border:1px solid #b7cbe0;background:var(--surface);border-radius:7px;color:var(--accent);font:650 11.5px inherit;cursor:pointer;}
   .reports-export:hover:not(button:disabled){background:#f5f9fd;}
-  .reports-filterbar{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;min-height:58px;}
-  .reports-filter-label{font-size:11px;color:var(--muted);font-weight:650;text-transform:uppercase;letter-spacing:.04em;margin-right:2px;}
-  .reports-select{height:36px;min-width:145px;border:1px solid var(--border);border-radius:6px;background:var(--surface);padding:0 30px 0 10px;font:500 12px inherit;color:var(--text);}
-  .analysis-scope-wrap{position:relative;}
-  .analysis-scope-btn{height:36px;min-width:145px;border:1px solid var(--border);border-radius:6px;background:var(--surface);padding:0 10px;font:500 12px inherit;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;}
+  .reports-filterbar{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;min-height:58px;}
+  .reports-filter-label{flex:0 0 auto;font-size:11px;color:var(--muted);font-weight:650;text-transform:uppercase;letter-spacing:.04em;margin-right:2px;}
+  .reports-select{height:36px;min-width:145px;flex:1 1 180px;border:1px solid var(--border);border-radius:6px;background:var(--surface);padding:0 30px 0 10px;font:500 12px inherit;color:var(--text);}
+  .analysis-scope-wrap{position:relative;flex:1 1 180px;min-width:145px;}
+  .analysis-scope-btn{height:36px;width:100%;min-width:145px;border:1px solid var(--border);border-radius:6px;background:var(--surface);padding:0 10px;font:500 12px inherit;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;}
   .analysis-scope-btn:hover:not(button:disabled){border-color:#c9d7e5;}
   .analysis-scope-btn #analysis-scope-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .analysis-scope-btn .scope-arrow{font-size:9px;color:var(--muted);transition:transform .15s ease;flex:0 0 auto;}
@@ -667,8 +667,6 @@
   .user-select-item.selected .user-select-radio-dot{display:block;}
   .user-select-name{font-size:13px;font-weight:600;color:#252a34;}
   .user-select-empty{padding:20px 4px;text-align:center;color:#8a909e;font-size:12px;}
-  .reports-apply{height:36px;padding:0 16px;border:0;border-radius:6px;background:var(--accent);color:white;font:650 11.5px inherit;cursor:pointer;margin-left:auto;}
-  .reports-apply:hover:not(button:disabled){background:var(--accent-dark)}
   .reports-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(20,22,30,.02);}
   .reports-card-head{height:48px;background:#eef2f5;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;}
   .reports-total-label{font-size:11px;color:#8993a0}.reports-total{font-size:17px;font-weight:650;color:var(--text);font-variant-numeric:tabular-nums;margin-left:5px;}
@@ -685,7 +683,7 @@
   .reports-legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text)}.reports-legend-dot{width:7px;height:7px;border-radius:50%}
   .reports-table-wrap{overflow:auto}.reports-table{width:100%;border-collapse:collapse;min-width:780px;font-size:11.5px}.reports-table th{height:42px;text-align:left;padding:0 14px;border-bottom:1px solid var(--border);color:#8b94a0;font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.04em;white-space:nowrap}.reports-table td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}.reports-table tr:last-child td{border-bottom:0}.reports-table .muted{color:var(--muted)}.reports-cargo{font-weight:600}.reports-timecell{font-variant-numeric:tabular-nums;white-space:nowrap}.reports-desc{max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .weekly-table{min-width:960px}.weekly-table th:not(:first-child),.weekly-table td:not(:first-child){text-align:right}.weekly-cargo{display:flex;align-items:center;gap:8px;white-space:nowrap}.weekly-dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px}.weekly-total-row td{background:#eef2f5;font-weight:650}.weekly-total-col{font-weight:650}.reports-empty{padding:42px 18px;text-align:center;color:var(--muted);font-size:12px;}
-  @media(max-width:900px){.reports-top-actions{width:100%;margin-left:0}.reports-filterbar{flex-wrap:wrap}.reports-apply{margin-left:0}.reports-bars{gap:8px}.reports-stack{width:48px}.reports-period-label{min-width:140px}}
+  @media(max-width:900px){.reports-top-actions{width:100%;margin-left:0}.reports-filterbar{flex-wrap:wrap}.reports-bars{gap:8px}.reports-stack{width:48px}.reports-period-label{min-width:140px}}
 
 
   /* PERÍODO — visão de membro e resumo do administrador */
@@ -998,8 +996,33 @@
 .cycle-data-history .cycle-data-table-scroll{max-height:none}
 #view-team .team-members-card{padding:0;overflow:hidden}
 #view-team .list-head{padding:18px 22px;margin:0;flex-wrap:wrap;gap:12px}
+#view-team .team-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-left:auto;min-width:0}
+#view-team .team-members-toolbar{display:flex;align-items:center;gap:12px;padding:0 22px 12px}
+#view-team .team-member-search{flex:1 1 240px;min-width:0;position:relative}
+#view-team .team-member-search input{width:100%;height:40px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);font:inherit;font-size:13px;box-sizing:border-box}
+#view-team .team-member-search input::placeholder{color:var(--muted)}
+#view-team .team-member-search input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#view-team #admin-add-area{display:flex;align-items:center;gap:12px;flex:0 0 auto;padding:16px 24px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+#view-team .team-member-add-field{position:relative;flex:0 1 360px;width:min(360px,100%);min-width:0}
+#view-team .team-member-add-field>svg{position:absolute;left:13px;top:50%;width:18px;height:18px;transform:translateY(-50%);fill:none;stroke:var(--muted);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#view-team #manual-add-user{width:100%!important;height:40px;padding:0 12px 0 42px!important;box-sizing:border-box;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;font-size:13px;transition:border-color .15s ease,box-shadow .15s ease}
+#view-team #manual-add-user::placeholder{color:var(--muted)}
+#view-team #manual-add-user:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+#view-team #manual-add-submit{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;height:40px;padding:0 16px;border-radius:10px;white-space:nowrap;transition:background-color .15s ease,opacity .15s ease}
+#view-team #manual-add-submit:hover:not(:disabled){opacity:1;filter:brightness(1.08)}
+#view-team #manual-add-submit:disabled{opacity:.52;cursor:not-allowed}
+#view-team #manual-add-submit svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#view-team .team-member-add-bar[hidden]{display:none!important}
+#view-team .team-members-count{padding:0 22px 10px;color:var(--muted);font-size:11px}
+#view-team .team-members-card.is-large-team #team-members-list{max-height:min(62vh,calc(100dvh - 300px));overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--muted) transparent}
+#view-team .team-members-card.is-large-team #team-members-list::-webkit-scrollbar{width:8px}
+#view-team .team-members-card.is-large-team #team-members-list::-webkit-scrollbar-track{background:transparent}
+#view-team .team-members-card.is-large-team #team-members-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
 #view-team .team-list-head,#view-team .team-member-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,.32fr) minmax(115px,auto);gap:18px;align-items:center;padding:10px 22px}
 #view-team .team-list-head{background:#f6f8fa;border-block:1px solid #e6ebf0;color:#7a8492;font-size:10px;font-weight:600;text-transform:uppercase}
+#view-team .team-members-card.is-large-team .team-list-head{position:sticky;top:0;z-index:3}
+#view-team .team-search-empty{grid-column:1/-1;padding:25px 18px;color:var(--muted);font-size:13px;text-align:center}
+#view-team .team-search-empty span{display:block;margin-top:5px;font-size:11px}
 #view-team .team-list-head span:last-child{text-align:right}
 #view-team .team-member-row{min-height:62px;border-bottom:1px solid #edf0f4}
 #view-team .team-member-row:nth-child(even){background:#edf7fd}
@@ -1026,9 +1049,83 @@
 #view-team .team-member-actions{display:flex;gap:5px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
 #view-team .team-member-actions .badge-admin{margin:0 5px 0 0}
 #view-team .team-sector-label{display:none}
+#view-team .team-list-head,#view-team .team-member-row{grid-template-columns:minmax(0,1fr) minmax(140px,160px) 56px;gap:14px;padding:10px 18px}
+#view-team .team-list-head{min-height:38px}
+#view-team .team-list-head span:last-child{font-size:9px;color:var(--muted)}
+#view-team .team-member-row{min-height:68px;position:relative}
+#view-team .team-member-row.no-actions{grid-template-columns:minmax(0,1fr) minmax(140px,160px)}
+#view-team .team-list-head.no-actions{grid-template-columns:minmax(0,1fr) minmax(140px,160px)}
+#view-team .team-member-actions:empty{display:none}
+#view-team .team-member-identity{gap:10px}
+#view-team .team-member-copy{display:flex;min-width:0;flex-wrap:wrap;align-items:center;gap:3px 8px}
+#view-team .team-member-name{display:block;flex:1 1 auto;min-width:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+#view-team .team-member-username{flex:0 1 auto;min-width:0;max-width:32%;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#view-team .team-member-name-line{display:flex;align-items:center;gap:7px;min-width:0;max-width:100%}
+#view-team .team-role-badge{display:inline-flex;flex:0 0 auto;align-items:center;gap:4px;padding:3px 7px;border:1px solid transparent;border-radius:999px;font-size:10px;line-height:1.2;font-weight:700;white-space:nowrap}
+#view-team .team-role-badge svg{width:12px;height:12px;flex:0 0 12px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#view-team .team-role-badge.is-owner{background:var(--accent-soft);color:var(--accent);border-color:rgba(39,96,151,.22)}
+#view-team .team-role-badge.is-admin{background:transparent;color:var(--accent);border-color:var(--accent)}
+#view-team .team-member-actions{min-height:32px;flex-wrap:nowrap}
+#view-team .team-actions-trigger{display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;transition:background .15s ease,color .15s ease}
+#view-team .team-actions-trigger svg{width:18px;height:18px;fill:currentColor}
+#view-team .team-actions-trigger:hover,#view-team .team-actions-trigger:focus-visible,#view-team .team-actions-trigger[aria-expanded="true"]{background:rgba(39,96,151,.12);color:var(--accent)}
+#view-team .team-actions-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#view-team .team-actions-spacer{width:32px;height:32px;display:block}
+.team-actions-layer{position:fixed;inset:0;z-index:1450;pointer-events:none}
+.team-actions-scrim{display:none}
+.team-actions-menu{position:fixed;z-index:1;width:212px;max-width:calc(100vw - 24px);padding:7px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;box-shadow:0 12px 32px rgba(9,20,35,.20);color:var(--text);pointer-events:auto}
+.team-actions-menu-head{padding:6px 9px 8px;color:var(--muted);font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team-actions-menu-separator{height:1px;margin:5px 3px;background:var(--border)}
+.team-actions-menu-item{display:flex;align-items:center;gap:10px;width:100%;height:38px;padding:0 9px;border:0;border-radius:7px;background:transparent;color:var(--text);font:500 12px/1 Inter,sans-serif;text-align:left;cursor:pointer}
+.team-actions-menu-item svg{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.team-actions-menu-item:hover,.team-actions-menu-item:focus-visible{background:var(--accent-soft);color:var(--accent)}
+.team-actions-menu-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.team-actions-menu-item.is-danger{color:var(--danger)}
+.team-actions-menu-item.is-danger:hover,.team-actions-menu-item.is-danger:focus-visible{background:rgba(232,86,79,.12);color:var(--danger)}
+:root[data-theme="dark"] .team-actions-menu{box-shadow:0 14px 34px rgba(0,0,0,.42)}
+:root[data-theme="dark"] #view-team .team-actions-trigger:hover,:root[data-theme="dark"] #view-team .team-actions-trigger:focus-visible,:root[data-theme="dark"] #view-team .team-actions-trigger[aria-expanded="true"]{color:var(--theme-link)}
+:root[data-theme="dark"] #view-team .team-role-badge.is-owner{background:var(--theme-blue-soft);border-color:rgba(155,201,244,.28);color:var(--theme-link)}
+:root[data-theme="dark"] #view-team .team-role-badge.is-admin{border-color:var(--theme-link);color:var(--theme-link)}
+:root[data-theme="dark"] .team-actions-menu-item.is-danger{color:var(--theme-danger-text)}
+:root[data-theme="dark"] .team-actions-menu-item.is-danger:hover,:root[data-theme="dark"] .team-actions-menu-item.is-danger:focus-visible{background:var(--theme-danger-bg);color:var(--theme-danger-text)}
+#remove-member-confirm{background:var(--danger);border-color:var(--danger);color:#fff}
+:root[data-theme="dark"] #remove-member-confirm{background:var(--theme-danger-bg);border-color:var(--theme-danger-border);color:var(--theme-danger-text)}
+@media(max-width:900px) and (min-width:641px){#view-team .team-list-head,#view-team .team-member-row{grid-template-columns:minmax(0,1fr) 130px 56px;gap:10px;padding-inline:14px}}
+@media(max-width:640px){
+  #view-team .team-list-head{display:none}
+  #view-team .team-members-toolbar{align-items:stretch;flex-direction:column;padding:0 15px 10px;gap:9px}
+  #view-team .team-member-search{flex:1 1 auto;width:100%}
+  #view-team #admin-add-area{align-items:stretch;flex-direction:column;gap:10px;padding:16px}
+  #view-team .team-member-add-field{flex:0 0 auto;width:100%;max-width:100%}
+  #view-team #manual-add-submit{width:100%}
+  #view-team .team-members-count{padding:0 15px 9px}
+  #view-team .team-members-card.is-large-team #team-members-list{max-height:max(180px,min(58vh,calc(100dvh - 300px)))}
+  #view-team .team-list-body{display:grid;gap:9px;padding:10px}
+  #view-team .team-member-row{grid-template-columns:minmax(0,1fr) 40px;gap:0 8px;min-height:0;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--surface)!important}
+  #view-team .team-member-row.no-actions{grid-template-columns:minmax(0,1fr)}
+  #view-team .team-member-identity{grid-column:1 / -1;align-items:start;gap:10px;padding-right:40px}
+  #view-team .team-avatar{width:36px;height:36px;flex-basis:36px}
+  #view-team .team-member-copy{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;align-items:start}
+  #view-team .team-member-name-line{display:contents}
+  #view-team .team-member-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #view-team .team-member-username{display:block;max-width:100%;margin:0}
+  #view-team .team-role-badge{justify-self:start;margin-top:2px}
+  #view-team .team-member-actions{position:absolute;right:10px;top:10px;width:40px;height:40px}
+  #view-team .team-actions-trigger,#view-team .team-actions-spacer{width:40px;height:40px;flex-basis:40px}
+  #view-team .team-sector{grid-column:1 / -1;display:flex;align-items:center;gap:8px;padding:10px 0 0;margin-top:10px;border-top:1px solid var(--border)}
+  #view-team .team-sector-label{display:inline;flex:0 0 auto;color:var(--muted)}
+  #view-team .team-sector-select{width:100%;min-width:0;max-width:none}
+  .team-actions-layer{z-index:1600}
+  .team-actions-scrim{display:block;position:absolute;inset:0;background:rgba(8,13,22,.58);pointer-events:auto}
+  .team-actions-menu{position:fixed;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%;max-width:none;padding:14px 16px max(18px,env(safe-area-inset-bottom));border-radius:18px 18px 0 0;border-bottom:0;box-shadow:0 -10px 30px rgba(0,0,0,.22)}
+  .team-actions-menu-head{padding:4px 8px 12px;font-size:12px}
+  .team-actions-menu-item{height:48px;font-size:14px}
+  .team-actions-menu-separator{margin:7px 4px}
+}
+@media(max-width:600px){#view-team .team-sector{padding-left:0}}
 #view-team> .card:first-child>div{gap:16px;flex-wrap:wrap}
 @media(max-width:1200px){.pc-compact{grid-template-columns:minmax(0,1.6fr) minmax(80px,.7fr) minmax(80px,.7fr);gap:15px}.pc-compact-status{grid-column:1}.pc-compact .cycle-data-btn{grid-column:2 / 4;justify-self:end}}
-@media(max-width:600px){.pc-compact{padding:15px;grid-template-columns:1fr 1fr;gap:13px}.pc-compact-title{grid-column:1 / -1}.pc-compact .pc-compact-range{font-size:16px}.pc-compact-date{border:0;padding:0}.pc-compact .cycle-data-btn{grid-column:1 / -1;justify-self:stretch}.pc-compact-status{grid-column:1 / -1}.cycle-data-history .pc-record-info{grid-template-columns:1fr 1fr}#view-team .list-head{padding:15px}#view-team #admin-add-area{flex-wrap:wrap;max-width:100%}#view-team #manual-add-user{max-width:100%}#view-team .team-list-head{display:none}#view-team .team-member-row{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:12px 15px}#view-team .team-member-identity{grid-column:1 / -1}#view-team .team-member-username{display:block;margin:3px 0 0}#view-team .team-sector{padding-left:50px}#view-team .team-sector-label{display:inline;color:#7b8592}}
+@media(max-width:600px){.pc-compact{padding:15px;grid-template-columns:1fr 1fr;gap:13px}.pc-compact-title{grid-column:1 / -1}.pc-compact .pc-compact-range{font-size:16px}.pc-compact-date{border:0;padding:0}.pc-compact .cycle-data-btn{grid-column:1 / -1;justify-self:stretch}.pc-compact-status{grid-column:1 / -1}.cycle-data-history .pc-record-info{grid-template-columns:1fr 1fr}#view-team .list-head{padding:15px}#view-team .team-header-actions{flex:1 1 100%;width:100%;margin-left:0;justify-content:flex-end;flex-wrap:wrap}#view-team #admin-add-area{flex-wrap:wrap;max-width:100%}#view-team #manual-add-user{max-width:100%}#view-team .team-list-head{display:none}#view-team .team-member-row{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:12px 15px}#view-team .team-member-identity{grid-column:1 / -1}#view-team .team-member-username{display:block;margin:3px 0 0}#view-team .team-sector{padding-left:0}#view-team .team-sector-label{display:inline;color:var(--muted)}}
 .cycle-holiday-toggle{display:flex;align-items:center;gap:9px;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;width:fit-content;}
 .cycle-holiday-toggle[hidden]{display:none;}
 .cycle-holiday-toggle input{width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent);cursor:pointer;}
@@ -1173,7 +1270,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
 :root[data-theme="dark"] :is(.profile-popover-card,.manage-modal-backdrop,.admin-cycle-role-backdrop,.cycle-data-modal-backdrop,.cycle-form-modal-backdrop,.final-period-overlay){background:rgba(5,8,14,.64);}
 :root[data-theme="dark"] .btn-delete-team{background:var(--theme-danger-bg);color:var(--theme-danger-text);border-color:var(--theme-danger-border);}
 :root[data-theme="dark"] .btn-delete-team:hover:not(:disabled){background:#4a2d31;}
-:root[data-theme="dark"] :is(.btn-solid,.btn-start,.manage-add-btn,.reports-apply){color:#fff;}
+:root[data-theme="dark"] :is(.btn-solid,.btn-start,.manage-add-btn){color:#fff;}
 :root[data-theme="dark"] .reports-apply:hover:not(:disabled){background:#3273ad;}
 :root[data-theme="dark"] .reports-export{color:var(--theme-link);border-color:#50779a;}
 :root[data-theme="dark"] :is(.profile-dialog-close,.analysis-scope-btn .scope-user-icon){color:var(--muted);}
@@ -1469,7 +1566,18 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
 .ui-select-item.is-manage{color:var(--accent-dark,#276097);font-weight:600;}
 @keyframes ui-select-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 </style>
-</head>
+<style id="analysis-user-nav-style">
+.analysis-scope-wrap{display:flex;align-items:center;gap:6px;flex:0 0 280px;width:280px;min-width:280px;position:relative}
+.analysis-user-nav{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+.analysis-user-nav.inactive button{visibility:hidden;pointer-events:none}
+.analysis-user-nav button{width:30px;height:36px;flex:0 0 30px;display:grid;place-items:center;padding:0;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer;transition:background .12s,border-color .12s,color .12s}
+.analysis-user-nav button:hover{background:var(--theme-hover,var(--bg));border-color:var(--border);color:var(--text)}
+.analysis-user-nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.analysis-user-nav svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.analysis-scope-btn{flex:1 1 auto;width:auto;min-width:0}
+@media(min-width:640px) and (max-width:1023px){.analysis-scope-wrap{flex-basis:260px;width:260px;min-width:260px}}
+@media(max-width:900px){.analysis-scope-wrap{flex:1 1 280px;width:auto;min-width:min(280px,100%)}}
+</style></head>
 <body>
 
 <!-- 1. TELA DE LOGIN / CADASTRO -->
@@ -1778,7 +1886,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
           <div id="cargo-picker-popover" class="cargo-picker-popover" hidden onclick="event.stopPropagation()">
             <div class="cargo-picker-search"><input id="cargo-picker-search" type="text" placeholder="Buscar cargo ou projeto" autocomplete="off" oninput="renderCargoPicker(this.value)"></div>
             <div id="cargo-picker-projects" class="cargo-picker-projects"></div>
-            <div class="cargo-picker-footer"><button type="button" onclick="closeCargoPicker();openOptionsManager('cargo', managedSelectPreviousValue.cargo || '')">＋ Adicionar / gerenciar cargos e projetos</button></div>
+            <div class="cargo-picker-footer" id="cargo-manage-footer"><button type="button" onclick="closeCargoPicker();openOptionsManager('cargo', managedSelectPreviousValue.cargo || '')">＋ Adicionar / gerenciar cargos e projetos</button></div>
           </div>
         </div>
 
@@ -1789,7 +1897,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
           <div id="modalidade-picker-popover" class="cargo-picker-popover modalidade-picker-popover" hidden onclick="event.stopPropagation()">
             <div class="cargo-picker-search"><input id="modalidade-picker-search" type="text" placeholder="Buscar local de trabalho" autocomplete="off" oninput="renderModalidadePicker(this.value)"></div>
             <div id="modalidade-picker-list" class="cargo-picker-projects"></div>
-            <div class="cargo-picker-footer"><button type="button" onclick="closeModalidadePicker();openOptionsManager('modalidade', managedSelectPreviousValue.modalidade || '')">＋ Adicionar / gerenciar locais</button></div>
+            <div class="cargo-picker-footer" id="modality-manage-footer"><button type="button" onclick="closeModalidadePicker();openOptionsManager('modalidade', managedSelectPreviousValue.modalidade || '')">＋ Adicionar / gerenciar locais</button></div>
           </div>
         </div>
 
@@ -1849,6 +1957,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
             <button type="button" id="analysis-scope-btn" class="analysis-scope-btn" onclick="toggleAnalysisScopeMenu(event)" aria-haspopup="listbox" aria-expanded="false" aria-label="Quem exibir">
               <span id="analysis-scope-label">Usuário</span><span class="scope-arrow" aria-hidden="true">▼</span>
             </button>
+            <div class="analysis-user-nav" id="analysis-user-nav"><button type="button" aria-label="Usuário anterior" title="Usuário anterior" onclick="navigateAnalysisUser(-1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" aria-label="Próximo usuário" title="Próximo usuário" onclick="navigateAnalysisUser(1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>
             <div class="analysis-scope-menu" id="analysis-scope-menu" role="listbox" hidden>
               <div class="analysis-scope-menu-item" data-scope="user" role="option" onclick="chooseAnalysisScopeOption('user')">Usuário</div>
               <div class="analysis-scope-menu-item" data-scope="team" role="option" onclick="chooseAnalysisScopeOption('team')">Equipe inteira</div>
@@ -1858,7 +1967,6 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
           <select id="analysis-sector" class="reports-select" onchange="renderAnalysis()" aria-label="Setor" hidden></select>
           <select id="analysis-cargo" class="reports-select" onchange="renderAnalysis()" aria-label="Cargo ou projeto"><option value="">Todos os cargos/projetos</option></select>
           <select id="analysis-modalidade" class="reports-select" onchange="renderAnalysis()" aria-label="Local de trabalho"><option value="">Todos os locais</option></select>
-          <button class="reports-apply" onclick="renderAnalysis()">APLICAR FILTRO</button>
         </div>
 
         <div id="analysis-overview-panel">
@@ -1902,17 +2010,26 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
       <div class="card team-members-card">
         <div class="list-head">
           <h3>Membros da Equipe</h3>
-          <div style="display:flex; gap:8px;" id="admin-add-area" hidden>
-            <input type="text" id="manual-add-user" placeholder="Usuário para add" style="width:180px; padding:6px 10px; font-size:12px;">
-            <button class="btn-solid" style="width:auto; padding:6px 12px;" onclick="addMemberManually(this)">Adicionar</button>
+          <div class="team-header-actions">
+            <button type="button" class="btn-outline" id="team-admin-manage-access" style="width:auto" onclick="selectManageTeam(session.teamCode);document.getElementById('manage-team-overlay').hidden=false" hidden>Gerenciar equipe</button>
           </div>
         </div>
+        <div class="team-members-toolbar">
+          <label class="team-member-search" for="team-member-search" hidden><input type="search" id="team-member-search" placeholder="Pesquisar membro..." aria-label="Pesquisar membro por nome, usuário ou setor" oninput="filterTeamMembers(this.value)"></label>
+        </div>
+        <div class="team-member-add-bar" id="admin-add-area" hidden>
+          <div class="team-member-add-field">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-1.5a4.5 4.5 0 0 0-4.5-4.5h-4A4.5 4.5 0 0 0 3 19.5V21"></path><circle cx="9.5" cy="7" r="4"></circle><path d="M19 8v6M16 11h6"></path></svg>
+            <input type="text" id="manual-add-user" placeholder="Digite o @usuário para adicionar" aria-label="Digite o usuário para adicionar" oninput="syncManualAddButton()" onkeydown="if(event.key==='Enter'){event.preventDefault();if(!document.getElementById('manual-add-submit').disabled)addMemberManually(document.getElementById('manual-add-submit'))}">
+          </div>
+          <button class="btn-solid" id="manual-add-submit" type="button" onclick="addMemberManually(this)" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>Adicionar</span></button>
+        </div>
+        <div id="team-members-count" class="team-members-count" aria-live="polite" hidden></div>
         <div id="team-members-list"><div class="empty">Carregando...</div></div>
       </div>
 
       <div id="team-management-access" style="text-align:right; margin-top:14px;">
         <button type="button" class="btn-delete-team" id="team-leave-access" onclick="manageTeamCode=session.teamCode;manageTeamLeave()" hidden>Sair da equipe</button>
-        <button type="button" class="btn-outline" id="team-admin-manage-access" style="width:auto" onclick="selectManageTeam(session.teamCode);document.getElementById('manage-team-overlay').hidden=false" hidden>Gerenciar equipe</button>
       </div>
     </section>
 
@@ -2062,7 +2179,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbysfR0gz5qhJk_yKvA1naRdaZ1B26xWAq5K-eGQwN5v9KwKfJ6KeINzt_HUCIRpJL17/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzNgtx1h3_3uoEcsyMl8sePtO-KnMJ2NfwWIabxvaCufq5weUe_aCasuMd2b4gTCHen/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2167,7 +2284,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   }
   function mapTeamFromServer(team, members) {
     const membersObj = {};
-    (members || []).forEach(m => { membersObj[m.username] = { sector: m.sector || 'Geral' }; });
+    (members || []).forEach(m => { membersObj[m.username] = { sector: m.sector || 'Geral', role: m.role || (m.isOwner ? 'owner' : m.isAdmin ? 'admin' : 'member') }; });
     const sectors = normalizeTeamSectors(team.sectors, membersObj);
     Object.values(membersObj).forEach(member => {
       member.sector = sectors.find(name => name.toLocaleLowerCase('pt-BR') === String(member.sector).trim().toLocaleLowerCase('pt-BR')) || 'Geral';
@@ -2188,6 +2305,12 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     const d = await api('getTeamBootstrap', { code: session.teamCode });
     if (pendingWrites > 0 || seq !== writeSeq) return;
     CACHE.teams[session.teamCode] = mapTeamFromServer(d.team, d.members);
+    const myMembership = (d.members || []).find(m => m.username === session.username);
+    const myTeam = (CACHE.myTeams || []).find(t => t.code === session.teamCode);
+    if (myMembership && myTeam) {
+      myTeam.isOwner = !!myMembership.isOwner;
+      myTeam.isAdmin = !!myMembership.isAdmin;
+    }
     CACHE.entries = (d.entries || []).map(mapEntryFromServer);
     CACHE.cycles = (d.cycles || []).map(mapCycleFromServer);
     (d.members || []).forEach(m => { CACHE.users[m.username] = { username: m.username, name: m.displayName }; });
@@ -2325,6 +2448,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   function renderCargoPicker(filter=''){const host=document.getElementById('cargo-picker-projects');if(!host)return;const q=String(filter||'').trim().toLocaleLowerCase('pt-BR');const items=getCargoOptions().filter(c=>!q||c.name.toLocaleLowerCase('pt-BR').includes(q));if(!items.length){host.innerHTML='<div class="empty" style="padding:18px">Nenhum cargo ou projeto encontrado.</div>';return;}host.innerHTML=items.map(c=>{const enc=encodeURIComponent(c.name);return `<div class="cargo-project-block"><div class="cargo-project-row"><div class="cargo-project-main" onclick="selectCargoFromPicker('${enc}')"><span class="cargo-project-dot" style="background:${c.color}"></span><span class="cargo-project-name" style="color:${c.color}">${escapeHtml(c.name)}</span></div></div></div>`;}).join('');}
   document.addEventListener('click',event=>{const wrap=document.querySelector('.cargo-select-wrap');if(wrap&&!wrap.contains(event.target))closeCargoPicker();});
   function openOptionsManager(type, fallback='') {
+    if (!isTeamAdmin()) { alert('Somente administradores podem gerenciar cargos e locais.'); return; }
     managingOptionType = type;
     if (fallback && fallback !== '__manage__') managedSelectPreviousValue[type] = fallback;
     const modal = document.getElementById('manage-options-modal');
@@ -2365,7 +2489,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     const items = managingOptionType === 'cargo' ? getCargoOptions() : getModalidadeOptions().map(name=>({name}));
     list.innerHTML = items.length ? items.map(item => `
       <div class="manage-item">
-        ${managingOptionType === 'cargo' ? `${DB.getTeams()[session?.teamCode]?.admin === session?.username ? `<span class="manage-color-edit"><button type="button" class="manage-color-dot" style="background:${item.color}" title="Alterar cor" aria-label="Alterar cor de ${escapeHtml(item.name)}" ${isActionPending('cargo-color:' + session.teamCode + ':' + item.name) ? 'disabled' : ''} onclick="this.nextElementSibling.click()"></button><input type="color" value="${item.color}" aria-label="Cor de ${escapeHtml(item.name)}" tabindex="-1" onchange="updateManagedCargoColor('${encodeURIComponent(item.name)}', this.value, this.previousElementSibling)"></span>` : `<span class="manage-color-dot" style="background:${item.color}"></span>`}` : '<span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>'}
+        ${managingOptionType === 'cargo' ? `${isTeamAdmin() ? `<span class="manage-color-edit"><button type="button" class="manage-color-dot" style="background:${item.color}" title="Alterar cor" aria-label="Alterar cor de ${escapeHtml(item.name)}" ${isActionPending('cargo-color:' + session.teamCode + ':' + item.name) ? 'disabled' : ''} onclick="this.nextElementSibling.click()"></button><input type="color" value="${item.color}" aria-label="Cor de ${escapeHtml(item.name)}" tabindex="-1" onchange="updateManagedCargoColor('${encodeURIComponent(item.name)}', this.value, this.previousElementSibling)"></span>` : `<span class="manage-color-dot" style="background:${item.color}"></span>`}` : '<span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>'}
         <span class="manage-item-name" ${managingOptionType === 'cargo' ? `style="color:${item.color}"` : ''}>${escapeHtml(item.name)}</span>
         <button class="manage-delete" type="button" onclick="deleteManagedOption('${encodeURIComponent(item.name)}', this)" title="Excluir" aria-label="Excluir ${escapeHtml(item.name)}"><svg viewBox="0 0 24 24"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 7V4h6v3"></path><path d="M6 7l1 14h10l1-14"></path></svg></button>
       </div>`).join('') : '<div class="empty">Nenhuma opção cadastrada.</div>';
@@ -2373,7 +2497,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   async function updateManagedCargoColor(encodedName, color, button) {
     const code = session?.teamCode, actor = session?.username;
     const team = DB.getTeams()[code], name = decodeURIComponent(encodedName);
-    if (!team || team.admin !== actor || !/^#[0-9a-f]{6}$/i.test(color)) return;
+    if (!team || !isTeamAdmin() || !/^#[0-9a-f]{6}$/i.test(color)) return;
     const cargo = team.cargos.find(c => c.name === name);
     const key = 'cargo-color:' + code + ':' + name;
     if (!cargo || cargo.color === color || isActionPending(key) || isActionPending('delete-option:cargo:' + name)) return;
@@ -2726,8 +2850,9 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
 
     if (myTeams.length > 0) {
       listEl.innerHTML = myTeams.map(t => {
-        const roleBadge = t.isAdmin
-          ? `<span class="badge-role badge-role-admin"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px;margin-right:5px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M3 7l4 4 5-7 5 7 4-4-2 10H5L3 7z"></path><path d="M6 20h12"></path></svg>Admin (Criador)</span>`
+        const roleBadge = t.isOwner
+          ? `<span class="badge-role badge-role-admin">Criador</span>`
+          : t.isAdmin ? `<span class="badge-role badge-role-admin">Admin</span>`
           : `<span class="badge-role badge-role-member">Membro</span>`;
         return `
           <div class="team-card-wrap">
@@ -2945,7 +3070,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
       const current = team.code === session.teamCode;
       return `<button type="button" class="switch-team-item ${current ? 'current' : ''}" onclick="switchTeamInline('${team.code}')">
         <span class="switch-team-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7.5" r="3.5"></circle><path d="M21 20v-2a4 4 0 0 0-3-3.85"></path><path d="M15.5 4.15a3.5 3.5 0 0 1 0 6.7"></path></svg></span>
-        <span class="switch-team-info"><span class="switch-team-name">${escapeHtml(team.name)}</span><span class="switch-team-meta">Código: ${escapeHtml(team.code)} <span class="switch-team-role ${team.isAdmin ? 'admin' : ''}">${team.isAdmin ? 'Admin (Criador)' : 'Membro'}</span></span></span>
+        <span class="switch-team-info"><span class="switch-team-name">${escapeHtml(team.name)}</span><span class="switch-team-meta">Código: ${escapeHtml(team.code)} <span class="switch-team-role ${team.isAdmin ? 'admin' : ''}">${team.isOwner ? 'Criador' : team.isAdmin ? 'Admin' : 'Membro'}</span></span></span>
         ${current ? '<span class="switch-team-check" title="Equipe atual"><svg viewBox="0 0 24 24"><path d="m6 12 4 4 8-8"></path></svg></span>' : '<svg class="switch-team-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>'}
       </button>`;
     }).join('');
@@ -2990,7 +3115,12 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
 
     const initials = String(currentName || session.username || 'U').trim().split(/\s+/).filter(Boolean).slice(0,2).map(p => p[0]).join('').toUpperCase();
     document.getElementById('sidebar-profile-trigger').textContent = initials || 'U';
-    document.getElementById('admin-add-area').hidden = (team.admin !== session.username);
+    document.getElementById('admin-add-area').hidden = !isTeamAdmin();
+    const mayManageTeamOptions = isTeamAdmin();
+    const cargoManageFooter = document.getElementById('cargo-manage-footer');
+    const modalityManageFooter = document.getElementById('modality-manage-footer');
+    if (cargoManageFooter) cargoManageFooter.hidden = !mayManageTeamOptions;
+    if (modalityManageFooter) modalityManageFooter.hidden = !mayManageTeamOptions;
     document.getElementById('nav-cycle').hidden = false;
     updateCycleRoleControl();
     notifyEndedCycle();
@@ -3829,6 +3959,17 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     return { start, end };
   }
 
+  function navigateAnalysisUser(direction) {
+    if (analysisScope !== 'user') return;
+    const members = getAnalysisTeamMembers();
+    if (members.length <= 1) return;
+    const current = members.findIndex(member => member.username === analysisSelectedUser);
+    const index = current < 0 ? 0 : (current + direction + members.length) % members.length;
+    analysisSelectedUser = members[index].username;
+    updateAnalysisScopeLabel();
+    renderAnalysis();
+  }
+
   function changeAnalysisWeek(delta) {
     analysisWeekOffset += delta;
     renderAnalysis();
@@ -3916,6 +4057,12 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     else if (analysisScope === 'sector') label.textContent = 'Por setor';
     else if (analysisSelectedUser) label.innerHTML = '<svg class="scope-user-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"></circle><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"></path></svg><span class="scope-user-name">' + escapeHtml(analysisSelectedUser) + '</span>';
     else label.textContent = 'Usuário';
+    const nav = document.getElementById('analysis-user-nav');
+    if (nav) {
+      const disabled = analysisScope !== 'user' || getAnalysisTeamMembers().length <= 1;
+      nav.classList.toggle('inactive', disabled);
+      nav.querySelectorAll('button').forEach(button => { button.disabled = disabled; button.setAttribute('aria-hidden', String(disabled)); });
+    }
     const userItem = document.querySelector('#analysis-scope-menu .analysis-scope-menu-item[data-scope="user"]');
     if (userItem) userItem.innerHTML = analysisSelectedUser ? 'Usuário (<strong>' + escapeHtml(analysisSelectedUser) + '</strong>)' : 'Usuário';
     document.querySelectorAll('#analysis-scope-menu .analysis-scope-menu-item').forEach(el => {
@@ -4313,34 +4460,162 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     win.document.close();
   }
 
+  let teamMemberSearchTerm = '';
+  function normalizeTeamMemberSearch(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR').trim();
+  }
+  function filterTeamMembers(value) {
+    teamMemberSearchTerm = String(value || '');
+    renderTeamMembers();
+  }
   function renderTeamMembers() {
     if (currentView === 'team') document.getElementById('view-title').textContent = (DB.getTeams()[session?.teamCode]?.name ? 'Equipe - ' + DB.getTeams()[session.teamCode].name : 'Gestão da Equipe');
-    const teams = DB.getTeams(), users = DB.getUsers(), team = teams[session.teamCode], isAdmin = team.admin === session.username, el = document.getElementById('team-members-list');
-    document.getElementById('team-leave-access').hidden = isAdmin;
+    const teams = DB.getTeams(), users = DB.getUsers(), team = teams[session.teamCode], isOwner = team.admin === session.username, isAdmin = isTeamAdmin(), el = document.getElementById('team-members-list');
+    document.getElementById('team-leave-access').hidden = isOwner;
     document.getElementById('team-admin-manage-access').hidden = !isAdmin;
     syncTeamManagementModals();
     const sectors = [...new Set(['Geral', ...getTeamSectors()])];
-    const rows = Object.keys(team.members).map(memberUser => {
+    const allMembers = Object.keys(team.members);
+    const isLargeTeam = allMembers.length > 20;
+    const membersCard = document.querySelector('#view-team .team-members-card');
+    const searchInput = document.getElementById('team-member-search');
+    const searchLabel = searchInput?.closest('.team-member-search');
+    const searchToolbar = searchLabel?.parentElement;
+    const countEl = document.getElementById('team-members-count');
+    membersCard?.classList.toggle('is-large-team', isLargeTeam);
+    if (searchLabel) searchLabel.hidden = !isLargeTeam;
+    if (searchToolbar) searchToolbar.hidden = !isLargeTeam;
+    if (countEl) countEl.hidden = !isLargeTeam;
+    if (!isLargeTeam) {
+      teamMemberSearchTerm = '';
+      if (searchInput) searchInput.value = '';
+    }
+    const searchTerm = normalizeTeamMemberSearch(teamMemberSearchTerm);
+    const filteredMembers = allMembers.filter(memberUser => {
+      if (!searchTerm) return true;
+      const member = team.members[memberUser] || {};
+      const uData = users[memberUser] || { name: memberUser };
+      const displayedName = uData.name || uData.username || memberUser;
+      return normalizeTeamMemberSearch([displayedName, '@' + memberUser, memberUser, member.sector || 'Geral'].join(' ')).includes(searchTerm);
+    });
+    if (countEl) countEl.textContent = searchTerm
+      ? `Mostrando ${filteredMembers.length} de ${allMembers.length} ${allMembers.length === 1 ? 'membro' : 'membros'}`
+      : `${allMembers.length} ${allMembers.length === 1 ? 'membro' : 'membros'}`;
+    const canActOnMember = memberUser => {
+      const isMemberOwner = team.admin === memberUser;
+      const isMemberAdmin = isMemberOwner || team.members[memberUser]?.role === 'admin';
+      return (isOwner && !isMemberOwner) || (isAdmin && !isMemberOwner && (!isMemberAdmin || isOwner));
+    };
+    const hasActions = Object.keys(team.members).some(canActOnMember);
+    const rows = filteredMembers.map(memberUser => {
       const uData = users[memberUser] || { name: memberUser };
       const realMemName = uData.name || uData.username || memberUser;
       const sector = team.members[memberUser].sector || 'Geral';
-      const isMemAdmin = (team.admin === memberUser);
-      
-      let actions = '';
-      if (isAdmin) {
-        // O setor é editado diretamente na coluna Setor.
-        if (!isMemAdmin) actions += `<button class="icon-btn" style="color:var(--danger)" onclick="removeMember('${memberUser}', this)" title="Remover">✕</button>`;
-      }
+      const isMemOwner = team.admin === memberUser;
+      const isMemAdmin = isMemOwner || team.members[memberUser]?.role === 'admin';
+      const memberActions = [];
+      if (isOwner && !isMemOwner) memberActions.push(isMemAdmin ? 'demote' : 'promote');
+      if (isAdmin && !isMemOwner && (!isMemAdmin || isOwner)) memberActions.push('remove');
       const sectorControl = isAdmin ? `<select class="team-sector-select" data-member="${escapeHtml(memberUser)}" aria-label="Setor de ${escapeHtml(realMemName)}" onchange="changeTeamSector(this)" ${(isActionPending('update-sector:' + session.teamCode + ':' + memberUser) || isActionPending('delete-sector:' + session.teamCode)) ? 'disabled' : ''}><option value="add">＋ Adicionar</option>${sectors.map((name, index) => `<option value="${index}" ${name === sector ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}</select>` : escapeHtml(sector);
-      return `<div class="team-member-row"><div class="team-member-identity"><span class="team-avatar" aria-hidden="true">${escapeHtml(cycleMemberInitials(realMemName))}</span><div><span class="team-member-name">${escapeHtml(realMemName)}</span><span class="team-member-username">@${escapeHtml(memberUser)}</span></div></div><div class="team-sector"><span class="team-sector-label">Setor: </span>${sectorControl}</div><div class="team-member-actions">${isMemAdmin ? '<span class="badge-user badge-admin">Admin</span>' : ''}${actions}</div></div>`;
+      const roleBadge = isMemOwner
+        ? `<span class="team-role-badge is-owner"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8Z"></path><path d="M5 21h14"></path></svg>Criador</span>`
+        : isMemAdmin ? `<span class="team-role-badge is-admin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>Admin</span>` : '';
+      const actionButton = memberActions.length
+        ? `<button class="team-actions-trigger" type="button" aria-label="Ações de ${escapeHtml(realMemName)}" aria-haspopup="menu" aria-expanded="false" data-member="${escapeHtml(memberUser)}" data-member-name="${escapeHtml(realMemName)}" data-actions="${memberActions.join(',')}" onclick="toggleTeamActionsMenu(this)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="19" cy="12" r="1.7"></circle></svg></button>`
+        : '<span class="team-actions-spacer" aria-hidden="true"></span>';
+      return `<div class="team-member-row${hasActions ? '' : ' no-actions'}"><div class="team-member-identity"><span class="team-avatar" aria-hidden="true">${escapeHtml(cycleMemberInitials(realMemName))}</span><div class="team-member-copy"><div class="team-member-name-line"><span class="team-member-name" title="${escapeHtml(realMemName)}">${escapeHtml(realMemName)}</span><span class="team-member-username" title="@${escapeHtml(memberUser)}">@${escapeHtml(memberUser)}</span>${roleBadge}</div></div></div><div class="team-sector"><span class="team-sector-label">Setor: </span>${sectorControl}</div><div class="team-member-actions">${hasActions ? actionButton : ''}</div></div>`;
     }).join('');
-    el.innerHTML = '<div class="team-list-head"><span>Membro</span><span>Setor</span><span>Ações</span></div><div class="team-list-body">' + rows + '</div>';
+    const emptyState = !allMembers.length
+      ? '<div class="team-search-empty">Nenhum membro na equipe.</div>'
+      : !filteredMembers.length
+        ? '<div class="team-search-empty">Nenhum membro encontrado.<span>Tente buscar por nome, usuário ou setor.</span></div>'
+        : rows;
+    el.innerHTML = `<div class="team-list-head${hasActions ? '' : ' no-actions'}"><span>Membro</span><span>Setor</span>${hasActions ? '<span>Ações</span>' : ''}</div><div class="team-list-body${hasActions ? '' : ' no-actions'}">${emptyState}</div>`;
   }
+
+  let teamActionsLayer = null, teamActionsMenu = null, teamActionsTrigger = null;
+  function closeTeamActionsMenu(returnFocus = false) {
+    const trigger = teamActionsTrigger;
+    const menuHadFocus = !!(teamActionsMenu && teamActionsMenu.contains(document.activeElement));
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    teamActionsLayer?.remove();
+    teamActionsLayer = teamActionsMenu = teamActionsTrigger = null;
+    if ((returnFocus || menuHadFocus) && trigger?.isConnected) trigger.focus();
+  }
+  function toggleTeamActionsMenu(trigger) {
+    if (teamActionsTrigger === trigger) { closeTeamActionsMenu(true); return; }
+    closeTeamActionsMenu(false);
+    const actions = String(trigger.dataset.actions || '').split(',').filter(Boolean);
+    if (!actions.length) return;
+    teamActionsTrigger = trigger;
+    trigger.setAttribute('aria-expanded', 'true');
+    const layer = document.createElement('div');
+    layer.className = 'team-actions-layer';
+    layer.addEventListener('click', event => { if (event.target === layer || event.target.classList.contains('team-actions-scrim')) closeTeamActionsMenu(false); });
+    const scrim = document.createElement('div');
+    scrim.className = 'team-actions-scrim';
+    scrim.setAttribute('aria-hidden', 'true');
+    const menu = document.createElement('div');
+    menu.className = 'team-actions-menu';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', 'Ações para ' + trigger.dataset.memberName);
+    menu.dataset.member = trigger.dataset.member;
+    menu.dataset.memberName = trigger.dataset.memberName;
+    menu.innerHTML = `<div class="team-actions-menu-head">${escapeHtml(trigger.dataset.memberName)}</div>${actions.map(action => {
+      if (action === 'promote') return `<button class="team-actions-menu-item" type="button" role="menuitem" tabindex="-1" data-action="promote"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3"></path><path d="M18 8v8M14 12h8"></path></svg><span>Tornar admin</span></button>`;
+      if (action === 'demote') return `<button class="team-actions-menu-item" type="button" role="menuitem" tabindex="-1" data-action="demote"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"></path><path d="M8 12h8"></path></svg><span>Remover admin</span></button>`;
+      return `<button class="team-actions-menu-item is-danger" type="button" role="menuitem" tabindex="-1" data-action="remove"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 14h10l1-14"></path></svg><span>Remover da equipe</span></button>`;
+    }).join('')}`;
+    // Mantém remoção sempre após as ações de papel, separada por divisor.
+    if (actions.includes('remove') && (actions.includes('promote') || actions.includes('demote'))) {
+      const removeItem = menu.querySelector('[data-action="remove"]');
+      const divider = document.createElement('div'); divider.className = 'team-actions-menu-separator'; divider.setAttribute('role', 'separator');
+      removeItem?.before(divider);
+    }
+    layer.append(scrim, menu);
+    document.body.appendChild(layer);
+    teamActionsLayer = layer; teamActionsMenu = menu;
+    const items = [...menu.querySelectorAll('[role="menuitem"]')];
+    items.forEach(item => item.addEventListener('click', () => chooseTeamMemberAction(item.dataset.action)));
+    if (!window.matchMedia('(max-width: 640px)').matches) {
+      const rect = trigger.getBoundingClientRect(), menuRect = menu.getBoundingClientRect(), gap = 6;
+      const left = Math.max(12, Math.min(window.innerWidth - menuRect.width - 12, rect.right - menuRect.width));
+      const below = window.innerHeight - rect.bottom;
+      const top = below < menuRect.height + gap && rect.top > menuRect.height + gap ? rect.top - menuRect.height - gap : rect.bottom + gap;
+      menu.style.left = left + 'px'; menu.style.top = Math.max(8, Math.min(window.innerHeight - menuRect.height - 8, top)) + 'px';
+    }
+    items[0]?.focus();
+  }
+  function chooseTeamMemberAction(action) {
+    const trigger = teamActionsTrigger;
+    if (!trigger) return closeTeamActionsMenu(false);
+    const username = trigger.dataset.member;
+    closeTeamActionsMenu(false);
+    if (action === 'promote' || action === 'demote') requestTeamRoleChange(username, action, trigger);
+    else if (action === 'remove') removeMember(username, trigger);
+  }
+  document.addEventListener('pointerdown', event => {
+    if (!teamActionsMenu || teamActionsMenu.contains(event.target) || event.target === teamActionsTrigger) return;
+    closeTeamActionsMenu(false);
+  }, true);
+  document.addEventListener('keydown', event => {
+    if (!teamActionsMenu) return;
+    const items = [...teamActionsMenu.querySelectorAll('[role="menuitem"]')];
+    const index = items.indexOf(document.activeElement);
+    if (event.key === 'Escape') { event.preventDefault(); closeTeamActionsMenu(true); }
+    else if (event.key === 'ArrowDown') { event.preventDefault(); items[(index + 1 + items.length) % items.length]?.focus(); }
+    else if (event.key === 'ArrowUp') { event.preventDefault(); items[(index - 1 + items.length) % items.length]?.focus(); }
+    else if (event.key === 'Home') { event.preventDefault(); items[0]?.focus(); }
+    else if (event.key === 'End') { event.preventDefault(); items[items.length - 1]?.focus(); }
+    else if (event.key === 'Tab') closeTeamActionsMenu(false);
+  }, true);
+  document.addEventListener('scroll', () => closeTeamActionsMenu(false), true);
+  window.addEventListener('resize', () => closeTeamActionsMenu(false));
 
   async function changeTeamSector(select) {
     const code = session?.teamCode, actor = session?.username;
     const team = DB.getTeams()[code], u = select.dataset.member;
-    if (!team || team.admin !== actor || !team.members[u]) { renderTeamMembers(); return; }
+    if (!team || !isTeamAdmin() || !team.members[u]) { renderTeamMembers(); return; }
     const key = 'update-sector:' + code + ':' + u;
     if (isActionPending(key) || isActionPending('delete-sector:' + code)) { renderTeamMembers(); return; }
     const member = team.members[u], previous = member.sector;
@@ -4396,7 +4671,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   function requestDeleteTeamSector(btn) {
     const code = session?.teamCode, actor = session?.username, name = btn.dataset.sector;
     const team = DB.getTeams()[code];
-    if (!team || team.admin !== actor || name === 'Geral' || isActionPending('delete-sector:' + code)) return;
+    if (!team || !isTeamAdmin() || name === 'Geral' || isActionPending('delete-sector:' + code)) return;
     const count = Object.values(team.members).filter(m => (m.sector || 'Geral') === name).length;
     const text = count ? 'O setor “' + name + '” está sendo usado por ' + count + ' membro(s). Ao excluí-lo, esses membros serão movidos para o setor Geral.' : 'Tem certeza que deseja excluir o setor “' + name + '”?';
     openTeamActionConfirm({type:'sector', code, actor, name, trigger:btn}, 'Excluir setor', text, 'Excluir');
@@ -4410,7 +4685,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
       return deleteEntry(target.id, btn, true);
     }
     const team = DB.getTeams()[target.code];
-    if (!team || team.admin !== target.actor || target.name === 'Geral') { closeTeamActionConfirm(); return; }
+    if (!team || !isTeamAdmin() || target.name === 'Geral') { closeTeamActionConfirm(); return; }
     const error = document.getElementById('team-action-confirm-error');
     if (isActionPending('add-sector:' + target.code) || Object.keys(team.members).some(u => isActionPending('update-sector:' + target.code + ':' + u))) {
       error.textContent = 'Aguarde as alterações de setor terminarem e tente novamente.'; error.hidden = false; return;
@@ -4446,7 +4721,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   let teamSectorTarget = null, removeMemberTarget = null;
   function teamModalTargetValid(target) {
     const team = target && DB.getTeams()[target.code];
-    return !!(target && session?.teamCode === target.code && session?.username === target.actor && team?.admin === target.actor && team.members[target.user]);
+    return !!(target && session?.teamCode === target.code && session?.username === target.actor && isTeamAdmin() && team?.members?.[target.user]);
   }
   function syncTeamManagementModals() {
     if (teamSectorTarget && !teamModalTargetValid(teamSectorTarget)) closeTeamSectorModal();
@@ -4506,11 +4781,53 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     });
   }
 
+  let teamRoleChangeTarget = null;
+  function requestTeamRoleChange(username, action, trigger) {
+    const team = DB.getTeams()[session?.teamCode];
+    if (!team || team.admin !== session?.username || !team.members?.[username] || username === team.admin || !['promote','demote'].includes(action)) return;
+    const displayName = DB.getUsers()[username]?.name || DB.getUsers()[username]?.displayName || username;
+    teamRoleChangeTarget = {code:session.teamCode, actor:session.username, username, action, trigger};
+    document.getElementById('team-role-change-error').hidden = true;
+    document.getElementById('team-role-change-error').textContent = '';
+    document.getElementById('team-role-change-title').textContent = action === 'promote' ? 'Tornar administrador' : 'Remover administração';
+    document.getElementById('team-role-change-copy').textContent = action === 'promote' ? 'Deseja tornar ' + displayName + ' (@' + username + ') administrador? Essa pessoa poderá gerenciar membros, setores, cargos/projetos, locais e períodos.' : 'Deseja remover a permissão de administrador de ' + displayName + ' (@' + username + ')?';
+    document.getElementById('team-role-change-overlay').hidden = false;
+    document.getElementById('team-role-change-cancel').focus();
+  }
+  function closeTeamRoleChange() {
+    if (isActionPending('team-role-change')) return;
+    const target = teamRoleChangeTarget; teamRoleChangeTarget = null;
+    document.getElementById('team-role-change-overlay').hidden = true;
+    if (target?.trigger?.isConnected) target.trigger.focus();
+  }
+  async function submitTeamRoleChange(btn) {
+    const target = teamRoleChangeTarget;
+    if (!target || isActionPending('team-role-change') || session?.teamCode !== target.code || session?.username !== target.actor || DB.getTeams()[target.code]?.admin !== target.actor) return closeTeamRoleChange();
+    let actionSucceeded = false;
+    await runOnce('team-role-change', btn, 'Salvando...', async () => {
+      try {
+        await api(target.action === 'promote' ? 'promoteMemberToAdmin' : 'demoteMemberFromAdmin', {code:target.code, username:target.username});
+        actionSucceeded = true;
+        await refreshTeamData();
+      } catch (err) {
+        const error = document.getElementById('team-role-change-error');
+        error.textContent = err.message || 'Não foi possível alterar o papel deste membro.';
+        error.hidden = false;
+      }
+    });
+    if (actionSucceeded) {
+      if (teamRoleChangeTarget === target) closeTeamRoleChange();
+      renderTeamMembers();
+      [...document.querySelectorAll('#team-members-list .team-actions-trigger')].find(button => button.dataset.member === target.username)?.focus();
+    }
+  }
+
   function removeMember(u, btn) {
     const target = {code:session?.teamCode, actor:session?.username, user:u, trigger:btn};
     if (!teamModalTargetValid(target) || u === target.actor || isActionPending('remove-member:' + u)) return;
     removeMemberTarget = target;
-    document.getElementById('remove-member-name').textContent = '@' + u;
+    const memberData = DB.getUsers()[u] || {};
+    document.getElementById('remove-member-name').textContent = (memberData.name || memberData.displayName || u) + ' (@' + u + ')';
     document.getElementById('remove-member-error').hidden = true;
     document.getElementById('remove-member-overlay').hidden = false;
     document.getElementById('remove-member-cancel').focus();
@@ -4575,11 +4892,14 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     document.getElementById('manage-team-copy-status').textContent = '';
     document.getElementById('manage-team-copy-btn').textContent = 'Copiar';
     document.getElementById('manage-team-admin').hidden = !t.isAdmin;
+    document.getElementById('manage-team-owner-controls').hidden = !t.isOwner;
+    document.getElementById('manage-team-admin-leave').hidden = !!t.isOwner;
     document.getElementById('manage-team-member').hidden = !!t.isAdmin;
+    document.getElementById('manage-team-name').disabled = !t.isOwner;
     document.getElementById('manage-team-name').value = name;
     document.getElementById('manage-team-detail').hidden = false;
     document.getElementById('manage-team-title').textContent = 'Gerenciar equipe - ' + name;
-    if (t.isAdmin) setTimeout(() => document.getElementById('manage-team-name').focus(), 30);
+    if (t.isOwner) setTimeout(() => document.getElementById('manage-team-name').focus(), 30);
   }
   async function copyManagedTeamCode(btn) {
     const code = manageTeamCode;
@@ -4612,7 +4932,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   async function saveTeamName(btn) {
     const code = manageTeamCode;
     const t = (CACHE.myTeams || []).find(x => x.code === code);
-    if (!t || !t.isAdmin) return;
+    if (!t || !t.isOwner) return;
     const name = document.getElementById('manage-team-name').value.trim();
     if (!name) return alert('Dê um nome para a equipe.');
     if (name === t.name) return closeManageTeam();
@@ -4681,7 +5001,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   function deleteTeamAction(code) {
     code = code || session.teamCode;
     const t = (CACHE.myTeams || []).find(x => x.code === code);
-    if (!t || !t.isAdmin) return;
+    if (!t || !t.isOwner) return;
     deleteTeamTargetCode = code;
     document.getElementById('delete-team-name').textContent = t.name;
     document.getElementById('delete-team-overlay').hidden = false;
@@ -4701,7 +5021,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     if (isActionPending('delete-team')) return;
     const code = deleteTeamTargetCode;
     const t = (CACHE.myTeams || []).find(x => x.code === code);
-    if (!code || !t || !t.isAdmin) return closeDeleteTeamModal();
+    if (!code || !t || !t.isOwner) return closeDeleteTeamModal();
     return runOnce('delete-team', btn, 'Excluindo...', async () => {
       pendingWrites++;
       try {
@@ -4727,6 +5047,11 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
       finally { pendingWrites--; }
     });
   }
+  function syncManualAddButton() {
+    const input = document.getElementById('manual-add-user');
+    const button = document.getElementById('manual-add-submit');
+    if (button) button.disabled = isActionPending('add-member') || !input?.value.trim();
+  }
   async function addMemberManually(btn) {
     if (isActionPending('add-member')) return;
     const i = document.getElementById('manual-add-user'), u = i.value.trim().toLowerCase();
@@ -4738,7 +5063,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
         i.value = '';
         renderTeamMembers();
       } catch (err) { alert(err.message); }
-    });
+    }).finally(syncManualAddButton);
   }
 
   // ---------- PERÍODO ----------
@@ -5346,7 +5671,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   function isTeamAdmin() {
     const teams = DB.getTeams();
     const team = teams[session.teamCode];
-    return !!team && team.admin === session.username;
+    return !!team && (team.admin === session?.username || team.members?.[session?.username]?.role === 'admin');
   }
 
   function renderCycleView() {
@@ -5535,20 +5860,33 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
         <span id="manage-team-copy-status" role="status" aria-live="polite"></span>
       </section>
       <div id="manage-team-admin" hidden>
-        <label for="manage-team-name">Nome da equipe</label>
-        <div class="manage-team-row">
-          <input type="text" id="manage-team-name" maxlength="60" onkeydown="if(event.key==='Enter'){event.preventDefault();saveTeamName(document.getElementById('manage-team-save-btn'));}">
-          <button class="profile-btn profile-btn-primary" type="button" id="manage-team-save-btn" onclick="saveTeamName(this)">Salvar</button>
+        <div id="manage-team-owner-controls" hidden>
+          <label for="manage-team-name">Nome da equipe</label>
+          <div class="manage-team-row">
+            <input type="text" id="manage-team-name" maxlength="60" onkeydown="if(event.key==='Enter'){event.preventDefault();saveTeamName(document.getElementById('manage-team-save-btn'));}">
+            <button class="profile-btn profile-btn-primary" type="button" id="manage-team-save-btn" onclick="saveTeamName(this)">Salvar</button>
+          </div>
+          <hr class="manage-team-sep" style="margin-top:16px;">
+          <p class="manage-team-note" style="margin-bottom:10px;">Excluir apaga a equipe, os registros e os períodos de todos os membros.</p>
+          <button type="button" class="btn-delete-team" onclick="manageTeamDelete()">Excluir equipe</button>
         </div>
-        <hr class="manage-team-sep" style="margin-top:16px;">
-        <p class="manage-team-note" style="margin-bottom:10px;">Excluir apaga a equipe, os registros e os períodos de todos os membros.</p>
-        <button type="button" class="btn-delete-team" onclick="manageTeamDelete()">Excluir equipe</button>
+        <div id="manage-team-admin-leave" hidden>
+          <p class="manage-team-note" style="margin-bottom:10px;">Você administra esta equipe. Ao sair, ela some da sua lista e você só volta com o código de convite.</p>
+          <button type="button" class="btn-delete-team" onclick="manageTeamLeave()">Sair da equipe</button>
+        </div>
       </div>
       <div id="manage-team-member" hidden>
         <p class="manage-team-note" style="margin-bottom:10px;">Você é membro desta equipe. Ao sair, ela some da sua lista e você só volta com o código de convite. Seus registros ficam guardados e voltam se você entrar de novo.</p>
         <button type="button" class="btn-delete-team" onclick="manageTeamLeave()">Sair da equipe</button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="profile-popover-card hub-modal" id="team-role-change-overlay" hidden onclick="if(event.target===this) closeTeamRoleChange()">
+  <div class="delete-team-dialog" role="alertdialog" aria-modal="true" aria-labelledby="team-role-change-title">
+    <div class="profile-dialog-head"><h3 id="team-role-change-title">Alterar função</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeTeamRoleChange()">×</button></div>
+    <div class="delete-team-body"><p id="team-role-change-copy"></p><p id="team-role-change-error" role="alert" hidden style="color:var(--danger)"></p><div class="profile-dialog-actions"><button class="profile-btn profile-btn-secondary" type="button" id="team-role-change-cancel" onclick="closeTeamRoleChange()">Cancelar</button><button class="profile-btn profile-btn-primary" type="button" id="team-role-change-submit" onclick="submitTeamRoleChange(this)">Confirmar</button></div></div>
   </div>
 </div>
 
