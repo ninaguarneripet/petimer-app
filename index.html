@@ -2095,8 +2095,9 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   }
   function modalidadeOptionsHTML(selected='', includeManage=true) {
     const manage = includeManage ? '<option class="manage-select-option" value="__manage__">＋ Adicionar</option>' : '';
+    const empty = `<option value="" ${!selected?'selected':''}>Sem localização</option>`;
     const opts = getModalidadeOptions().map(m => `<option value="${escapeHtml(m)}" ${m===selected?'selected':''}>${escapeHtml(m)}</option>`).join('');
-    return manage + opts;
+    return manage + empty + opts;
   }
   function populateManagedSelects(preserve=true) {
     const cargoEl=document.getElementById('cargo-input'), modEl=document.getElementById('modalidade-input');
@@ -2106,7 +2107,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     cargoEl.innerHTML=cargoOptionsHTML(cargoCurrent,true); modEl.innerHTML=modalidadeOptionsHTML(modCurrent);
     const cargos=getCargoOptions(), modalidades=getModalidadeOptions(), cargoObj=cargos.find(c=>c.name===cargoCurrent);
     const cargoNext=cargoObj?cargoCurrent:(cargos[0]?.name||'__manage__');
-    const modNext=modCurrent&&modalidades.includes(modCurrent)?modCurrent:(modalidades[0]||'__manage__');
+    const modNext=modCurrent&&modalidades.includes(modCurrent)?modCurrent:'';
     cargoEl.value=cargoNext; modEl.value=modNext; if(cargoNext)managedSelectPreviousValue.cargo=cargoNext; if(modNext!=='__manage__')managedSelectPreviousValue.modalidade=modNext;
     applyCargoSelectColor(cargoEl); syncCargoPickerTrigger();
   }
@@ -2160,7 +2161,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     if (select) {
       const values = type === 'cargo' ? getCargoOptions().map(c=>c.name) : getModalidadeOptions();
       const previous = managedSelectPreviousValue[type];
-      const next = values.includes(previous) ? previous : (values[0] || '__manage__');
+      const next = values.includes(previous) ? previous : (type === 'modalidade' ? '' : (values[0] || '__manage__'));
       select.value = next;
       if (next !== '__manage__') managedSelectPreviousValue[type] = next;
     }
@@ -2992,7 +2993,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     const cargo = document.getElementById('cargo-input').value;
     const modalidade = document.getElementById('modalidade-input').value;
     if (!cargo || cargo === '__manage__') return alert('Selecione ou adicione um cargo/projeto.');
-    if (!modalidade || modalidade === '__manage__') return alert('Selecione ou adicione um local de trabalho.');
+    if (modalidade === '__manage__') return;
     const date = document.getElementById('date-input').value;
     const startT = document.getElementById('time-start').value;
     const endT = document.getElementById('time-end').value;
@@ -3042,7 +3043,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     const cargo = document.getElementById('cargo-input').value;
     const modalidade = document.getElementById('modalidade-input').value;
     if (!cargo || cargo === '__manage__') return alert('Selecione ou adicione um cargo/projeto.');
-    if (!modalidade || modalidade === '__manage__') return alert('Selecione ou adicione um local de trabalho.');
+    if (modalidade === '__manage__') return;
     const date = localDateStr(new Date());
 
     
@@ -3392,7 +3393,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
                 <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>
                 <select class="edit-select" style="font-size:11px;" onchange="updateEntry('${e.id}', 'modalidade', this.value)" ${readOnly || e.isRunning ? 'disabled' : ''}>
                   ${modalidadeOptionsHTML(e.modalidade, false)}
-                  ${!getModalidadeOptions().includes(e.modalidade) ? `<option value="${escapeHtml(e.modalidade)}" selected>${escapeHtml(e.modalidade)}</option>` : ''}
+                  ${e.modalidade && !getModalidadeOptions().includes(e.modalidade) ? `<option value="${escapeHtml(e.modalidade)}" selected>${escapeHtml(e.modalidade)}</option>` : ''}
                 </select>
               </div>
 
@@ -5402,4 +5403,3 @@ button:disabled svg,button:disabled span{color:inherit !important;}
 
 </body>
 </html>
-
