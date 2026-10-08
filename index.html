@@ -1383,6 +1383,92 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   .tracker-right-cluster .time-controls .entry-mode{width:100%;justify-content:flex-end;flex-wrap:nowrap;}
 }
 </style>
+<style id="tracker-compact-aligned-v1">
+/* Barra de registro: controles menores e todos centralizados na mesma linha horizontal.
+   O desalinhamento vinha de .time-controls ter altura fixa (37,6px) menor que os controles (44px),
+   o que empurrava horários/data/botões alguns pixels para baixo em relação aos dois seletores. */
+#view-tracker .tracker-bar .time-controls,
+#view-tracker .tracker-bar .time-controls .entry-mode{height:auto;align-items:center;}
+#view-tracker .tracker-bar .tracker-right-cluster{align-items:center;gap:8px;}
+#view-tracker .tracker-bar .icon-select-wrap,
+#view-tracker .tracker-bar .tracker-time,
+#view-tracker .tracker-bar .compact-date,
+#view-tracker .tracker-bar .manual-add,
+#view-tracker .tracker-bar .time-controls .icon-btn-line,
+#view-tracker .tracker-bar #timer-btn{height:34px;min-height:34px;box-sizing:border-box;margin-top:0;margin-bottom:0;}
+#view-tracker .tracker-bar .cargo-picker-trigger{height:32px;font-size:12.5px;}
+#view-tracker .tracker-bar .cargo-select-wrap{min-width:130px;max-width:200px;}
+#view-tracker .tracker-bar .modalidade-select-wrap{width:120px;min-width:120px;max-width:120px;}
+#view-tracker .tracker-bar .tracker-time{width:70px;min-width:70px;max-width:70px;padding:0 6px;font-size:13px;}
+#view-tracker .tracker-bar .manual-add,
+#view-tracker .tracker-bar #timer-btn{padding-top:0;padding-bottom:0;padding-left:18px;padding-right:18px;display:inline-flex;align-items:center;justify-content:center;}
+#view-tracker .tracker-bar .time-controls .icon-btn-line{width:34px;min-width:34px;}
+#view-tracker .tracker-bar .compact-date{min-width:60px;}
+@media(min-width:1321px){
+  .tracker-right-cluster .time-controls{flex:0 0 auto;width:auto;min-width:0;}
+}
+</style>
+<style id="ui-select-unified-v1">
+/* ===== Caixas de seleção padronizadas no site inteiro =====
+   - todas arredondadas, com seta própria (sem o visual quadrado nativo do navegador)
+   - a lista que abre ao clicar usa o mesmo estilo arredondado do menu "Usuário / Equipe inteira / Por setor" */
+:root{
+  --ui-radius:10px;
+  --ui-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7686' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --ui-menu-bg:#fff;--ui-menu-border:#e4e6ec;--ui-menu-text:#343946;--ui-menu-hover:#f3f6fa;--ui-menu-hover-text:#082f53;
+  --ui-menu-active-bg:#eaf2fa;--ui-menu-active-text:#276097;--ui-menu-shadow:0 12px 32px rgba(8,47,83,.18);
+}
+:root[data-theme="dark"]{
+  --ui-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a9b4c3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --ui-menu-bg:var(--surface);--ui-menu-border:var(--border);--ui-menu-text:var(--text);--ui-menu-hover:var(--theme-hover);--ui-menu-hover-text:var(--text);
+  --ui-menu-active-bg:var(--theme-blue-soft);--ui-menu-active-text:var(--theme-link);--ui-menu-shadow:0 18px 48px rgba(0,0,0,.4);
+}
+
+/* seta + sem aparência nativa (especificidade alta para vencer as regras antigas) */
+select:not(#_u1):not(#_u2):not([multiple]):not([style*="pointer-events:none"]){
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  background-image:var(--ui-chevron);background-repeat:no-repeat;
+  background-position:right 9px center;background-size:14px 14px;
+  padding-right:28px;cursor:pointer;text-overflow:ellipsis;
+}
+select:disabled:not(#_u1):not(#_u2){cursor:default;}
+
+/* caixas "soltas" (com borda própria) */
+input:not(#_u1):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),
+select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-radius);}
+.reports-select{height:36px;font-size:12.5px;}
+.analysis-scope-btn{border-radius:var(--ui-radius);}
+#view-team .team-sector-select{border-radius:var(--ui-radius);padding-top:7px;padding-bottom:7px;padding-right:28px;}
+
+/* caixas com ícone (borda no wrapper) */
+.input-icon-wrap{border-radius:var(--ui-radius);}
+.input-icon-wrap select:not(#_u1):not(#_u2){padding-right:24px;}
+.entry-select-wrap{border-radius:8px;}
+.entry-select-wrap .edit-select:not(#_u1):not(#_u2){padding-right:22px;background-position:right 4px center;}
+
+/* menus suspensos (os existentes ficam com o mesmo raio) */
+.analysis-scope-menu,.cargo-picker-popover,.activity-suggestions{border-radius:12px;}
+
+/* lista customizada que substitui a lista quadrada nativa do <select> */
+.ui-select-menu{
+  position:fixed;z-index:5000;box-sizing:border-box;padding:5px;overflow-y:auto;overscroll-behavior:contain;
+  background:var(--ui-menu-bg);border:1px solid var(--ui-menu-border);border-radius:12px;box-shadow:var(--ui-menu-shadow);
+  font-family:'Inter',sans-serif;animation:ui-select-in .12s ease-out;
+}
+.ui-select-menu[data-up="1"]{transform-origin:bottom center;}
+.ui-select-item{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 10px;border-radius:8px;
+  font-size:13px;color:var(--ui-menu-text);cursor:pointer;white-space:nowrap;user-select:none;
+}
+.ui-select-item[data-active="1"]{background:var(--ui-menu-hover);color:var(--ui-menu-hover-text);}
+.ui-select-item[aria-selected="true"]{background:var(--ui-menu-active-bg);color:var(--ui-menu-active-text);font-weight:650;}
+.ui-select-item[aria-selected="true"]::after{content:'';flex:0 0 12px;height:12px;margin-left:auto;
+  background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5L20 7'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5L20 7'/%3E%3C/svg%3E") center/contain no-repeat;}
+.ui-select-item[aria-disabled="true"]{opacity:.45;cursor:default;}
+.ui-select-item.is-manage{color:var(--accent-dark,#276097);font-weight:600;}
+@keyframes ui-select-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+</style>
 </head>
 <body>
 
@@ -3944,7 +4030,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     const modSel = document.getElementById('analysis-modalidade');
     if (modSel) {
       const prev = modSel.value;
-      const mods = [...new Set(all.map(e => e.modalidade || 'Sem localização'))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+      const mods = [...new Set(all.map(e => e.modalidade).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
       modSel.innerHTML = '<option value="">Todos os locais</option>' + mods.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
       if (mods.includes(prev)) modSel.value = prev;
     }
@@ -5508,5 +5594,108 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   
 </div>
 
+<script id="ui-select-unified-js">
+/* Substitui a lista quadrada nativa dos <select> por uma lista arredondada, igual em todo o site.
+   Funciona por delegação de eventos: o <select> continua sendo o campo real (valor, onchange, re-renderizações). */
+(function(){
+  if(!window.matchMedia||!matchMedia('(hover:hover) and (pointer:fine)').matches)return; // em celular, mantém o seletor nativo
+  var menu=null,owner=null,items=[],active=-1;
+  function usable(sel){
+    return sel&&sel.tagName==='SELECT'&&!sel.disabled&&!sel.multiple&&!(sel.size>1)&&!/pointer-events:\s*none/.test(sel.getAttribute('style')||'');
+  }
+  function close(){
+    if(menu){menu.remove();menu=null;}
+    if(owner){owner.setAttribute('aria-expanded','false');}
+    owner=null;items=[];active=-1;
+  }
+  function setActive(i,scroll){
+    if(!items.length)return;
+    i=Math.max(0,Math.min(items.length-1,i));
+    while(items[i]&&items[i].getAttribute('aria-disabled')==='true'){i+=(i>=active?1:-1);if(i<0||i>=items.length)return;}
+    if(active>-1&&items[active])items[active].removeAttribute('data-active');
+    active=i;items[i].setAttribute('data-active','1');
+    if(scroll)items[i].scrollIntoView({block:'nearest'});
+  }
+  function choose(i){
+    var sel=owner,opt=sel&&sel.options[i];
+    if(!opt||opt.disabled)return;
+    var changed=sel.selectedIndex!==i;
+    close();
+    if(changed){
+      sel.selectedIndex=i;
+      sel.dispatchEvent(new Event('input',{bubbles:true}));
+      sel.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    sel.focus();
+  }
+  function open(sel){
+    close();
+    owner=sel;sel.setAttribute('aria-expanded','true');
+    menu=document.createElement('div');
+    menu.className='ui-select-menu';menu.setAttribute('role','listbox');
+    var cs=getComputedStyle(sel);
+    Array.prototype.forEach.call(sel.options,function(opt,i){
+      if(opt.hidden)return;
+      var it=document.createElement('div');
+      it.className='ui-select-item'+(opt.value==='__manage__'||opt.className.indexOf('manage-select-option')>-1?' is-manage':'');
+      it.setAttribute('role','option');it.dataset.index=i;
+      it.setAttribute('aria-selected',i===sel.selectedIndex?'true':'false');
+      if(opt.disabled)it.setAttribute('aria-disabled','true');
+      var label=document.createElement('span');label.textContent=opt.textContent;it.appendChild(label);
+      if(opt.style&&opt.style.color)label.style.color=opt.style.color;
+      it.addEventListener('mousemove',function(){var k=items.indexOf(it);if(k!==active)setActive(k,false);});
+      it.addEventListener('mousedown',function(e){e.preventDefault();e.stopPropagation();choose(i);});
+      menu.appendChild(it);items.push(it);
+    });
+    document.body.appendChild(menu);
+    var r=sel.getBoundingClientRect(),vh=window.innerHeight,vw=window.innerWidth;
+    menu.style.minWidth=Math.max(r.width,120)+'px';
+    menu.style.maxHeight=Math.min(300,vh-24)+'px';
+    var mh=menu.offsetHeight,mw=menu.offsetWidth;
+    var below=vh-r.bottom-10,above=r.top-10,up=mh>below&&above>below;
+    var top=up?Math.max(8,r.top-mh-6):r.bottom+6;
+    if(!up&&top+mh>vh-8)top=Math.max(8,vh-mh-8);
+    var left=Math.min(Math.max(8,r.left),Math.max(8,vw-mw-8));
+    menu.style.top=top+'px';menu.style.left=left+'px';
+    if(up)menu.setAttribute('data-up','1');
+    var cur=items.findIndex(function(el){return el.getAttribute('aria-selected')==='true';});
+    setActive(cur>-1?cur:0,true);
+  }
+  // abre ao clicar (bloqueia a lista nativa)
+  document.addEventListener('mousedown',function(e){
+    var t=e.target;
+    if(menu&&menu.contains(t))return;
+    var sel=t&&t.closest?t.closest('select'):null;
+    if(usable(sel)){
+      e.preventDefault();
+      var same=owner===sel;
+      sel.focus();
+      if(same)close();else open(sel);
+      return;
+    }
+    if(menu)close();
+  },true);
+  // teclado: abrir e navegar
+  document.addEventListener('keydown',function(e){
+    if(menu){
+      if(e.key==='ArrowDown'){e.preventDefault();setActive(active+1,true);}
+      else if(e.key==='ArrowUp'){e.preventDefault();setActive(active-1,true);}
+      else if(e.key==='Home'){e.preventDefault();setActive(0,true);}
+      else if(e.key==='End'){e.preventDefault();setActive(items.length-1,true);}
+      else if(e.key==='Enter'||e.key===' '){e.preventDefault();if(active>-1)choose(+items[active].dataset.index);}
+      else if(e.key==='Escape'){e.preventDefault();var s=owner;close();if(s)s.focus();}
+      else if(e.key==='Tab'){close();}
+      return;
+    }
+    var t=e.target;
+    if(usable(t)&&(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key==='Enter'||e.key===' ')&&!e.altKey&&!e.ctrlKey&&!e.metaKey){
+      e.preventDefault();open(t);
+    }
+  },true);
+  window.addEventListener('resize',close);
+  window.addEventListener('blur',close);
+  document.addEventListener('scroll',function(e){if(menu&&!menu.contains(e.target))close();},true);
+})();
+</script>
 </body>
 </html>
