@@ -881,6 +881,13 @@
 .cargo-picker-projects{max-height:360px;overflow:auto;padding:6px 0}.cargo-project-block{border-bottom:1px solid #eef1f4}.cargo-project-block:last-child{border-bottom:0}.cargo-project-row{display:flex;align-items:center;gap:9px;padding:10px 12px;min-height:42px}.cargo-project-main{display:flex;align-items:center;gap:8px;min-width:0;flex:1;cursor:pointer}.cargo-project-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}.cargo-project-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cargo-picker-footer{border-top:1px solid #e6ebef;padding:9px 12px}.cargo-picker-footer button{border:0;background:transparent;color:#176fae;font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;padding:3px 0}
 @media(max-width:900px){.cargo-picker-popover{right:auto;left:0;width:360px}}
+.modalidade-picker-wrap{position:relative}
+.modalidade-picker-wrap .cargo-picker-trigger{min-width:0;width:100%;font-weight:400;color:var(--text)}
+.cargo-picker-popover.modalidade-picker-popover{left:auto;right:0;width:260px;max-width:calc(100vw - 32px)}
+.modalidade-option{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;font-size:14px;font-weight:400}
+.modalidade-option:hover{background:#e4e9ee}
+.modalidade-option input{width:18px;height:18px;margin:0;accent-color:#276097;cursor:pointer;flex:0 0 auto}
+:root[data-theme="dark"] .modalidade-option:hover{background:rgba(255,255,255,.08)}
 
   /* Feedback temporário de restauração e troca de equipe. */
   #petimer-loading{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.58);backdrop-filter:blur(4px) saturate(.75);-webkit-backdrop-filter:blur(4px) saturate(.75);cursor:wait;touch-action:none;}
@@ -1626,9 +1633,15 @@ button:disabled svg,button:disabled span{color:inherit !important;}
           </div>
         </div>
 
-        <div class="icon-select-wrap modalidade-select-wrap" title="Local de trabalho">
+        <div class="icon-select-wrap modalidade-select-wrap modalidade-picker-wrap" title="Local de trabalho">
           <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>
-          <select id="modalidade-input" class="tracker-select" onchange="handleManagedSelectChange('modalidade', this)"></select>
+          <select id="modalidade-input" class="tracker-select" onchange="handleManagedSelectChange('modalidade', this)" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;"></select>
+          <button id="modalidade-picker-trigger" class="cargo-picker-trigger" type="button" onclick="toggleModalidadePicker(event)" aria-haspopup="true" aria-expanded="false" aria-label="Local de trabalho"><span class="cargo-picker-label"></span></button>
+          <div id="modalidade-picker-popover" class="cargo-picker-popover modalidade-picker-popover" hidden onclick="event.stopPropagation()">
+            <div class="cargo-picker-search"><input id="modalidade-picker-search" type="text" placeholder="Buscar local de trabalho" autocomplete="off" oninput="renderModalidadePicker(this.value)"></div>
+            <div id="modalidade-picker-list" class="cargo-picker-projects"></div>
+            <div class="cargo-picker-footer"><button type="button" onclick="closeModalidadePicker();openOptionsManager('modalidade', managedSelectPreviousValue.modalidade || '')">＋ Adicionar / gerenciar locais</button></div>
+          </div>
         </div>
 
         <div class="time-controls">
@@ -2095,7 +2108,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   }
   function modalidadeOptionsHTML(selected='', includeManage=true) {
     const manage = includeManage ? '<option class="manage-select-option" value="__manage__">＋ Adicionar</option>' : '';
-    const empty = `<option value="" ${!selected?'selected':''}>Sem localização</option>`;
+    const empty = `<option value="" ${!selected?'selected':''}>&nbsp;</option>`;
     const opts = getModalidadeOptions().map(m => `<option value="${escapeHtml(m)}" ${m===selected?'selected':''}>${escapeHtml(m)}</option>`).join('');
     return manage + empty + opts;
   }
@@ -2109,7 +2122,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     const cargoNext=cargoObj?cargoCurrent:(cargos[0]?.name||'__manage__');
     const modNext=modCurrent&&modalidades.includes(modCurrent)?modCurrent:'';
     cargoEl.value=cargoNext; modEl.value=modNext; if(cargoNext)managedSelectPreviousValue.cargo=cargoNext; if(modNext!=='__manage__')managedSelectPreviousValue.modalidade=modNext;
-    applyCargoSelectColor(cargoEl); syncCargoPickerTrigger();
+    applyCargoSelectColor(cargoEl); syncCargoPickerTrigger(); syncModalidadePickerTrigger();
   }
   function applyCargoSelectColor(select) {
     if (!select) return;
@@ -2124,6 +2137,35 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     managedSelectPreviousValue[type] = select.value;
     if (type === 'cargo') applyCargoSelectColor(select);
   }
+  function syncModalidadePickerTrigger(){
+    const trigger=document.getElementById('modalidade-picker-trigger'),select=document.getElementById('modalidade-input');if(!trigger||!select)return;
+    const span=trigger.querySelector('.cargo-picker-label');if(span)span.textContent=select.value&&select.value!=='__manage__'?select.value:'';
+  }
+  function toggleModalidadePicker(event){
+    event?.stopPropagation();const pop=document.getElementById('modalidade-picker-popover');if(!pop)return;
+    const opening=pop.hidden;closeCargoPicker();pop.hidden=!opening;
+    document.getElementById('modalidade-picker-trigger')?.setAttribute('aria-expanded',String(opening));
+    if(opening){const q=document.getElementById('modalidade-picker-search');if(q)q.value='';renderModalidadePicker('');setTimeout(()=>q?.focus(),0);}
+  }
+  function closeModalidadePicker(){
+    const pop=document.getElementById('modalidade-picker-popover');if(pop)pop.hidden=true;
+    document.getElementById('modalidade-picker-trigger')?.setAttribute('aria-expanded','false');
+  }
+  function toggleModalidadeOption(encoded,checked){
+    const select=document.getElementById('modalidade-input');if(!select)return;
+    const value=checked?decodeURIComponent(encoded):'';
+    if(value&&!Array.from(select.options).some(o=>o.value===value))select.add(new Option(value,value));
+    select.value=value;managedSelectPreviousValue.modalidade=value;
+    syncModalidadePickerTrigger();closeModalidadePicker();
+  }
+  function renderModalidadePicker(filter=''){
+    const host=document.getElementById('modalidade-picker-list'),select=document.getElementById('modalidade-input');if(!host)return;
+    const q=String(filter||'').trim().toLocaleLowerCase('pt-BR'),current=select?select.value:'';
+    const items=getModalidadeOptions().filter(m=>!q||m.toLocaleLowerCase('pt-BR').includes(q));
+    if(!items.length){host.innerHTML='<div class="empty" style="padding:18px">Nenhum local encontrado.</div>';return;}
+    host.innerHTML=items.map(m=>`<label class="modalidade-option"><input type="checkbox" ${m===current?'checked':''} onchange="toggleModalidadeOption('${encodeURIComponent(m)}',this.checked)"><span>${escapeHtml(m)}</span></label>`).join('');
+  }
+  document.addEventListener('click',event=>{const wrap=document.querySelector('.modalidade-picker-wrap');if(wrap&&!wrap.contains(event.target))closeModalidadePicker();});
   function syncCargoPickerTrigger(){
     const trigger=document.getElementById('cargo-picker-trigger'),select=document.getElementById('cargo-input');if(!trigger||!select)return;
     const label=select.value||'Cargo/Projeto';const span=trigger.querySelector('.cargo-picker-label');if(span)span.textContent=label;trigger.style.color=select.value?getCargoColor(select.value):'var(--text)';
@@ -2166,6 +2208,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
       if (next !== '__manage__') managedSelectPreviousValue[type] = next;
     }
     if (type === 'cargo') applyCargoSelectColor(select);
+    syncModalidadePickerTrigger();
     managingOptionType = null;
   }
   function renderManagedOptionsList() {
@@ -2220,6 +2263,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
       select.value = name;
       managedSelectPreviousValue[type] = name;
       if (type === 'cargo') applyCargoSelectColor(select);
+      syncModalidadePickerTrigger();
       input.value = '';
       renderManagedOptionsList();
       renderEntries();
@@ -2814,7 +2858,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
     if (run && run.user === session.username && run.teamCode === session.teamCode) {
       document.getElementById('activity-input').value = run.activity;
       if(run.cargo) { document.getElementById('cargo-input').value = run.cargo; applyCargoSelectColor(document.getElementById('cargo-input')); syncCargoPickerTrigger(); }
-      if(run.modalidade) document.getElementById('modalidade-input').value = run.modalidade;
+      if(run.modalidade) { document.getElementById('modalidade-input').value = run.modalidade; syncModalidadePickerTrigger(); }
       if(run.date) document.getElementById('date-input').value = run.date;
       setTimerUI(true); startTick(); setEntryMode('timer'); updateSelectedDate();
     } else {
@@ -3264,7 +3308,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
       if (observer) { if (!input.hasAttribute('data-observer-disabled')) input.dataset.observerDisabled = String(input.disabled); input.disabled = true; }
       else if (input.hasAttribute('data-observer-disabled')) { input.disabled = input.dataset.observerDisabled === 'true'; delete input.dataset.observerDisabled; }
     });
-    if (observer) { closeCargoPicker(); document.getElementById('activity-suggestions').hidden = true; }
+    if (observer) { closeCargoPicker(); closeModalidadePicker(); document.getElementById('activity-suggestions').hidden = true; }
     return observer;
   }
   document.addEventListener('click', event => { if (!event.target.closest('#tracker-observer-controls')) closeTrackerMemberMenu(); });
@@ -3586,7 +3630,7 @@ button:disabled svg,button:disabled span{color:inherit !important;}
       if(!Array.from(select.options).some(o=>o.value===next))select.add(new Option(next,next));
       select.value=next;managedSelectPreviousValue[type]=next;
     });
-    applyCargoSelectColor(document.getElementById('cargo-input'));syncCargoPickerTrigger();
+    applyCargoSelectColor(document.getElementById('cargo-input'));syncCargoPickerTrigger();syncModalidadePickerTrigger();
     closeActivitySuggestions();
   }
   function updateSuggestions() {
