@@ -1320,7 +1320,58 @@ button:disabled svg,button:disabled span{color:inherit !important;}
 </style><style>.manage-color-edit{position:relative;display:inline-flex;flex-shrink:0}.manage-color-edit button.manage-color-dot{border:0;padding:0;cursor:pointer;transition:transform 130ms;flex-shrink:0}.manage-color-edit button:hover:not(:disabled){transform:scale(1.08);outline:1px solid var(--border);outline-offset:2px}.manage-color-edit button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.manage-color-edit button:disabled{opacity:.55;cursor:default}.manage-color-edit input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}</style><style id="day-header-contrast">
 :root{--day-header-bg:#E3E6EA;}
 :root[data-theme="dark"]{--day-header-bg:var(--theme-hover);}
-</style></head>
+</style>
+<style id="tracker-uniform-controls-v1">
+/* Padroniza os campos da barra de registro: todos os controles ficam com a mesma altura e os horários com dimensões idênticas. */
+#view-tracker .tracker-bar .icon-select-wrap,
+#view-tracker .tracker-bar .tracker-time,
+#view-tracker .tracker-bar .compact-date,
+#view-tracker .tracker-bar .manual-add,
+#view-tracker .tracker-bar .time-controls .icon-btn-line {
+  height:44px;
+  box-sizing:border-box;
+}
+#view-tracker .tracker-bar .tracker-time {
+  width:86px;
+  min-width:86px;
+  max-width:86px;
+  padding:0 8px;
+  display:block;
+}
+#view-tracker .tracker-bar .icon-select-wrap {
+  min-height:44px;
+}
+#view-tracker .tracker-bar .cargo-picker-trigger {
+  height:42px;
+  box-sizing:border-box;
+  padding-top:0;
+  padding-bottom:0;
+}
+#view-tracker .tracker-bar .compact-date {
+  min-height:44px;
+}
+#view-tracker .tracker-bar .manual-add {
+  min-height:44px;
+  padding-top:0;
+  padding-bottom:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+#view-tracker .tracker-bar .time-controls .icon-btn-line {
+  width:44px;
+  min-width:44px;
+  padding:0;
+}
+@media(max-width:640px){
+  #view-tracker .tracker-bar .tracker-time {
+    width:86px;
+    min-width:86px;
+    max-width:86px;
+  }
+}
+</style>
+</head>
 <body>
 
 <!-- 1. TELA DE LOGIN / CADASTRO -->
