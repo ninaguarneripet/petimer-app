@@ -2062,7 +2062,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzHOqA4WsxmOTqleFQ_gxtDC5Zqammqg_6h4LKCMPFfb8Nv11-KzO2WExAvzh1YRtqe/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbysfR0gz5qhJk_yKvA1naRdaZ1B26xWAq5K-eGQwN5v9KwKfJ6KeINzt_HUCIRpJL17/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -4666,6 +4666,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
         CACHE.myTeams = meData.teams || [];
         document.getElementById('leave-team-overlay').hidden = true;
         leaveTeamTargetCode = null;
+        showScreen('hub-screen');
         renderHub();
       } catch (err) {
         document.getElementById('leave-team-overlay').hidden = true;
