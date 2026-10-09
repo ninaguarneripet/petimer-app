@@ -1598,6 +1598,13 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
 .analysis-user-nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .analysis-user-nav svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .analysis-scope-btn{flex:1 1 auto;width:auto;min-width:0}
+.analysis-scope-btn .scope-arrow{width:14px;height:14px;font-size:0;line-height:0;background-image:var(--ui-chevron);background-repeat:no-repeat;background-position:center;background-size:14px 14px;transition:transform .15s ease;flex:0 0 14px}
+.analysis-scope-btn[aria-expanded="true"] .scope-arrow{transform:rotate(180deg)}
+.analysis-scope-menu-item[data-scope="sector"].active{font-weight:400}
+.analysis-scope-menu-item[data-scope="sector"]{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.analysis-scope-menu-item .scope-item-arrow{display:inline-flex;align-items:center;font-size:0;line-height:0}
+.analysis-scope-menu-item .scope-item-arrow svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;display:block}
+.analysis-scope-menu-item[data-scope="sector"] strong{font-weight:700}
 @media(min-width:640px) and (max-width:1023px){.analysis-scope-wrap{flex-basis:260px;width:260px;min-width:260px}}
 @media(max-width:900px){.analysis-scope-wrap{flex:1 1 280px;width:auto;min-width:min(280px,100%)}}
 </style><style id="observer-member-nav">
@@ -2002,13 +2009,13 @@ html{scrollbar-gutter:stable}
           <span class="reports-filter-label">Filtros</span>
           <div class="analysis-scope-wrap" id="analysis-scope-wrap">
             <button type="button" id="analysis-scope-btn" class="analysis-scope-btn" onclick="toggleAnalysisScopeMenu(event)" aria-haspopup="listbox" aria-expanded="false" aria-label="Quem exibir">
-              <span id="analysis-scope-label">Usuário</span><span class="scope-arrow" aria-hidden="true">▼</span>
+              <span id="analysis-scope-label">Usuário</span><span class="scope-arrow" aria-hidden="true"></span>
             </button>
-            <div class="analysis-user-nav" id="analysis-user-nav"><button type="button" aria-label="Usuário anterior" title="Usuário anterior" onclick="navigateAnalysisUser(-1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" aria-label="Próximo usuário" title="Próximo usuário" onclick="navigateAnalysisUser(1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>
+            <div class="analysis-user-nav" id="analysis-user-nav"><button type="button" id="analysis-nav-prev" aria-label="Usuário anterior" title="Usuário anterior" onclick="navigateAnalysisScopeItem(-1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" id="analysis-nav-next" aria-label="Próximo usuário" title="Próximo usuário" onclick="navigateAnalysisScopeItem(1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>
             <div class="analysis-scope-menu" id="analysis-scope-menu" role="listbox" hidden>
-              <div class="analysis-scope-menu-item" data-scope="user" role="option" onclick="chooseAnalysisScopeOption('user')"><span class="scope-item-text">Usuário</span><span class="scope-item-arrow" aria-hidden="true">▼</span></div>
+              <div class="analysis-scope-menu-item" data-scope="user" role="option" onclick="chooseAnalysisScopeOption('user')"><span class="scope-item-text">Usuário</span><span class="scope-item-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></div>
               <div class="analysis-scope-menu-item" data-scope="team" role="option" onclick="chooseAnalysisScopeOption('team')">Equipe inteira</div>
-              <div class="analysis-scope-menu-item" data-scope="sector" role="option" onclick="chooseAnalysisScopeOption('sector')">Por setor</div>
+              <div class="analysis-scope-menu-item" data-scope="sector" role="option" onclick="chooseAnalysisScopeOption('sector')"><span class="scope-item-text">Por setor</span><span class="scope-item-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></div>
             </div>
           </div>
           <select id="analysis-sector" class="reports-select" onchange="renderAnalysis()" aria-label="Setor" hidden></select>
@@ -4031,6 +4038,7 @@ html{scrollbar-gutter:stable}
   let analysisMode = 'overview';
   let analysisScope = 'user';
   let analysisSelectedUser = null;
+  let analysisSelectedSector = null;
   let userSelectPendingChoice = null;
 
   function startOfWeek(date) {
@@ -4058,6 +4066,20 @@ html{scrollbar-gutter:stable}
     const current = members.findIndex(member => member.username === analysisSelectedUser);
     const index = current < 0 ? 0 : (current + direction + members.length) % members.length;
     analysisSelectedUser = members[index].username;
+    updateAnalysisScopeLabel();
+    renderAnalysis();
+  }
+
+  // Setas do filtro: no modo Usuário navegam entre membros; em "Por setor", entre setores; em "Equipe inteira" não fazem nada.
+  function navigateAnalysisScopeItem(direction) {
+    if (analysisScope === 'user') { navigateAnalysisUser(direction); return; }
+    if (analysisScope !== 'sector') return;
+    const sectors = getTeamSectors();
+    if (sectors.length <= 1) return;
+    ensureAnalysisSelectedSector();
+    const current = sectors.indexOf(analysisSelectedSector);
+    const index = current < 0 ? 0 : (current + direction + sectors.length) % sectors.length;
+    analysisSelectedSector = sectors[index];
     updateAnalysisScopeLabel();
     renderAnalysis();
   }
@@ -4142,21 +4164,37 @@ html{scrollbar-gutter:stable}
     if (!stillValid) analysisSelectedUser = members.some(m => m.username === session.username) ? session.username : (members[0]?.username || null);
   }
 
+  // Garante um setor válido: mantém o anterior; senão "Geral"; senão o primeiro disponível.
+  function ensureAnalysisSelectedSector() {
+    const sectors = getTeamSectors();
+    if (analysisSelectedSector && sectors.includes(analysisSelectedSector)) return;
+    analysisSelectedSector = sectors.includes('Geral') ? 'Geral' : (sectors[0] || null);
+  }
+
   function updateAnalysisScopeLabel() {
     const label = document.getElementById('analysis-scope-label');
     if (!label) return;
+    ensureAnalysisSelectedSector();
     if (analysisScope === 'team') label.textContent = 'Equipe inteira';
-    else if (analysisScope === 'sector') label.textContent = 'Por setor';
+    else if (analysisScope === 'sector') label.textContent = analysisSelectedSector ? 'Por setor (' + analysisSelectedSector + ')' : 'Por setor';
     else if (analysisSelectedUser) label.innerHTML = '<svg class="scope-user-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"></circle><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"></path></svg><span class="scope-user-name">' + escapeHtml(analysisSelectedUser) + '</span>';
     else label.textContent = 'Usuário';
     const nav = document.getElementById('analysis-user-nav');
     if (nav) {
-      const disabled = analysisScope !== 'user' || getAnalysisTeamMembers().length <= 1;
+      const itemCount = analysisScope === 'sector' ? getTeamSectors().length : getAnalysisTeamMembers().length;
+      const disabled = analysisScope === 'team' || itemCount <= 1;
+      const prevBtn = document.getElementById('analysis-nav-prev'), nextBtn = document.getElementById('analysis-nav-next');
+      const prevText = analysisScope === 'sector' ? 'Setor anterior' : 'Usuário anterior';
+      const nextText = analysisScope === 'sector' ? 'Próximo setor' : 'Próximo usuário';
+      if (prevBtn) { prevBtn.title = prevText; prevBtn.setAttribute('aria-label', prevText); }
+      if (nextBtn) { nextBtn.title = nextText; nextBtn.setAttribute('aria-label', nextText); }
       nav.classList.toggle('inactive', disabled);
       nav.querySelectorAll('button').forEach(button => { button.disabled = disabled; button.setAttribute('aria-hidden', String(disabled)); });
     }
     const userItem = document.querySelector('#analysis-scope-menu .analysis-scope-menu-item[data-scope="user"]');
-    if (userItem) userItem.innerHTML = '<span class="scope-item-text">' + (analysisSelectedUser ? 'Usuário (<strong>' + escapeHtml(analysisSelectedUser) + '</strong>)' : 'Usuário') + '</span><span class="scope-item-arrow" aria-hidden="true">▼</span>';
+    if (userItem) userItem.innerHTML = '<span class="scope-item-text">' + (analysisSelectedUser ? 'Usuário (<strong>' + escapeHtml(analysisSelectedUser) + '</strong>)' : 'Usuário') + '</span><span class="scope-item-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>';
+    const sectorItem = document.querySelector('#analysis-scope-menu .analysis-scope-menu-item[data-scope="sector"]');
+    if (sectorItem) sectorItem.innerHTML = '<span class="scope-item-text">' + (analysisSelectedSector ? 'Por setor (<strong>' + escapeHtml(analysisSelectedSector) + '</strong>)' : 'Por setor') + '</span><span class="scope-item-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>';
     document.querySelectorAll('#analysis-scope-menu .analysis-scope-menu-item').forEach(el => {
       el.classList.toggle('active', el.dataset.scope === analysisScope);
     });
@@ -4187,21 +4225,34 @@ html{scrollbar-gutter:stable}
   function chooseAnalysisScopeOption(scope) {
     closeAnalysisScopeMenu();
     if (scope === 'user') {
-      openUserSelectModal();
+      openUserSelectModal('user');
+      return;
+    }
+    if (scope === 'sector') {
+      openUserSelectModal('sector');
       return;
     }
     analysisScope = scope;
-    document.getElementById('analysis-sector').hidden = scope !== 'sector';
+    document.getElementById('analysis-sector').hidden = true;
     updateAnalysisScopeLabel();
     renderAnalysis();
   }
 
   // ---------- Modal de seleção de usuário ----------
-  function openUserSelectModal() {
-    ensureAnalysisSelectedUser();
-    userSelectPendingChoice = analysisScope === 'user' ? analysisSelectedUser : (analysisSelectedUser || session.username);
+  let userSelectKind = 'user';
+  function openUserSelectModal(kind = 'user') {
+    userSelectKind = kind === 'sector' ? 'sector' : 'user';
+    const title = document.getElementById('user-select-title');
+    if (title) title.textContent = userSelectKind === 'sector' ? 'Selecionar setor' : 'Selecionar usuário';
+    if (userSelectKind === 'sector') {
+      ensureAnalysisSelectedSector();
+      userSelectPendingChoice = analysisSelectedSector;
+    } else {
+      ensureAnalysisSelectedUser();
+      userSelectPendingChoice = analysisScope === 'user' ? analysisSelectedUser : (analysisSelectedUser || session.username);
+    }
     const search = document.getElementById('user-select-search');
-    if (search) search.value = '';
+    if (search) { search.value = ''; search.placeholder = userSelectKind === 'sector' ? 'Buscar setor...' : 'Buscar usuário...'; }
     renderUserSelectList('');
     const overlay = document.getElementById('user-select-overlay');
     if (overlay) overlay.hidden = false;
@@ -4216,8 +4267,20 @@ html{scrollbar-gutter:stable}
   function renderUserSelectList(filterText) {
     const list = document.getElementById('user-select-list');
     if (!list) return;
-    const members = getAnalysisTeamMembers();
     const term = (filterText || '').trim().toLowerCase();
+    if (userSelectKind === 'sector') {
+      const sectors = getTeamSectors().filter(name => !term || name.toLowerCase().includes(term));
+      if (!sectors.length) {
+        list.innerHTML = '<div class="user-select-empty">Nenhum setor encontrado.</div>';
+        return;
+      }
+      list.innerHTML = sectors.map(name => `<button type="button" class="user-select-item ${name === userSelectPendingChoice ? 'selected' : ''}" data-username="${escapeHtml(name)}" onclick="pickUserSelectOption(this.dataset.username)">
+        <span class="user-select-radio"><span class="user-select-radio-dot"></span></span>
+        <span class="user-select-name">${escapeHtml(name)}</span>
+      </button>`).join('');
+      return;
+    }
+    const members = getAnalysisTeamMembers();
     const filtered = term ? members.filter(m => m.username.toLowerCase().includes(term) || m.name.toLowerCase().includes(term)) : members;
 
     if (!filtered.length) {
@@ -4227,7 +4290,7 @@ html{scrollbar-gutter:stable}
 
     list.innerHTML = filtered.map(m => {
       const selected = m.username === userSelectPendingChoice;
-      return `<button type="button" class="user-select-item ${selected ? 'selected' : ''}" data-username="${escapeHtml(m.username)}" onclick="pickUserSelectOption('${escapeHtml(m.username)}')">
+      return `<button type="button" class="user-select-item ${selected ? 'selected' : ''}" data-username="${escapeHtml(m.username)}" onclick="pickUserSelectOption(this.dataset.username)">
         <span class="user-select-radio"><span class="user-select-radio-dot"></span></span>
         <span class="user-select-name">${escapeHtml(m.username)}</span>
       </button>`;
@@ -4245,9 +4308,14 @@ html{scrollbar-gutter:stable}
   }
 
   function confirmUserSelect() {
-    if (!userSelectPendingChoice) { alert('Selecione um usuário.'); return; }
-    analysisScope = 'user';
-    analysisSelectedUser = userSelectPendingChoice;
+    if (!userSelectPendingChoice) { alert(userSelectKind === 'sector' ? 'Selecione um setor.' : 'Selecione um usuário.'); return; }
+    if (userSelectKind === 'sector') {
+      analysisScope = 'sector';
+      analysisSelectedSector = userSelectPendingChoice;
+    } else {
+      analysisScope = 'user';
+      analysisSelectedUser = userSelectPendingChoice;
+    }
     document.getElementById('analysis-sector').hidden = true;
     closeUserSelectModal();
     updateAnalysisScopeLabel();
@@ -4278,11 +4346,10 @@ html{scrollbar-gutter:stable}
 
     const sectorSel = document.getElementById('analysis-sector');
     if (sectorSel) {
-      const prev = sectorSel.value;
       const sectors = getTeamSectors();
+      ensureAnalysisSelectedSector();
       sectorSel.innerHTML = sectors.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-      if (sectors.includes(prev)) sectorSel.value = prev;
-      else if (sectors.length) sectorSel.value = sectors[0];
+      if (analysisSelectedSector) sectorSel.value = analysisSelectedSector;
     }
 
     updateAnalysisScopeLabel();
@@ -4304,7 +4371,8 @@ html{scrollbar-gutter:stable}
     if (scope === 'user') {
       entries = entries.filter(e => e.user === analysisSelectedUser);
     } else if (scope === 'sector') {
-      const sector = document.getElementById('analysis-sector')?.value || '';
+      ensureAnalysisSelectedSector();
+      const sector = analysisSelectedSector || '';
       const members = sector ? usersInSector(sector) : [];
       entries = entries.filter(e => members.includes(e.user));
     }
@@ -4320,7 +4388,7 @@ html{scrollbar-gutter:stable}
     if (!root || !session || !session.teamCode) return;
 
     populateAnalysisFilters();
-    document.getElementById('analysis-sector').hidden = analysisScope !== 'sector';
+    document.getElementById('analysis-sector').hidden = true; // setor é escolhido pelo botão principal + setas
 
     const { start, end } = analysisWeekRange();
     const label = document.getElementById('analysis-period-label');
