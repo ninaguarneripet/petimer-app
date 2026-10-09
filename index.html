@@ -790,6 +790,8 @@
   .analysis-scope-btn .scope-user-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
   .analysis-scope-menu-item[data-scope="user"].active{font-weight:400;}
   .analysis-scope-menu-item[data-scope="user"] strong{font-weight:700;}
+  .analysis-scope-menu-item[data-scope="user"]{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .analysis-scope-menu-item .scope-item-arrow{font-size:9px;color:var(--muted);flex:0 0 auto;}
   .cycle-detail-hero{padding:18px 20px;margin-bottom:14px;}
   .cycle-detail-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
   .cycle-detail-title{display:flex;align-items:flex-start;gap:10px}.cycle-detail-title .line-icon{margin-top:1px;color:var(--accent);}
@@ -917,6 +919,17 @@
   html.petimer-restoring[data-petimer-restore-view="cycle"] #view-cycle,
   html.petimer-restoring[data-petimer-restore-view="team"] #view-team{display:block!important;}
   html.petimer-restoring #petimer-loading{display:flex!important;}
+
+  /* Botão "olho" para mostrar/ocultar senha */
+  .pw-wrap{position:relative;display:block;width:100%;}
+  .pw-wrap > input{width:100%;box-sizing:border-box;padding-right:42px !important;}
+  .pw-toggle{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;padding:0;}
+  .pw-toggle:hover{color:var(--text);background:rgba(120,130,150,.14);}
+  .pw-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .pw-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;}
+  .pw-toggle .pw-eye-off{display:none;}
+  .pw-toggle.shown .pw-eye{display:none;}
+  .pw-toggle.shown .pw-eye-off{display:block;}
 </style>
 
 <style id="registro-visual-align-v2">
@@ -1587,7 +1600,24 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
 .analysis-scope-btn{flex:1 1 auto;width:auto;min-width:0}
 @media(min-width:640px) and (max-width:1023px){.analysis-scope-wrap{flex-basis:260px;width:260px;min-width:260px}}
 @media(max-width:900px){.analysis-scope-wrap{flex:1 1 280px;width:auto;min-width:min(280px,100%)}}
-</style><style id="observer-toggle-style">
+</style><style id="observer-member-nav">
+.tracker-member-picker{display:flex;align-items:center;gap:8px;flex:0 0 auto;min-width:0}
+.tracker-member-select{position:relative;flex:0 0 auto;min-width:0}
+.tracker-member-nav{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+.tracker-member-nav.inactive button{visibility:hidden;pointer-events:none}
+.tracker-member-nav button{width:34px;height:44px;flex:0 0 34px;display:grid;place-items:center;padding:0;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted,var(--text-muted));cursor:pointer;transition:background .12s,border-color .12s,color .12s}
+.tracker-member-nav button:hover{background:var(--theme-hover,var(--bg));color:var(--text)}
+.tracker-member-nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tracker-member-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#tracker-member-trigger .tracker-member-chevron{flex:0 0 auto;font-size:9px;line-height:1;color:var(--muted,var(--text-muted));transition:transform .15s ease}
+#tracker-member-trigger[aria-expanded="true"] .tracker-member-chevron{transform:rotate(180deg)}
+@media(max-width:639px){.tracker-member-picker{width:100%}.tracker-member-select{flex:1 1 auto}#tracker-member-trigger{width:100%}}
+</style><style id="stable-scrollbar-gutter">
+/* Reserva sempre o espaço da barra de rolagem: a página não "pula" de largura entre telas com e sem rolagem */
+html{scrollbar-gutter:stable}
+@supports not (scrollbar-gutter:stable){html{overflow-y:scroll}}
+</style>
+<style id="observer-toggle-style">
 .profile-menu #observer-mode-toggle.is-on{color:var(--accent,#276097);background:color-mix(in srgb,var(--accent,#276097) 10%,transparent);}
 </style>
 </head>
@@ -1884,7 +1914,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   <main class="main">
     <header class="topbar">
       <div class="tracker-title-group"><h1 id="view-title">Registro de atividade</h1><p class="tracker-observer-subtitle">Acompanhamento de registros da equipe</p></div>
-      <div id="tracker-observer-controls" hidden><span class="tracker-observer-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>Somente leitura</span><button id="tracker-member-trigger" type="button" aria-label="Selecionar membro para visualização" aria-expanded="false" aria-controls="tracker-member-menu" onclick="toggleTrackerMemberMenu()"></button><div id="tracker-member-menu" hidden><div class="tracker-member-search-zone"><div class="tracker-member-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="tracker-member-search" type="text" placeholder="Buscar membro…" aria-label="Buscar membro por nome ou username" autocomplete="off" oninput="filterTrackerMembers()" onkeydown="handleTrackerMemberSearchKey(event)"><button id="tracker-member-clear" type="button" aria-label="Limpar busca" onclick="clearTrackerMemberSearch()" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></div><div class="tracker-member-scroll"><div id="tracker-member-items"></div><div id="tracker-member-no-results" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>Nenhum membro encontrado</span></div></div></div></div>
+      <div id="tracker-observer-controls" hidden><span class="tracker-observer-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>Somente leitura</span><div class="tracker-member-picker"><div class="tracker-member-select"><button id="tracker-member-trigger" type="button" aria-label="Selecionar membro para visualização" aria-expanded="false" aria-controls="tracker-member-menu" onclick="toggleTrackerMemberMenu()"></button><div id="tracker-member-menu" hidden><div class="tracker-member-search-zone"><div class="tracker-member-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="tracker-member-search" type="text" placeholder="Buscar membro…" aria-label="Buscar membro por nome ou username" autocomplete="off" oninput="filterTrackerMembers()" onkeydown="handleTrackerMemberSearchKey(event)"><button id="tracker-member-clear" type="button" aria-label="Limpar busca" onclick="clearTrackerMemberSearch()" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></div><div class="tracker-member-scroll"><div id="tracker-member-items"></div><div id="tracker-member-no-results" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>Nenhum membro encontrado</span></div></div></div></div><div class="tracker-member-nav" id="tracker-member-nav"><button type="button" id="tracker-member-prev" aria-label="Membro anterior" title="Membro anterior" onclick="navigateTrackerMember(-1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" id="tracker-member-next" aria-label="Próximo membro" title="Próximo membro" onclick="navigateTrackerMember(1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div></div></div>
       <div class="cycle-badge" id="cycle-status-badge" hidden></div>
     </header>
 
@@ -1976,7 +2006,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
             </button>
             <div class="analysis-user-nav" id="analysis-user-nav"><button type="button" aria-label="Usuário anterior" title="Usuário anterior" onclick="navigateAnalysisUser(-1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" aria-label="Próximo usuário" title="Próximo usuário" onclick="navigateAnalysisUser(1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>
             <div class="analysis-scope-menu" id="analysis-scope-menu" role="listbox" hidden>
-              <div class="analysis-scope-menu-item" data-scope="user" role="option" onclick="chooseAnalysisScopeOption('user')">Usuário</div>
+              <div class="analysis-scope-menu-item" data-scope="user" role="option" onclick="chooseAnalysisScopeOption('user')"><span class="scope-item-text">Usuário</span><span class="scope-item-arrow" aria-hidden="true">▼</span></div>
               <div class="analysis-scope-menu-item" data-scope="team" role="option" onclick="chooseAnalysisScopeOption('team')">Equipe inteira</div>
               <div class="analysis-scope-menu-item" data-scope="sector" role="option" onclick="chooseAnalysisScopeOption('sector')">Por setor</div>
             </div>
@@ -3603,6 +3633,16 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     if (!menu.hidden) { if (matchMedia('(min-width:640px)').matches) document.getElementById('tracker-member-search').focus(); }
     else { document.getElementById('tracker-member-search').value = ''; filterTrackerMembers(); }
   }
+  function navigateTrackerMember(direction) {
+    const team = DB.getTeams()[session?.teamCode];
+    if (!isTrackerObserver() || !team) return;
+    const members = Object.keys(team.members || {}).filter(u => u !== session.username);
+    if (members.length <= 1) return;
+    const current = members.indexOf(trackerObservedUser);
+    const index = current < 0 ? 0 : (current + direction + members.length) % members.length;
+    trackerObservedUser = members[index];
+    closeTrackerMemberMenu(); renderEntries(); renderCycleBadge();
+  }
   function selectTrackerMember(user) {
     const team = DB.getTeams()[session?.teamCode];
     if (!isTrackerObserver() || user === session.username || !team.members[user]) return;
@@ -3619,9 +3659,15 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
     if (!members.includes(trackerObservedUser)) trackerObservedUser = members[0] || null;
     const users = DB.getUsers();
     const observedName = users[trackerObservedUser]?.name || trackerObservedUser || '';
-    document.getElementById('tracker-member-trigger').innerHTML = trackerObservedUser ? '<span class="tracker-member-avatar">' + escapeHtml(observedName.slice(0,2).toUpperCase()) + '</span><span class="tracker-member-label"><span class="tracker-viewing-label">Visualizando:</span><span class="tracker-selected-name">' + escapeHtml(observedName) + '</span></span><span class="tracker-member-chevron" aria-hidden="true">⌄</span>' : 'Nenhum membro disponível';
+    document.getElementById('tracker-member-trigger').innerHTML = trackerObservedUser ? '<span class="tracker-member-avatar">' + escapeHtml(observedName.slice(0,2).toUpperCase()) + '</span><span class="tracker-member-label"><span class="tracker-viewing-label">Visualizando:</span><span class="tracker-selected-name">' + escapeHtml(observedName) + '</span></span><span class="tracker-member-chevron" aria-hidden="true">▼</span>' : 'Nenhum membro disponível';
     document.getElementById('tracker-member-trigger').title = observedName;
     document.getElementById('tracker-member-trigger').disabled = !members.length;
+    const memberNav = document.getElementById('tracker-member-nav');
+    if (memberNav) {
+      const navOff = members.length <= 1;
+      memberNav.classList.toggle('inactive', navOff);
+      memberNav.querySelectorAll('button').forEach(b => { b.disabled = navOff; b.setAttribute('aria-hidden', String(navOff)); });
+    }
     document.getElementById('tracker-member-items').innerHTML = members.map(u => {
       const name = users[u]?.name || u;
       return '<button type="button" data-user="' + escapeHtml(u) + '"><span class="tracker-member-avatar">' + escapeHtml(name.slice(0,2).toUpperCase()) + '</span><span class="tracker-member-name">' + escapeHtml(name) + '<small>@' + escapeHtml(u) + '</small></span></button>';
@@ -4110,7 +4156,7 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
       nav.querySelectorAll('button').forEach(button => { button.disabled = disabled; button.setAttribute('aria-hidden', String(disabled)); });
     }
     const userItem = document.querySelector('#analysis-scope-menu .analysis-scope-menu-item[data-scope="user"]');
-    if (userItem) userItem.innerHTML = analysisSelectedUser ? 'Usuário (<strong>' + escapeHtml(analysisSelectedUser) + '</strong>)' : 'Usuário';
+    if (userItem) userItem.innerHTML = '<span class="scope-item-text">' + (analysisSelectedUser ? 'Usuário (<strong>' + escapeHtml(analysisSelectedUser) + '</strong>)' : 'Usuário') + '</span><span class="scope-item-arrow" aria-hidden="true">▼</span>';
     document.querySelectorAll('#analysis-scope-menu .analysis-scope-menu-item').forEach(el => {
       el.classList.toggle('active', el.dataset.scope === analysisScope);
     });
@@ -6141,6 +6187,48 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
   window.addEventListener('resize',close);
   window.addEventListener('blur',close);
   document.addEventListener('scroll',function(e){if(menu&&!menu.contains(e.target))close();},true);
+})();
+</script>
+<script>
+/* Adiciona o botão "olho" (mostrar/ocultar) em todos os campos de senha do site */
+(function(){
+  var EYE='<svg class="pw-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>'
+          +'<svg class="pw-eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.9 5.2A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1"/><path d="M6.6 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.4 4.5-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
+
+  function enhance(input){
+    if(input.dataset.pwEnhanced) return;
+    input.dataset.pwEnhanced='1';
+    var wrap=document.createElement('div');
+    wrap.className='pw-wrap';
+    input.parentNode.insertBefore(wrap,input);
+    wrap.appendChild(input);
+    var btn=document.createElement('button');
+    btn.type='button';
+    btn.className='pw-toggle';
+    btn.setAttribute('aria-label','Mostrar senha');
+    btn.title='Mostrar senha';
+    btn.innerHTML=EYE;
+    btn.addEventListener('mousedown',function(e){e.preventDefault();});
+    btn.addEventListener('click',function(){
+      var show=input.type==='password';
+      input.type=show?'text':'password';
+      btn.classList.toggle('shown',show);
+      var label=show?'Ocultar senha':'Mostrar senha';
+      btn.setAttribute('aria-label',label);
+      btn.title=label;
+    });
+    wrap.appendChild(btn);
+  }
+
+  function scan(){
+    document.querySelectorAll('input[type="password"]').forEach(enhance);
+  }
+
+  function start(){
+    scan();
+    new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();
 </script>
 </body>
