@@ -627,7 +627,7 @@
   .side-tab:last-child{border-right:0}
   .side-tab:hover:not(.active){background:var(--surface-2)}
   .side-tab.active{background:#eef3f8;color:var(--accent-dark);font-weight:650;}
-  .member-hours-row{border-bottom:1px solid var(--border);padding:10px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;}
+  .member-hours-row{border-bottom:1px solid var(--border);padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;}
   .member-hours-row.is-zero{opacity:.45;}
   .member-hours-name{font-size:11.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .member-hours-time{font-size:11.5px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap;}
@@ -4675,9 +4675,7 @@ html{scrollbar-gutter:stable}
       const active = rows.filter(r => r[1].duration > 0).length;
       if (hint) hint.textContent = `${active} de ${rows.length} com horas`;
       list.innerHTML = rows.length ? rows.map(([u,obj]) => {
-        const segs = Object.entries(obj.cargos).sort((a,b) => b[1].duration - a[1].duration).map(([name,c]) =>
-          `<div class="member-hours-seg" title="${escapeHtml(name)} — ${fmtHM(c.duration)}" style="width:${obj.duration ? c.duration/obj.duration*100 : 0}%;background:${c.color}"></div>`).join('');
-        return `<div class="member-hours-row${obj.duration ? '' : ' is-zero'}"><div class="member-hours-name" title="${escapeHtml(reportMemberName(u))}">${escapeHtml(reportMemberName(u))}</div><div class="member-hours-time">${obj.duration ? fmtHM(obj.duration) : '—'}</div><div class="member-hours-track"><div class="member-hours-fill" style="width:${obj.duration/max*100}%">${segs}</div></div></div>`;
+        return `<div class="member-hours-row${obj.duration ? '' : ' is-zero'}"><div class="member-hours-name" title="${escapeHtml(reportMemberName(u))}">${escapeHtml(reportMemberName(u))}</div><div class="member-hours-time">${obj.duration ? fmtHM(obj.duration) : '—'}</div></div>`;
       }).join('') + `<div class="member-hours-total"><span>Total do filtro</span><strong>${fmtHM(total)}</strong></div>`
         : '<div class="empty" style="padding:24px 16px">Sem membros neste filtro.</div>';
       return;
