@@ -621,6 +621,22 @@
   .dashboard-activity-sub{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .dashboard-dot{width:5px;height:5px;border-radius:50%;flex:0 0 5px;}
   .dashboard-activity-time{font-size:11px;color:var(--text);font-variant-numeric:tabular-nums;}
+  .dashboard-side-tabs{gap:10px;}
+  .side-tabs{display:inline-flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;background:var(--surface);}
+  .side-tab{height:28px;padding:0 12px;border:0;border-right:1px solid var(--border);background:var(--surface);color:var(--text);font:500 11px inherit;cursor:pointer;}
+  .side-tab:last-child{border-right:0}
+  .side-tab:hover:not(.active){background:var(--surface-2)}
+  .side-tab.active{background:#eef3f8;color:var(--accent-dark);font-weight:650;}
+  .member-hours-row{border-bottom:1px solid var(--border);padding:10px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;}
+  .member-hours-row.is-zero{opacity:.45;}
+  .member-hours-name{font-size:11.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .member-hours-time{font-size:11.5px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .member-hours-track{grid-column:1 / -1;height:8px;background:#eef1f4;border-radius:4px;overflow:hidden;}
+  .member-hours-fill{height:100%;display:flex;border-radius:4px;overflow:hidden;min-width:0;}
+  .member-hours-seg{height:100%;min-width:2px;}
+  .member-hours-total{padding:10px 16px;font-size:10.5px;color:var(--muted);display:flex;justify-content:space-between;}
+  :root[data-theme="dark"] :is(.side-tab.active){background:var(--theme-blue-soft);color:var(--theme-link);}
+  :root[data-theme="dark"] :is(.member-hours-track){background:var(--surface-2);}
   @media(max-width:1100px){.dashboard-layout{grid-template-columns:1fr}.dashboard-side-card{min-height:0}.dashboard-breakdown{grid-template-columns:1fr}.dashboard-category-row{grid-template-columns:minmax(100px,1fr) 70px minmax(140px,2fr) 46px}}
 
 
@@ -2080,7 +2096,13 @@ html{scrollbar-gutter:stable}
             </div>
 
             <aside class="dashboard-side-card">
-              <div class="dashboard-side-head"><span>Atividades mais registradas</span><span>Top 10</span></div>
+              <div class="dashboard-side-head dashboard-side-tabs">
+                <div class="side-tabs" role="tablist" aria-label="Detalhamento">
+                  <button type="button" class="side-tab" data-side-tab="members" role="tab" onclick="setAnalysisSideTab('members')">Membros</button>
+                  <button type="button" class="side-tab" data-side-tab="activities" role="tab" onclick="setAnalysisSideTab('activities')">Atividades</button>
+                </div>
+                <span id="dash-side-hint"></span>
+              </div>
               <div id="dash-top-activities" class="dashboard-activity-list"><div class="empty">Sem registros.</div></div>
             </aside>
           </div>
@@ -4609,6 +4631,63 @@ html{scrollbar-gutter:stable}
     }
   }
 
+  // ---------- Card lateral da Análise: Membros | Atividades ----------
+  let analysisSideTab = null; // null = automático (Membros se houver mais de uma pessoa no filtro)
+
+  function fmtHM(ms) {
+    const mins = Math.round(Math.max(0, ms) / 60000);
+    const h = Math.floor(mins / 60), m = mins % 60;
+    if (!h) return `${m}min`;
+    return m ? `${h}h ${String(m).padStart(2,'0')}min` : `${h}h`;
+  }
+
+  function analysisScopeMembers() {
+    if (analysisScope === 'user') return analysisSelectedUser ? [analysisSelectedUser] : [];
+    if (analysisScope === 'sector') { ensureAnalysisSelectedSector(); return usersInSector(analysisSelectedSector || ''); }
+    return getAnalysisTeamMembers().map(m => m.username);
+  }
+
+  function setAnalysisSideTab(tab) {
+    analysisSideTab = tab;
+    renderAnalysis();
+  }
+
+  function renderAnalysisSide(entries, activityTotals, total) {
+    const list = document.getElementById('dash-top-activities');
+    const hint = document.getElementById('dash-side-hint');
+    if (!list) return;
+    const scopeMembers = analysisScopeMembers();
+    const tab = analysisSideTab || (scopeMembers.length > 1 ? 'members' : 'activities');
+    document.querySelectorAll('[data-side-tab]').forEach(b => b.classList.toggle('active', b.dataset.sideTab === tab));
+
+    if (tab === 'members') {
+      const byUser = {};
+      scopeMembers.forEach(u => { byUser[u] = { duration: 0, cargos: {} }; });
+      entries.forEach(e => {
+        if (!byUser[e.user]) byUser[e.user] = { duration: 0, cargos: {} };
+        const dur = Number(e.duration) || 0, cargo = e.cargo || 'Sem cargo';
+        byUser[e.user].duration += dur;
+        if (!byUser[e.user].cargos[cargo]) byUser[e.user].cargos[cargo] = { duration: 0, color: dashboardCargoColor(e) };
+        byUser[e.user].cargos[cargo].duration += dur;
+      });
+      const rows = Object.entries(byUser).sort((a,b) => b[1].duration - a[1].duration || reportMemberName(a[0]).localeCompare(reportMemberName(b[0]), 'pt-BR'));
+      const max = Math.max(...rows.map(r => r[1].duration), 1);
+      const active = rows.filter(r => r[1].duration > 0).length;
+      if (hint) hint.textContent = `${active} de ${rows.length} com horas`;
+      list.innerHTML = rows.length ? rows.map(([u,obj]) => {
+        const segs = Object.entries(obj.cargos).sort((a,b) => b[1].duration - a[1].duration).map(([name,c]) =>
+          `<div class="member-hours-seg" title="${escapeHtml(name)} — ${fmtHM(c.duration)}" style="width:${obj.duration ? c.duration/obj.duration*100 : 0}%;background:${c.color}"></div>`).join('');
+        return `<div class="member-hours-row${obj.duration ? '' : ' is-zero'}"><div class="member-hours-name" title="${escapeHtml(reportMemberName(u))}">${escapeHtml(reportMemberName(u))}</div><div class="member-hours-time">${obj.duration ? fmtHM(obj.duration) : '—'}</div><div class="member-hours-track"><div class="member-hours-fill" style="width:${obj.duration/max*100}%">${segs}</div></div></div>`;
+      }).join('') + `<div class="member-hours-total"><span>Total do filtro</span><strong>${fmtHM(total)}</strong></div>`
+        : '<div class="empty" style="padding:24px 16px">Sem membros neste filtro.</div>';
+      return;
+    }
+
+    if (hint) hint.textContent = 'Top 10';
+    const topActs = Object.entries(activityTotals).sort((a,b) => b[1].duration - a[1].duration).slice(0,10);
+    list.innerHTML = topActs.length ? topActs.map(([activity,obj]) => `<div class="dashboard-activity-row"><div class="dashboard-activity-main"><div class="dashboard-activity-name">${escapeHtml(activity)}</div><div class="dashboard-activity-sub"><span class="dashboard-dot" style="background:${obj.color}"></span><span style="color:${obj.color}">${escapeHtml(obj.cargo)}</span></div></div><div class="dashboard-activity-time">${fmtClock(obj.duration)}</div></div>`).join('') : '<div class="empty" style="padding:24px 16px">Sem registros nesta semana.</div>';
+  }
+
   function renderAnalysisOverview(entries, start) {
     const total = entries.reduce((sum,e)=>sum+(Number(e.duration)||0),0);
     document.getElementById('dash-total-time').textContent = fmtClock(total);
@@ -4681,10 +4760,8 @@ html{scrollbar-gutter:stable}
       return `<div class="dashboard-category-row"><div class="dashboard-category-name" style="color:${color}">${escapeHtml(name)}</div><div class="dashboard-category-time">${fmtClock(dur)}</div><div class="dashboard-category-track"><div class="dashboard-category-fill" style="width:${pct}%;background:${color}"></div></div><div class="dashboard-category-percent">${pct.toFixed(1).replace('.',',')}%</div></div>`;
     }).join('') : '<div class="empty">Sem registros nesta semana.</div>';
 
-    // Top 10 atividades
-    const topActs = Object.entries(activityTotals).sort((a,b)=>b[1].duration-a[1].duration).slice(0,10);
-    const actList = document.getElementById('dash-top-activities');
-    actList.innerHTML = topActs.length ? topActs.map(([activity,obj])=>`<div class="dashboard-activity-row"><div class="dashboard-activity-main"><div class="dashboard-activity-name">${escapeHtml(activity)}</div><div class="dashboard-activity-sub"><span class="dashboard-dot" style="background:${obj.color}"></span><span style="color:${obj.color}">${escapeHtml(obj.cargo)}</span></div></div><div class="dashboard-activity-time">${fmtClock(obj.duration)}</div></div>`).join('') : '<div class="empty" style="padding:24px 16px">Sem registros nesta semana.</div>';
+    // Card lateral: horas por membro / atividades
+    renderAnalysisSide(entries, activityTotals, total);
   }
 
   function renderReportDetailed(entries) {
