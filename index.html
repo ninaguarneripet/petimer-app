@@ -628,8 +628,11 @@
   .side-tab:hover:not(.active){background:var(--surface-2)}
   .side-tab.active{background:#eef3f8;color:var(--accent-dark);font-weight:650;}
   .member-hours-row{border-bottom:1px solid var(--border);padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;}
-  .member-hours-row.is-zero{opacity:.45;}
+  .member-hours-row.is-zero :is(.member-hours-name,.member-hours-time){opacity:.45;}
   .member-hours-name{font-size:11.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .member-hours-sub{grid-column:1 / -1;font-size:10.5px;color:var(--muted);line-height:1.5;}
+  .member-hours-sub strong{color:var(--text);font-weight:600;}
+  .member-hours-sub.is-done{color:#2f7d68;}
   .member-hours-time{font-size:11.5px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap;}
   .member-hours-track{grid-column:1 / -1;height:8px;background:#eef1f4;border-radius:4px;overflow:hidden;}
   .member-hours-fill{height:100%;display:flex;border-radius:4px;overflow:hidden;min-width:0;}
@@ -4652,6 +4655,24 @@ html{scrollbar-gutter:stable}
     renderAnalysis();
   }
 
+  // Quanto falta cada membro cumprir no período ativo (usa a mesma conta da aba Período).
+  function memberCycleLine(username) {
+    if (analysisWeekOffset !== 0) return '';
+    const cycle = getActiveCycle();
+    if (!cycle) return '';
+    const team = DB.getTeams()[session.teamCode];
+    if (team && username === team.admin && team.adminParticipatesInCycle === false) return '';
+    const pr = computeCycleProgress(cycle, username);
+    const unit = cycle.unit === 'weeks' ? 'semana' : (cycle.unit === 'days' ? 'dia' : 'hora');
+    const unitPl = cycle.unit === 'weeks' ? 'semanas' : (cycle.unit === 'days' ? 'dias' : 'horas');
+    if (pr.remainingMs <= 30000) return `<div class="member-hours-sub is-done">Meta do período cumprida (${formatHM(pr.loggedMs)})</div>`;
+    const left = pr.periodsRemaining;
+    const thisWeek = pr.periodCompleted
+      ? `${unit[0].toUpperCase()+unit.slice(1)} atual cumprida`
+      : `Faltam <strong>${formatHM(pr.remainingThisPeriodMs)}</strong> nesta ${unit}`;
+    return `<div class="member-hours-sub">${thisWeek} · <strong>${formatHM(pr.remainingMs)}</strong> no período (${formatHM(pr.loggedMs)} de ${formatHM(pr.goalMs)}) · média de <strong>${formatHM(pr.requiredMs)}</strong> por ${unit} nas ${left} ${left === 1 ? unit : unitPl} que restam</div>`;
+  }
+
   function renderAnalysisSide(entries, activityTotals, total) {
     const list = document.getElementById('dash-top-activities');
     const hint = document.getElementById('dash-side-hint');
@@ -4675,7 +4696,7 @@ html{scrollbar-gutter:stable}
       const active = rows.filter(r => r[1].duration > 0).length;
       if (hint) hint.textContent = `${active} de ${rows.length} com horas`;
       list.innerHTML = rows.length ? rows.map(([u,obj]) => {
-        return `<div class="member-hours-row${obj.duration ? '' : ' is-zero'}"><div class="member-hours-name" title="${escapeHtml(reportMemberName(u))}">${escapeHtml(reportMemberName(u))}</div><div class="member-hours-time">${obj.duration ? fmtHM(obj.duration) : '—'}</div></div>`;
+        return `<div class="member-hours-row${obj.duration ? '' : ' is-zero'}"><div class="member-hours-name" title="${escapeHtml(reportMemberName(u))}">${escapeHtml(reportMemberName(u))}</div><div class="member-hours-time">${obj.duration ? fmtHM(obj.duration) : '—'}</div>${memberCycleLine(u)}</div>`;
       }).join('') + `<div class="member-hours-total"><span>Total do filtro</span><strong>${fmtHM(total)}</strong></div>`
         : '<div class="empty" style="padding:24px 16px">Sem membros neste filtro.</div>';
       return;
