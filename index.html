@@ -73,7 +73,7 @@
       window.petimerVisualRestore = {
         view: ['tracker','analysis','cycle','team'].includes(state.view) ? state.view : 'tracker',
         cycleSubView: state.cycleSubView === 'records' ? 'records' : 'current',
-        analysisMode: ['overview','detailed','weekly'].includes(state.analysisMode) ? state.analysisMode : 'overview'
+        analysisMode: ['overview','detailed','weekly','period'].includes(state.analysisMode) ? state.analysisMode : 'overview'
       };
       document.documentElement.classList.add('petimer-restoring');
       document.documentElement.dataset.petimerRestoreView = window.petimerVisualRestore.view;
@@ -627,12 +627,38 @@
   .side-tab:last-child{border-right:0}
   .side-tab:hover:not(.active){background:var(--surface-2)}
   .side-tab.active{background:#eef3f8;color:var(--accent-dark);font-weight:650;}
+  .period-head{gap:12px;flex-wrap:wrap;}
+  .period-sheet-wrap{overflow:auto;padding:0;}
+  .period-sheet{width:100%;border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums;min-width:780px;}
+  .period-sheet th{height:42px;padding:0 14px;text-align:center;white-space:nowrap;background:var(--surface);color:#8b94a0;font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.04em;border-bottom:1px solid var(--border);}
+  .period-sheet thead th small{display:block;font-weight:500;font-size:9.5px;color:var(--muted);text-transform:none;letter-spacing:0;margin-top:2px;}
+  .period-sheet thead th:first-child,.period-sheet td.member-col{text-align:left;}
+  .period-sheet thead th.goal-col{background:var(--accent-soft);color:var(--accent);border-left:1px solid var(--border);}
+  .period-sheet thead th.goal-col:first-of-type{border-left:1px solid var(--border);}
+  .period-sheet td{padding:12px 14px;text-align:center;white-space:nowrap;color:var(--text);border-bottom:1px solid var(--border);background:var(--surface);}
+  .period-sheet tbody tr:nth-child(even) td{background:#f1f4f8;}
+  .period-sheet tbody tr:hover td{background:#e8eef5;}
+  .period-sheet td.member-col{font-weight:600;min-width:130px;}
+  .period-sheet td.is-future{color:var(--muted);}
+  .period-sheet td.is-done{color:#2f7d68;font-weight:600;}
+  .period-sheet td.total-col{font-weight:650;}
+  .period-sheet .min-flag{color:#e8564f;font-weight:700;margin-left:3px;}
+  .period-sheet tfoot td{background:#eef2f5;color:var(--text);font-weight:650;border-bottom:1px solid var(--border);}
+  .period-sheet tfoot tr:first-child td{border-top:1px solid var(--border);}
+  .period-sheet tfoot tr:last-child td{border-bottom:0;}
+  .period-sheet tfoot td.foot-label{text-align:left;text-transform:uppercase;font-size:10px;letter-spacing:.04em;color:#8b94a0;}
+  .period-sheet tfoot td.foot-empty{background:#eef2f5;}
+  .period-legend{padding:12px 16px 14px;font-size:10.5px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;}
+  .period-legend .lg-star{color:#e8564f;font-weight:700;margin-right:4px;}
+  :root[data-theme="dark"] .period-sheet th,:root[data-theme="dark"] .period-sheet td{border-color:var(--border);}
+  :root[data-theme="dark"] .period-sheet thead th.goal-col{background:var(--accent-soft);color:#8fb8e3;}
+  :root[data-theme="dark"] .period-sheet tbody tr:nth-child(even) td{background:var(--surface-2);}
+  :root[data-theme="dark"] .period-sheet tbody tr:hover td{background:var(--accent-soft);}
+  :root[data-theme="dark"] .period-sheet tfoot td,:root[data-theme="dark"] .period-sheet tfoot td.foot-empty{background:var(--surface-2);}
+
   .member-hours-row{border-bottom:1px solid var(--border);padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;}
   .member-hours-row.is-zero :is(.member-hours-name,.member-hours-time){opacity:.45;}
   .member-hours-name{font-size:11.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .member-hours-sub{grid-column:1 / -1;font-size:10.5px;color:var(--muted);line-height:1.5;}
-  .member-hours-sub strong{color:var(--text);font-weight:600;}
-  .member-hours-sub.is-done{color:#2f7d68;}
   .member-hours-time{font-size:11.5px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap;}
   .member-hours-track{grid-column:1 / -1;height:8px;background:#eef1f4;border-radius:4px;overflow:hidden;}
   .member-hours-fill{height:100%;display:flex;border-radius:4px;overflow:hidden;min-width:0;}
@@ -2048,15 +2074,16 @@ html{scrollbar-gutter:stable}
             <button class="reports-tab active" data-analysis-mode="overview" onclick="setAnalysisMode('overview',this)">Visão geral</button>
             <button class="reports-tab" data-analysis-mode="detailed" onclick="setAnalysisMode('detailed',this)">Detalhado</button>
             <button class="reports-tab" data-analysis-mode="weekly" onclick="setAnalysisMode('weekly',this)">Semanal</button>
+            <button class="reports-tab" data-analysis-mode="period" onclick="setAnalysisMode('period',this)">Planilha acompanhamento</button>
           </div>
           <div class="reports-top-actions">
-            <div class="reports-period">
+            <div class="reports-period" id="analysis-week-nav">
               <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg></span>
               <span class="reports-period-label" id="analysis-period-label">Esta semana</span>
               <button onclick="changeAnalysisWeek(-1)" title="Semana anterior"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></button>
               <button onclick="changeAnalysisWeek(1)" title="Próxima semana"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></button>
             </div>
-            <button class="reports-export" onclick="exportCurrentAnalysis()">EXPORTAR</button>
+            <button class="reports-export" id="analysis-export-btn" onclick="exportCurrentAnalysis()">EXPORTAR</button>
           </div>
         </div>
 
@@ -2117,6 +2144,14 @@ html{scrollbar-gutter:stable}
             <div class="reports-group-label" id="analysis-table-group-label">Registros individuais</div>
           </div>
           <div id="analysis-table-content"><div class="reports-empty">Sem registros.</div></div>
+        </div>
+
+        <div class="reports-card" id="analysis-period-panel" hidden>
+          <div class="reports-card-head period-head">
+            <select id="analysis-period-cycle" class="reports-select" onchange="setAnalysisPeriodCycle(this.value)" aria-label="Período da planilha"></select>
+            <div class="reports-group-label" id="analysis-period-note"></div>
+          </div>
+          <div id="analysis-period-content"><div class="reports-empty">Sem período cadastrado.</div></div>
         </div>
       </div>
     </section>
@@ -4245,7 +4280,10 @@ html{scrollbar-gutter:stable}
     analysisMode = mode;
     document.querySelectorAll('[data-analysis-mode]').forEach(b => b.classList.toggle('active', b.dataset.analysisMode === mode));
     document.getElementById('analysis-overview-panel').hidden = mode !== 'overview';
-    document.getElementById('analysis-table-panel').hidden = mode === 'overview';
+    document.getElementById('analysis-table-panel').hidden = mode !== 'detailed' && mode !== 'weekly';
+    const periodPanel = document.getElementById('analysis-period-panel'); if (periodPanel) periodPanel.hidden = mode !== 'period';
+    const weekNav = document.getElementById('analysis-week-nav'); if (weekNav) weekNav.hidden = mode === 'period';
+    const exportBtn = document.getElementById('analysis-export-btn'); if (exportBtn) exportBtn.hidden = mode === 'period';
     savePetimerVisualNavigation();
     if (render) renderAnalysis();
   }
@@ -4293,7 +4331,8 @@ html{scrollbar-gutter:stable}
   function usersInSector(sector) {
     const team = DB.getTeams()[session.teamCode];
     if (!team) return [];
-    return Object.keys(team.members || {}).filter(u => (team.members[u].sector || 'Geral') === sector);
+    const idleAdmin = team.adminParticipatesInCycle === false ? team.admin : null;
+    return Object.keys(team.members || {}).filter(u => u !== idleAdmin && (team.members[u].sector || 'Geral') === sector);
   }
 
   // Membros da equipe atual, para a seleção individual de usuário.
@@ -4302,7 +4341,8 @@ html{scrollbar-gutter:stable}
     const team = DB.getTeams()[session.teamCode];
     if (!team) return [];
     const users = DB.getUsers();
-    return Object.keys(team.members || {}).map(u => ({
+    const idleAdmin = team.adminParticipatesInCycle === false ? team.admin : null;
+    return Object.keys(team.members || {}).filter(u => u !== idleAdmin).map(u => ({
       username: u,
       name: (users[u] && users[u].name) || (u === session.username ? session.name : null) || u
     })).sort((a,b) => a.username.localeCompare(b.username,'pt-BR'));
@@ -4585,15 +4625,20 @@ html{scrollbar-gutter:stable}
   function getAnalysisFilteredEntries() {
     if (!session || !session.teamCode) return [];
     const { start, end } = analysisWeekRange();
-    const scope = analysisScope || 'user';
-    const cargo = document.getElementById('analysis-cargo')?.value || '';
-    const modalidade = document.getElementById('analysis-modalidade')?.value || '';
 
     let entries = DB.getEntries().filter(e => e.teamCode === session.teamCode && e.date);
     entries = entries.filter(e => {
       const d = new Date(e.date + 'T12:00:00');
       return d >= start && d <= end;
     });
+    return applyAnalysisFilters(entries);
+  }
+
+  // Escopo (usuário / setor / equipe), cargo e local — compartilhado entre as abas da Análise.
+  function applyAnalysisFilters(entries) {
+    const scope = analysisScope || 'user';
+    const cargo = document.getElementById('analysis-cargo')?.value || '';
+    const modalidade = document.getElementById('analysis-modalidade')?.value || '';
 
     if (scope === 'user') {
       entries = entries.filter(e => e.user === analysisSelectedUser);
@@ -4621,6 +4666,8 @@ html{scrollbar-gutter:stable}
     const label = document.getElementById('analysis-period-label');
     if (label) label.textContent = analysisWeekOffset === 0 ? 'Esta semana' : `${reportDateLabel(start)} – ${reportDateLabel(end)}`;
 
+    if (analysisMode === 'period') { renderAnalysisPeriod(); return; }
+
     const entries = getAnalysisFilteredEntries();
 
     if (analysisMode === 'overview') {
@@ -4632,6 +4679,128 @@ html{scrollbar-gutter:stable}
       const content = document.getElementById('analysis-table-content'); if (!content) return;
       content.innerHTML = analysisMode === 'detailed' ? renderReportDetailed(entries) : renderReportWeekly(entries, start);
     }
+  }
+
+  // ---------- Análise › Período (planilha de horas por semana do período) ----------
+  let analysisPeriodCycleId = null;
+
+  function setAnalysisPeriodCycle(id) { analysisPeriodCycleId = id || null; renderAnalysis(); }
+
+  function weekStartOfDate(dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() - (d.getDay() + 6) % 7);
+    return localDateStr(d);
+  }
+
+  function fmtBR(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; }
+
+  // Só Geral e Projetos têm meta/média para bater (e "Todos", que soma tudo).
+  function periodCargoHasGoal(cargo) {
+    const key = String(cargo || '').trim().toLocaleLowerCase('pt-BR');
+    return key === '' || key === 'projetos';
+  }
+
+  function renderAnalysisPeriod() {
+    const content = document.getElementById('analysis-period-content');
+    const select = document.getElementById('analysis-period-cycle');
+    const note = document.getElementById('analysis-period-note');
+    if (!content || !select) return;
+
+    const cycles = DB.getCycles().filter(c => c.teamCode === session.teamCode).slice().sort((a, b) => String(b.startDate).localeCompare(String(a.startDate)));
+    if (!cycles.length) {
+      select.innerHTML = '<option value="">Sem períodos</option>';
+      if (note) note.textContent = '';
+      content.innerHTML = '<div class="reports-empty">Nenhum período cadastrado. Um administrador pode criar um na aba Período.</div>';
+      return;
+    }
+    const todayStr = localDateStr(new Date());
+    let cycle = cycles.find(c => c.id === analysisPeriodCycleId);
+    if (!cycle) cycle = cycles.find(c => todayStr >= c.startDate && todayStr <= c.endDate) || cycles.find(c => c.startDate <= todayStr) || cycles[0];
+    analysisPeriodCycleId = cycle.id;
+    select.innerHTML = cycles.map(c => `<option value="${escapeHtml(c.id)}">${fmtBR(c.startDate)} – ${fmtBR(c.endDate)}</option>`).join('');
+    select.value = cycle.id;
+
+    if (cycle.unit !== 'weeks') {
+      if (note) note.textContent = '';
+      content.innerHTML = '<div class="reports-empty">Esta página funciona para períodos com metas semanais.</div>';
+      return;
+    }
+
+    const weeks = getCycleWeeklyPeriods(cycle);
+    const todayWeek = weekStartOfDate(todayStr);
+    const weeksRemaining = weeks.filter(w => w.weekStart >= todayWeek).length; // contando a semana atual
+    // Regras da planilha:
+    //  - filtrado por Projetos: mínimo 1h; média 4h10 (250 min) menos 50 min por feriado na semana;
+    //  - todos os cargos/projetos: usa a média e o mínimo do próprio período (ex.: 20h/16h40, 16h40/13h20 com feriado).
+    const onlyProjects = String(document.getElementById('analysis-cargo')?.value || '').trim().toLocaleLowerCase('pt-BR') === 'projetos';
+    weeks.forEach(w => {
+      if (onlyProjects) {
+        const hol = (Array.isArray(cycle.holidayWeeks) ? cycle.holidayWeeks : []).filter(x => x.weekStart === w.weekStart).length;
+        const holidays = Math.max(hol, w.holidayDate ? 1 : 0);
+        w.sheetMin = 60;
+        w.sheetAvg = Math.max(0, 250 - 50 * holidays);
+      } else {
+        w.sheetMin = w.minimumMinutes;
+        w.sheetAvg = w.goalMinutes;
+      }
+    });
+    const goalTotalMs = weeks.reduce((sum, w) => sum + w.sheetAvg * 60000, 0);
+
+    const cargoFilter = document.getElementById('analysis-cargo')?.value || '';
+    const showGoal = periodCargoHasGoal(cargoFilter);
+
+    const team = DB.getTeams()[session.teamCode];
+    const idleOwner = !!team && team.adminParticipatesInCycle === false ? team.admin : null;
+
+    const cycleEntries = DB.getEntries().filter(e => e.teamCode === session.teamCode && e.date && e.date >= cycle.startDate && e.date <= cycle.endDate);
+    const entries = applyAnalysisFilters(cycleEntries);
+
+    const members = analysisScopeMembers().slice().sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'));
+    const byUser = {};
+    members.forEach(u => { byUser[u] = weeks.map(() => 0); });
+    const weekIndex = {};
+    weeks.forEach((w, i) => { weekIndex[w.weekStart] = i; });
+    entries.forEach(e => {
+      if (!byUser[e.user]) return;
+      const i = weekIndex[weekStartOfDate(e.date)];
+      if (i === undefined) return;
+      byUser[e.user][i] += Number(e.duration) || 0;
+    });
+
+    if (note) note.textContent = '';
+
+    const head = weeks.map((w, i) => `<th>Semana ${i + 1}<small>${reportDateLabel(new Date(w.weekStart + 'T12:00:00'))}</small></th>`).join('');
+    const goalHead = showGoal ? '<th class="goal-col">Total período</th><th class="goal-col">Faltante</th><th class="goal-col">Média para bater</th>' : '';
+
+    const rows = members.map(u => {
+      const cells = byUser[u];
+      const total = cells.reduce((a, b) => a + b, 0);
+      const weekCells = weeks.map((w, i) => w.weekStart > todayStr
+        ? `<td class="is-future"></td>`
+        : `<td class="">${fmtClock(cells[i])}${(u !== idleOwner && showGoal && w.weekEnd < todayStr && cells[i] < w.sheetMin * 60000) ? '<span class="min-flag" title="Abaixo do mínimo semanal">*</span>' : ''}</td>`).join('');
+      let goalCells = '';
+      if (showGoal) {
+        if (u === idleOwner) {
+          goalCells = '<td colspan="3" class="is-future" title="Apenas administrador">não participa</td>';
+        } else {
+          const missing = Math.max(0, goalTotalMs - total);
+          const avg = weeksRemaining > 0 ? missing / weeksRemaining : 0;
+          const done = missing <= 30000;
+          goalCells = `<td>${fmtClock(goalTotalMs)}</td><td class="${done ? 'is-done' : ''}">${fmtClock(missing)}</td><td class="${done ? 'is-done' : ''}">${weeksRemaining > 0 || done ? fmtClock(avg) : '—'}</td>`;
+        }
+      }
+      return `<tr><td class="member-col">${escapeHtml(u)}</td>${weekCells}<td class="total-col">${fmtClock(total)}</td>${goalCells}</tr>`;
+    }).join('');
+
+    const foot = showGoal ? `<tfoot>
+      <tr><td class="foot-label">Mínimo</td>${weeks.map(w => `<td>${fmtClock(w.sheetMin * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
+      <tr><td class="foot-label">Média</td>${weeks.map(w => `<td>${fmtClock(w.sheetAvg * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
+    </tfoot>` : '';
+
+    content.innerHTML = members.length
+      ? `<div class="period-sheet-wrap"><table class="period-sheet"><thead><tr><th>Membro</th>${head}<th class="goal-col">Total</th>${goalHead}</tr></thead><tbody>${rows}</tbody>${foot}</table></div>
+         ${showGoal ? '<div class="period-legend"><span><span class="lg-star">*</span>Abaixo do mínimo semanal</span></div>' : ''}`
+      : '<div class="reports-empty">Sem membros neste filtro.</div>';
   }
 
   // ---------- Card lateral da Análise: Membros | Atividades ----------
@@ -4653,24 +4822,6 @@ html{scrollbar-gutter:stable}
   function setAnalysisSideTab(tab) {
     analysisSideTab = tab;
     renderAnalysis();
-  }
-
-  // Quanto falta cada membro cumprir no período ativo (usa a mesma conta da aba Período).
-  function memberCycleLine(username) {
-    if (analysisWeekOffset !== 0) return '';
-    const cycle = getActiveCycle();
-    if (!cycle) return '';
-    const team = DB.getTeams()[session.teamCode];
-    if (team && username === team.admin && team.adminParticipatesInCycle === false) return '';
-    const pr = computeCycleProgress(cycle, username);
-    const unit = cycle.unit === 'weeks' ? 'semana' : (cycle.unit === 'days' ? 'dia' : 'hora');
-    const unitPl = cycle.unit === 'weeks' ? 'semanas' : (cycle.unit === 'days' ? 'dias' : 'horas');
-    if (pr.remainingMs <= 30000) return `<div class="member-hours-sub is-done">Meta do período cumprida (${formatHM(pr.loggedMs)})</div>`;
-    const left = pr.periodsRemaining;
-    const thisWeek = pr.periodCompleted
-      ? `${unit[0].toUpperCase()+unit.slice(1)} atual cumprida`
-      : `Faltam <strong>${formatHM(pr.remainingThisPeriodMs)}</strong> nesta ${unit}`;
-    return `<div class="member-hours-sub">${thisWeek} · <strong>${formatHM(pr.remainingMs)}</strong> no período (${formatHM(pr.loggedMs)} de ${formatHM(pr.goalMs)}) · média de <strong>${formatHM(pr.requiredMs)}</strong> por ${unit} nas ${left} ${left === 1 ? unit : unitPl} que restam</div>`;
   }
 
   function renderAnalysisSide(entries, activityTotals, total) {
@@ -4696,7 +4847,7 @@ html{scrollbar-gutter:stable}
       const active = rows.filter(r => r[1].duration > 0).length;
       if (hint) hint.textContent = `${active} de ${rows.length} com horas`;
       list.innerHTML = rows.length ? rows.map(([u,obj]) => {
-        return `<div class="member-hours-row${obj.duration ? '' : ' is-zero'}"><div class="member-hours-name" title="${escapeHtml(reportMemberName(u))}">${escapeHtml(reportMemberName(u))}</div><div class="member-hours-time">${obj.duration ? fmtHM(obj.duration) : '—'}</div>${memberCycleLine(u)}</div>`;
+        return `<div class="member-hours-row${obj.duration ? '' : ' is-zero'}"><div class="member-hours-name" title="${escapeHtml(reportMemberName(u))}">${escapeHtml(reportMemberName(u))}</div><div class="member-hours-time">${obj.duration ? fmtHM(obj.duration) : '—'}</div></div>`;
       }).join('') + `<div class="member-hours-total"><span>Total do filtro</span><strong>${fmtHM(total)}</strong></div>`
         : '<div class="empty" style="padding:24px 16px">Sem membros neste filtro.</div>';
       return;
@@ -5729,20 +5880,15 @@ html{scrollbar-gutter:stable}
     let basePeriodGoalMs = Number(cycle.goalMinutes) * 60000;
     let currentMinimumMs = 0;
     let currentGoalMs = basePeriodGoalMs;
-    let weightShare = 1 / periodsRemaining; // fatia da semana atual no que ainda falta
+    let weightShare = 1 / periodsRemaining; // divisão igual: fatia da semana atual no que ainda falta
     if (cycle.unit === 'weeks') {
       const currentWeekStart = localDateStr(new Date(periodStart));
       const currentWeek = weeklyPeriods.find(w => w.weekStart === currentWeekStart) || { goalMinutes: cycle.goalMinutes, minimumMinutes: cycle.minimumMinutes || 0 };
       currentGoalMs = currentWeek.goalMinutes * 60000;
       currentMinimumMs = currentWeek.minimumMinutes * 60000;
       basePeriodGoalMs = currentGoalMs;
-      // Semanas com feriado têm meta menor: o que falta é dividido
-      // proporcionalmente às metas das semanas restantes, e não por igual.
-      const weekIdx = weeklyPeriods.findIndex(w => w.weekStart === currentWeekStart);
-      if (weekIdx >= 0) {
-        const sumGoals = weeklyPeriods.slice(weekIdx).reduce((sum, w) => sum + w.goalMinutes, 0);
-        if (sumGoals > 0) weightShare = currentWeek.goalMinutes / sumGoals;
-      }
+      // O que falta no período é dividido por igual entre as semanas restantes
+      // (weightShare = 1 / periodsRemaining), sem ponderar pela meta de cada semana.
     }
 
     const goalMs = cycle.unit === 'weeks'
