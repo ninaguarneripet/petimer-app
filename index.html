@@ -91,13 +91,13 @@
     --danger:#e8564f; --radius:10px;
     --shadow:0 1px 2px rgba(20,22,30,.04), 0 1px 4px rgba(20,22,30,.03);
     --accent-soft:rgba(39, 96, 151,.10);
-    --sheet-head-bg:#0f3d66;
-    --sheet-head-text:#ffffff;
-    --sheet-head-subtext:rgba(255,255,255,.78);
-    --sheet-goal-bg:#276097;
-    --sheet-foot-bg:#0f3d66;
-    --sheet-foot-text:#ffffff;
-    --sheet-head-line:rgba(255,255,255,.16);
+    --sheet-head-bg:#dce7f2;
+    --sheet-head-text:#173b5c;
+    --sheet-head-subtext:rgba(23,59,92,.82);
+    --sheet-goal-bg:#d0e0ef;
+    --sheet-foot-bg:#e1eaf3;
+    --sheet-foot-text:#173b5c;
+    --sheet-head-line:rgba(23,59,92,.13);
     --sheet-zebra:#e8ecf1;
     --sheet-hover:#dde5ee;
   }
@@ -1336,11 +1336,11 @@ button:disabled svg,button:disabled span{color:inherit !important;}
   --theme-success-bg:#1b3429;--theme-success-border:#38624a;--theme-success-text:#97dfb3;
   --theme-warning-bg:#383020;--theme-warning-border:#726039;--theme-warning-text:#eed28b;
   --theme-danger-bg:#3b272a;--theme-danger-border:#7a454a;--theme-danger-text:#ffb0a9;
-  --sheet-head-bg:#1d3f62;
+  --sheet-head-bg:#263448;
   --sheet-head-text:#eaf2fb;
-  --sheet-head-subtext:rgba(234,242,251,.75);
-  --sheet-goal-bg:#2b5d8f;
-  --sheet-foot-bg:#1d3f62;
+  --sheet-head-subtext:rgba(234,242,251,.82);
+  --sheet-goal-bg:#30455e;
+  --sheet-foot-bg:#29394e;
   --sheet-foot-text:#eaf2fb;
   --sheet-head-line:rgba(255,255,255,.14);
   --sheet-zebra:#2a303c;
@@ -2096,7 +2096,7 @@ html{scrollbar-gutter:stable}
             <button class="reports-tab active" data-analysis-mode="overview" onclick="setAnalysisMode('overview',this)">Visão geral</button>
             <button class="reports-tab" data-analysis-mode="detailed" onclick="setAnalysisMode('detailed',this)">Detalhado</button>
             <button class="reports-tab" data-analysis-mode="weekly" onclick="setAnalysisMode('weekly',this)">Semanal</button>
-            <button class="reports-tab" data-analysis-mode="period" onclick="setAnalysisMode('period',this)">Acompanhamento</button>
+            <button class="reports-tab" data-analysis-mode="period" onclick="setAnalysisMode('period',this)" hidden>Acompanhamento</button>
           </div>
           <div class="reports-top-actions">
             <div class="reports-period" id="analysis-week-nav">
@@ -4304,7 +4304,26 @@ html{scrollbar-gutter:stable}
     renderAnalysis();
   }
 
+  // Semanal e Acompanhamento são alternativas conforme a existência de período ativo.
+  // Preserve as outras abas e nunca deixe uma aba oculta selecionada.
+  function syncAnalysisPeriodTabs() {
+    const hasActivePeriod = Boolean(getActiveCycle());
+    const weeklyTab = document.querySelector('[data-analysis-mode="weekly"]');
+    const periodTab = document.querySelector('[data-analysis-mode="period"]');
+    if (weeklyTab) weeklyTab.hidden = hasActivePeriod;
+    if (periodTab) periodTab.hidden = !hasActivePeriod;
+    const nextMode = analysisMode === 'weekly' && hasActivePeriod ? 'period'
+      : analysisMode === 'period' && !hasActivePeriod ? 'weekly' : analysisMode;
+    return nextMode;
+  }
+
   function setAnalysisMode(mode, btn, render = true) {
+    // Também valida restauração de aba após F5 ou troca de equipe.
+    syncAnalysisPeriodTabs();
+    const hasActivePeriod = Boolean(getActiveCycle());
+    if ((mode === 'weekly' && hasActivePeriod) || (mode === 'period' && !hasActivePeriod)) {
+      mode = mode === 'weekly' ? 'period' : 'weekly';
+    }
     analysisMode = mode;
     document.querySelectorAll('[data-analysis-mode]').forEach(b => b.classList.toggle('active', b.dataset.analysisMode === mode));
     document.getElementById('analysis-overview-panel').hidden = mode !== 'overview';
@@ -4742,6 +4761,8 @@ html{scrollbar-gutter:stable}
     const root = document.getElementById('view-analysis');
     if (!root || !session || !session.teamCode) return;
 
+    const nextMode = syncAnalysisPeriodTabs();
+    if (nextMode !== analysisMode) setAnalysisMode(nextMode, null, false);
     populateAnalysisFilters();
     document.getElementById('analysis-sector').hidden = true; // setor é escolhido pelo botão principal + setas
 
