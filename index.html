@@ -1222,6 +1222,19 @@
 #view-team> .card:first-child>div{gap:16px;flex-wrap:wrap}
 @media(max-width:1200px){.pc-compact{grid-template-columns:minmax(0,1.6fr) minmax(80px,.7fr) minmax(80px,.7fr);gap:15px}.pc-compact-status{grid-column:1}.pc-compact .cycle-data-btn{grid-column:2 / 4;justify-self:end}}
 @media(max-width:600px){.pc-compact{padding:15px;grid-template-columns:1fr 1fr;gap:13px}.pc-compact-title{grid-column:1 / -1}.pc-compact .pc-compact-range{font-size:16px}.pc-compact-date{border:0;padding:0}.pc-compact .cycle-data-btn{grid-column:1 / -1;justify-self:stretch}.pc-compact-status{grid-column:1 / -1}.cycle-data-history .pc-record-info{grid-template-columns:1fr 1fr}#view-team .list-head{padding:15px}#view-team .team-header-actions{flex:1 1 100%;width:100%;margin-left:0;justify-content:flex-end;flex-wrap:wrap}#view-team #admin-add-area{flex-wrap:wrap;max-width:100%}#view-team #manual-add-user{max-width:100%}#view-team .team-list-head{display:none}#view-team .team-member-row{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:12px 15px}#view-team .team-member-identity{grid-column:1 / -1}#view-team .team-member-username{display:block;margin:3px 0 0}#view-team .team-sector{padding-left:0}#view-team .team-sector-label{display:inline;color:var(--muted)}}
+
+  .goal-gear{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:6px;vertical-align:middle;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;padding:0;opacity:.75}
+  .goal-gear:hover{background:var(--accent-soft);color:var(--accent);opacity:1}
+  .goals-backdrop{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.45);backdrop-filter:blur(3px)}
+  .goals-card{position:relative;width:min(540px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:24px;font-family:Inter,sans-serif}
+  .goals-card h3{margin:0 0 4px;font-size:17px}.goals-sub{margin:0 0 18px;font-size:12.5px;color:var(--muted)}.goals-sub strong{color:var(--text)}
+  .goals-x{position:absolute;top:12px;right:14px;border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer;width:30px;height:30px;border-radius:8px}.goals-x:hover{background:var(--accent-soft);color:var(--text)}
+  .goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.goals-grid input{width:100%;font-variant-numeric:tabular-nums}
+  .goals-hint{margin:8px 0 0;font-size:11.5px;color:var(--muted)}.goals-sep{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+  .goals-err{margin:14px 0 0;font-size:12px;color:var(--danger,#c0392b)}.goals-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+  .goals-foot button:disabled{opacity:.55;cursor:not-allowed}
+  @media(max-width:520px){.goals-grid{grid-template-columns:1fr}}
+  #goals-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:2100;background:var(--text);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:13px;transition:.2s}#goals-toast.show{opacity:1;transform:translate(-50%,0)}
 .cycle-holiday-toggle{display:flex;align-items:center;gap:9px;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;width:fit-content;}
 .cycle-holiday-toggle[hidden]{display:none;}
 .cycle-holiday-toggle input{width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent);cursor:pointer;}
@@ -2354,7 +2367,7 @@ html{scrollbar-gutter:stable}
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzKTcdYkDe5tj6j4AxV-ct4oYz10F9UaHrXysbDUhoFcksSTzjZFIoswgsb9Yf_ypT_/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzOzFlvIygLbtzXdmwhXgaXd23RvD90Nrv4GNiWmQdIOaW2Rurxzi_47oSAYtQCMYrU/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2488,6 +2501,7 @@ html{scrollbar-gutter:stable}
     }
     CACHE.entries = (d.entries || []).map(mapEntryFromServer);
     CACHE.cycles = (d.cycles || []).map(mapCycleFromServer);
+    CACHE.goals = Array.isArray(d.goals) ? d.goals : [];
     (d.members || []).forEach(m => { CACHE.users[m.username] = { username: m.username, name: m.displayName }; });
     const running = d.running || [];
     const mine = running.find(r => r.user === session.username);
@@ -4813,6 +4827,84 @@ html{scrollbar-gutter:stable}
     return key === '' || key === 'projetos';
   }
 
+
+  // ---------- Metas de horas por cargo/projeto (Análise › Acompanhamento) ----------
+  const GOAL_GEAR_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><circle cx="12" cy="12" r="6.5"></circle><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"></path></svg>';
+  function analysisGoalKey() { return String(document.getElementById('analysis-cargo')?.value || '').trim().toLocaleLowerCase('pt-BR'); }
+  function canEditGoals() {
+    const k = analysisGoalKey();
+    const t = (CACHE.myTeams || []).find(x => x.code === session.teamCode);
+    return !!k && periodCargoHasGoal(k) && !!(t && t.isAdmin);
+  }
+  function goalGearButton() { return `<button type="button" class="goal-gear" title="Configurar metas de horas" aria-label="Configurar metas de horas" onclick="openGoalsModal()">${GOAL_GEAR_SVG}</button>`; }
+  // Versão vigente para o período: a última salva até o fim dele (períodos encerrados não mudam retroativamente).
+  function resolveGoalConfig(cycle, key) {
+    let hit = null;
+    (CACHE.goals || []).forEach(g => { if (g.cargo === key && String(g.effectiveFrom) <= String(cycle.endDate)) hit = g; });
+    return hit;
+  }
+  function parseDurationInput(raw) {
+    const t = String(raw || '').trim();
+    if (!t) return null;
+    let m = t.match(/^(\d{1,3}):([0-5]\d)$/);
+    if (m) return (+m[1]) * 60 + (+m[2]);
+    if (!/^\d+$/.test(t)) return null;
+    if (t.length <= 2) { const n = +t; return (t.length === 2 && n > 24) ? (+t[0]) * 60 + (+t[1]) * 10 : n * 60; }
+    if (t.length === 3) { const mm = +t.slice(1); return mm < 60 ? (+t[0]) * 60 + mm : null; }
+    if (t.length === 4) { const mm = +t.slice(2); return mm < 60 ? (+t.slice(0, 2)) * 60 + mm : null; }
+    return null;
+  }
+  function fmtDurationInput(min) { min = Math.max(0, Math.round(min || 0)); return String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
+  function goalsToast(msg) {
+    let el = document.getElementById('goals-toast');
+    if (!el) { el = document.createElement('div'); el.id = 'goals-toast'; document.body.appendChild(el); }
+    el.textContent = msg; el.className = 'show'; clearTimeout(el._t); el._t = setTimeout(() => el.className = '', 2600);
+  }
+  function openGoalsModal() {
+    if (!canEditGoals()) return;
+    const key = analysisGoalKey();
+    const cargoName = document.getElementById('analysis-cargo').selectedOptions[0]?.textContent || key;
+    const cycle = (DB.getCycles() || []).find(c => c.id === analysisPeriodCycleId);
+    if (!cycle) return;
+    let cur = resolveGoalConfig(cycle, key);
+    if (!cur) { // sem configuração: mostra os valores que hoje já valem
+      const h = (cycle.holidayWeeks || [])[0];
+      cur = key === 'projetos'
+        ? { normalMin: 60, normalAvg: 250, holidayMin: 60, holidayAvg: 200 }
+        : { normalMin: cycle.minimumMinutes || 0, normalAvg: cycle.goalMinutes || 0, holidayMin: h ? h.minimumMinutes : (cycle.minimumMinutes || 0), holidayAvg: h ? h.goalMinutes : (cycle.goalMinutes || 0) };
+    }
+    closeGoalsModal();
+    const f = (id, label, v) => `<div class="field"><label for="${id}">${label}</label><input type="text" id="${id}" inputmode="numeric" autocomplete="off" value="${fmtDurationInput(v)}" onblur="this.value=fmtDurationInput(parseDurationInput(this.value)??0)"></div>`;
+    const bd = document.createElement('div');
+    bd.id = 'goals-modal'; bd.className = 'goals-backdrop';
+    bd.innerHTML = `<div class="goals-card" role="dialog" aria-modal="true" aria-labelledby="goals-title">
+      <button type="button" class="goals-x" aria-label="Fechar" onclick="closeGoalsModal()">×</button>
+      <h3 id="goals-title">Configurar metas de horas</h3>
+      <p class="goals-sub">Cargo/projeto: <strong>${escapeHtml(cargoName)}</strong></p>
+      <div class="goals-sec"><div class="goals-grid">${f('goal-nmin','Mínimo semanal',cur.normalMin)}${f('goal-navg','Média semanal necessária',cur.normalAvg)}</div><p class="goals-hint">Metas utilizadas nas semanas sem feriados.</p></div>
+      <div class="goals-sec goals-sep"><div class="goals-grid">${f('goal-hmin','Mínimo semanal com feriado',cur.holidayMin)}${f('goal-havg','Média semanal com feriado',cur.holidayAvg)}</div><p class="goals-hint">Metas utilizadas nas semanas identificadas como semanas com feriado (marcadas em Período).</p></div>
+      <p class="goals-err" id="goals-err" hidden></p>
+      <div class="goals-foot"><button type="button" class="btn-outline" onclick="closeGoalsModal()">Cancelar</button><button type="button" class="btn-solid" id="goals-save" onclick="saveGoalsModal('${escapeHtml(key)}')">Salvar alterações</button></div></div>`;
+    bd.addEventListener('mousedown', e => { if (e.target === bd) closeGoalsModal(); });
+    document.body.appendChild(bd);
+  }
+  function closeGoalsModal() { document.getElementById('goals-modal')?.remove(); }
+  async function saveGoalsModal(key) {
+    const btn = document.getElementById('goals-save'), err = document.getElementById('goals-err');
+    const v = id => parseDurationInput(document.getElementById(id).value);
+    const g = { normalMin: v('goal-nmin'), normalAvg: v('goal-navg'), holidayMin: v('goal-hmin'), holidayAvg: v('goal-havg') };
+    const fail = m => { err.textContent = m; err.hidden = false; };
+    if (Object.values(g).some(x => x === null)) return fail('Informe durações válidas (ex.: 16:40, 20:00 ou 2000).');
+    if (g.normalAvg <= 0 || g.holidayAvg <= 0) return fail('A média semanal precisa ser maior que zero.');
+    if (g.normalMin > g.normalAvg || g.holidayMin > g.holidayAvg) return fail('O mínimo não pode ser maior que a média.');
+    err.hidden = true; btn.disabled = true;
+    try {
+      await api('saveGoals', Object.assign({ code: session.teamCode, cargo: key }, g));
+      await refreshTeamData();
+      closeGoalsModal(); renderAnalysis(); goalsToast('Metas atualizadas.');
+    } catch (e) { btn.disabled = false; fail(e.message || 'Não foi possível salvar.'); }
+  }
+
   function renderAnalysisPeriod() {
     const content = document.getElementById('analysis-period-content');
     const label = document.getElementById('analysis-period-cycle-label');
@@ -4848,12 +4940,17 @@ html{scrollbar-gutter:stable}
     //  - filtrado por Projetos: mínimo 1h; média 4h10 (250 min) menos 50 min por feriado na semana;
     //  - todos os cargos/projetos: usa a média e o mínimo do próprio período (ex.: 20h/16h40, 16h40/13h20 com feriado).
     const onlyProjects = String(document.getElementById('analysis-cargo')?.value || '').trim().toLocaleLowerCase('pt-BR') === 'projetos';
+    const goalKey = analysisGoalKey();
+    const goalCfg = goalKey ? resolveGoalConfig(cycle, goalKey) : null; // null = comportamento legado
     weeks.forEach(w => {
-      if (onlyProjects) {
-        const hol = (Array.isArray(cycle.holidayWeeks) ? cycle.holidayWeeks : []).filter(x => x.weekStart === w.weekStart).length;
-        const holidays = Math.max(hol, w.holidayDate ? 1 : 0);
+      const hol = (Array.isArray(cycle.holidayWeeks) ? cycle.holidayWeeks : []).filter(x => x.weekStart === w.weekStart).length;
+      const isHol = Math.max(hol, w.holidayDate ? 1 : 0) > 0;
+      if (goalCfg) {
+        w.sheetMin = isHol ? goalCfg.holidayMin : goalCfg.normalMin;
+        w.sheetAvg = isHol ? goalCfg.holidayAvg : goalCfg.normalAvg;
+      } else if (onlyProjects) {
         w.sheetMin = 60;
-        w.sheetAvg = Math.max(0, 250 - 50 * holidays);
+        w.sheetAvg = Math.max(0, 250 - 50 * (isHol ? 1 : 0));
       } else {
         w.sheetMin = w.minimumMinutes;
         w.sheetAvg = w.goalMinutes;
@@ -4907,9 +5004,10 @@ html{scrollbar-gutter:stable}
       return `<tr><td class="member-col">${escapeHtml(u)}</td>${weekCells}<td class="total-col">${fmtClock(total)}</td>${goalCells}</tr>`;
     }).join('');
 
+    const goalGear = canEditGoals() ? goalGearButton() : '';
     const foot = showGoal ? `<tfoot>
-      <tr><td class="foot-label">Mínimo</td>${weeks.map(w => `<td>${fmtClock(w.sheetMin * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
-      <tr><td class="foot-label">Média</td>${weeks.map(w => `<td>${fmtClock(w.sheetAvg * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
+      <tr><td class="foot-label">Mínimo${goalGear}</td>${weeks.map(w => `<td>${fmtClock(w.sheetMin * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
+      <tr><td class="foot-label">Média${goalGear}</td>${weeks.map(w => `<td>${fmtClock(w.sheetAvg * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
     </tfoot>` : '';
 
     content.innerHTML = members.length
