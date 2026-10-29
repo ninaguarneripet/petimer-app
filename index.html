@@ -658,6 +658,9 @@
   .period-sheet tfoot td.foot-label{text-align:left;text-transform:uppercase;font-size:11px;letter-spacing:.05em;color:var(--sheet-head-subtext);}
   .period-sheet tfoot td.foot-empty{background:var(--sheet-foot-bg);}
   .period-legend{margin-top:10px;padding:8px 14px;font-size:10.5px;color:var(--muted);line-height:1.5;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);display:inline-flex;flex-wrap:wrap;gap:6px 16px;align-items:center;}
+  .period-legend-row{display:flex;justify-content:flex-end;align-items:center;gap:12px;width:100%;margin-top:10px;}
+  .period-legend-row:has(.goals-add-row){justify-content:space-between;}
+  .period-legend-row .goals-add-row,.period-legend-row .period-legend{margin-top:0;}
   .period-legend .lg-star{color:#e8564f;font-weight:700;margin-right:4px;}
   :root[data-theme="dark"] .period-sheet td{border-color:var(--border);}
       /* zebra/hover do modo escuro vêm das variáveis --sheet-zebra / --sheet-hover */
@@ -1003,6 +1006,28 @@
   .pw-toggle .pw-eye-off{display:none;}
   .pw-toggle.shown .pw-eye{display:none;}
   .pw-toggle.shown .pw-eye-off{display:block;}
+
+  /* Período: o único ícone de calendário dos campos de data é o nativo e clicável. */
+  #cycle-start::-webkit-calendar-picker-indicator,
+  #cycle-end::-webkit-calendar-picker-indicator { cursor: pointer; }
+/* Excluir período aparece somente dentro de Editar período. */
+#form-cycle .form-actions .cycle-delete-btn{
+  margin-left:auto;display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:36px;flex:0 0 36px;padding:0;
+  border:1px solid rgba(214,78,72,.38);border-radius:9px;
+  background:rgba(214,78,72,.09);color:var(--danger,#d64e48);
+  cursor:pointer;transition:background .16s,border-color .16s;
+}
+#form-cycle .form-actions .cycle-delete-btn[hidden]{display:none!important;}
+#form-cycle .form-actions .cycle-delete-btn svg{width:16px;height:16px;}
+#form-cycle .form-actions .cycle-delete-btn:hover:not(:disabled){
+  background:rgba(214,78,72,.19);border-color:var(--danger,#d64e48);
+}
+#form-cycle .form-actions .cycle-delete-btn:focus-visible{
+  outline:2px solid var(--danger,#d64e48);outline-offset:3px;
+}
+/* Mesmo estilo do aviso da última semana, inclusive no tema escuro. */
+#ended-cycle-overlay{z-index:1250;}
 </style>
 
 <style id="registro-visual-align-v2">
@@ -1225,15 +1250,100 @@
 
   .goal-gear{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:6px;vertical-align:middle;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;padding:0;opacity:.75}
   .goal-gear:hover{background:var(--accent-soft);color:var(--accent);opacity:1}
-  .goals-backdrop{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.45);backdrop-filter:blur(3px)}
-  .goals-card{position:relative;width:min(540px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:24px;font-family:Inter,sans-serif}
-  .goals-card h3{margin:0 0 4px;font-size:17px}.goals-sub{margin:0 0 18px;font-size:12.5px;color:var(--muted)}.goals-sub strong{color:var(--text)}
-  .goals-x{position:absolute;top:12px;right:14px;border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer;width:30px;height:30px;border-radius:8px}.goals-x:hover{background:var(--accent-soft);color:var(--text)}
-  .goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.goals-grid input{width:100%;font-variant-numeric:tabular-nums}
-  .goals-hint{margin:8px 0 0;font-size:11.5px;color:var(--muted)}.goals-sep{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
-  .goals-err{margin:14px 0 0;font-size:12px;color:var(--danger,#c0392b)}.goals-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
-  .goals-foot button:disabled{opacity:.55;cursor:not-allowed}
-  @media(max-width:520px){.goals-grid{grid-template-columns:1fr}}
+  .goals-add-row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .goals-add-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px dashed var(--border);border-radius:8px;background:transparent;color:var(--muted);font:inherit;font-size:11.5px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .goals-add-btn:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+  .goals-add-btn svg{width:14px;height:14px}
+  /* Botão de configuração: superfície sutil, sem borda pontilhada. */
+  .goals-add-btn.goals-edit-btn{
+    width:38px;height:36px;min-width:38px;padding:0;justify-content:center;
+    border:1px solid var(--border);border-radius:9px;
+    background:color-mix(in srgb,var(--surface-2) 68%,transparent);
+    color:var(--muted);opacity:1;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+    transition:background .16s,border-color .16s,color .16s,transform .16s;
+  }
+  .goals-add-btn.goals-edit-btn:hover{
+    background:var(--accent-soft);border-color:var(--accent);
+    color:var(--accent);transform:translateY(-1px);
+  }
+  .goals-add-btn.goals-edit-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .goals-add-btn.goals-edit-btn svg{width:16px;height:16px}
+  .goals-remove{margin-right:auto;display:inline-flex;align-items:center;justify-content:center;
+    width:36px;height:36px;flex:0 0 36px;border:1px solid rgba(214,78,72,.38);
+    border-radius:9px;background:rgba(214,78,72,.09);color:var(--danger,#d64e48);cursor:pointer;
+    transition:background .16s,border-color .16s,color .16s}
+  .goals-remove svg{width:16px;height:16px;flex:0 0 16px}
+  .goals-remove:hover:not(:disabled){background:rgba(214,78,72,.19);border-color:var(--danger,#d64e48)}
+  .goals-remove:focus-visible{outline:2px solid var(--danger,#d64e48);outline-offset:3px}
+  #app-confirm-overlay.goals-confirm-top{z-index:2300!important}
+  .cycle-empty-message{margin:22px 0 0;padding:10px 12px;border:0;background:transparent;box-shadow:none}
+  /* Modal de metas por cargo/projeto: visual consistente com os temas do PETimer. */
+  .goals-backdrop{
+    position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;
+    padding:16px;background:rgba(8,13,22,.66);backdrop-filter:blur(5px);
+    animation:goals-overlay-in .18s ease-out;
+  }
+  .goals-card{
+    position:relative;width:min(560px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;
+    padding:26px;border:1px solid var(--border);border-radius:16px;background:var(--surface);
+    color:var(--text);font-family:'Inter',sans-serif;box-shadow:0 24px 68px rgba(0,0,0,.28);
+    animation:goals-dialog-in .22s cubic-bezier(.2,.8,.2,1);
+  }
+  .goals-head{margin:0 42px 20px 0}
+  .goals-card h3{margin:0 0 9px;font-size:19px;line-height:1.3;font-weight:700}
+  .goals-cargo-badge{
+    display:inline-flex;align-items:center;max-width:100%;padding:5px 10px;
+    border:1px solid var(--border);border-radius:999px;background:var(--accent-soft);
+    color:var(--text);font-size:12px;font-weight:600;overflow-wrap:anywhere;
+  }
+  .goals-sub{margin:10px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+  .goals-x{
+    position:absolute;top:14px;right:14px;display:grid;place-items:center;width:38px;height:38px;
+    padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted);
+    font-size:25px;cursor:pointer;transition:background .15s,color .15s;
+  }
+  .goals-x:hover{background:var(--surface-2);color:var(--text)}
+  .goals-sec{padding:18px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2)}
+  .goals-sec+.goals-sec{margin-top:16px}
+  .goals-sec-title{display:flex;align-items:center;gap:9px;margin:0 0 16px;color:var(--text);font-size:14px;font-weight:650}
+  .goals-sec-title svg{width:17px;height:17px;flex:0 0 17px;color:var(--accent)}
+  .goals-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+  .goals-field{min-width:0}
+  .goals-field label{display:block;margin:0 0 7px;color:var(--muted);font-size:12.5px;font-weight:500}
+  .goals-time-wrap{position:relative}
+  .goals-time-wrap input{
+    box-sizing:border-box;width:100%;min-height:44px;padding:10px 36px 10px 12px;
+    border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);
+    font:600 14px/1.2 'Inter',Arial,sans-serif;
+    font-variant-numeric:tabular-nums;text-align:center;
+    transition:border-color .16s,box-shadow .16s;
+  }
+  .goals-time-wrap input::placeholder{color:var(--muted);opacity:.8}
+  .goals-time-wrap input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(65,139,204,.19)}
+  .goals-unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px;pointer-events:none}
+  .goals-hint{margin:12px 0 0;color:var(--muted);font-size:12.5px;line-height:1.45}
+  .goals-err{margin:14px 0 0;font-size:12.5px;color:var(--danger,#dc625b)}
+  .goals-err[hidden]{display:none}
+  .goals-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:22px}
+  .goals-foot .btn-solid,.goals-foot .btn-outline{width:auto;min-width:108px;padding:10px 16px;border-radius:9px}
+  .goals-foot .btn-outline{background:transparent}
+  .goals-foot .btn-solid{box-shadow:0 3px 10px rgba(39,96,151,.12);transition:transform .16s,box-shadow .16s,filter .16s}
+  .goals-foot .btn-solid:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.09);box-shadow:0 7px 17px rgba(39,96,151,.22)}
+  .goals-foot button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .goals-x:focus-visible,.goals-foot button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  @keyframes goals-overlay-in{from{opacity:0}to{opacity:1}}
+  @keyframes goals-dialog-in{from{opacity:0;transform:scale(.975) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  @media(max-width:520px){
+    .goals-card{padding:20px}
+    .goals-grid{grid-template-columns:1fr;gap:14px}
+    .goals-foot{flex-wrap:wrap}
+    .goals-remove{flex:0 0 36px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .goals-backdrop,.goals-card{animation:none}
+    .goals-foot .btn-solid{transition:none}
+  }
   #goals-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:2100;background:var(--text);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:13px;transition:.2s}#goals-toast.show{opacity:1;transform:translate(-50%,0)}
 .cycle-holiday-toggle{display:flex;align-items:center;gap:9px;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;width:fit-content;}
 .cycle-holiday-toggle[hidden]{display:none;}
@@ -2080,7 +2190,7 @@ html{scrollbar-gutter:stable}
             </div>
             <label class="compact-date" title="Selecionar data da atividade">
               <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><span id="selected-date-label">HOJE</span>
-              <input type="date" id="date-input" aria-label="Data da atividade" onchange="updateSelectedDate()">
+              <input type="date" id="date-input" aria-label="Data da atividade" onchange="handleManualEntryDateChange()">
             </label>
             <button class="btn-pill manual-add" onclick="addManualEntry(this)" title="Adicionar registro manual">ADICIONAR</button>
             <button class="icon-btn-line" type="button" onclick="setEntryMode('timer')" title="Usar cronômetro" aria-label="Usar cronômetro"><svg viewBox="0 0 24 24"><path d="M9 2h6M12 2v3M18 6l2-2"/><circle cx="12" cy="14" r="8"/><path d="M12 9v5l3 2"/></svg></button>
@@ -2247,8 +2357,8 @@ html{scrollbar-gutter:stable}
             </div>
           <form id="form-cycle" onsubmit="handleSaveCycle(event)">
             <div class="form-group"><div class="form-group-label">Período</div><div class="form-row">
-              <div class="field"><label for="cycle-start">Data de início</label><div class="input-icon-wrap"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path></svg></span><input type="date" id="cycle-start" required></div></div>
-              <div class="field"><label for="cycle-end">Data de término</label><div class="input-icon-wrap"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M8 3v4M16 3v4M3.5 10h17"></path><path d="M9 15l2 2 4-4"></path></svg></span><input type="date" id="cycle-end" required></div></div>
+              <div class="field"><label for="cycle-start">Data de início</label><div class="input-icon-wrap"><input type="date" id="cycle-start" required></div></div>
+              <div class="field"><label for="cycle-end">Data de término</label><div class="input-icon-wrap"><input type="date" id="cycle-end" required></div></div>
             </div></div>
             <div class="form-group"><div class="form-group-label">Meta</div><div class="form-row">
               <div class="field"><label for="cycle-unit">Dividir por</label><div class="input-icon-wrap"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M20.5 4v5h-5"></path></svg></span><select id="cycle-unit" required onchange="updateCycleFormUnit()"><option value="weeks">Semanas</option><option value="days">Dias</option><option value="hours">Horas</option></select></div></div>
@@ -2275,7 +2385,7 @@ html{scrollbar-gutter:stable}
             </div>
             </div>
             <p class="form-note"><span class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></span><span>Registros com datas dentro do período são considerados, inclusive registros feitos antes da criação do período.</span></p>
-            <div class="form-actions"><button type="submit" class="btn-solid" id="cycle-submit-btn"><span class="icon-button-content"><span class="line-icon" id="cycle-submit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></span><span id="cycle-submit-label">Criar período</span></span></button><button type="button" class="btn-outline" id="cycle-cancel-btn" onclick="cancelEditCycle()">Cancelar</button></div>
+            <div class="form-actions"><button type="submit" class="btn-solid" id="cycle-submit-btn"><span class="icon-button-content"><span class="line-icon" id="cycle-submit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></span><span id="cycle-submit-label">Criar período</span></span></button><button type="button" class="btn-outline" id="cycle-cancel-btn" onclick="cancelEditCycle()">Cancelar</button><button type="button" class="cycle-delete-btn" id="cycle-delete-btn" title="Excluir período" aria-label="Excluir período" onclick="if(editingCycleId)deleteCycle(editingCycleId,this)" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v7m4-7v7"/></svg></button></div>
           </form>
           </div>
         </div>
@@ -2367,7 +2477,7 @@ html{scrollbar-gutter:stable}
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzOzFlvIygLbtzXdmwhXgaXd23RvD90Nrv4GNiWmQdIOaW2Rurxzi_47oSAYtQCMYrU/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwg-ssR1xnXWnJesb796GuQUXIZzWWfHMZzuwE_h5I48My8sgRlm95bilWX-ebl15BA/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2923,6 +3033,8 @@ html{scrollbar-gutter:stable}
     if (id !== 'main-app') {
       const finalOverlay = document.getElementById('final-period-overlay');
       if (finalOverlay) finalOverlay.hidden = true;
+      const endedOverlay = document.getElementById('ended-cycle-overlay');
+      if (endedOverlay) endedOverlay.hidden = true;
     }
   }
 
@@ -3359,11 +3471,10 @@ html{scrollbar-gutter:stable}
     updateCycleRoleControl();
     notifyEndedCycle();
 
-    // Setar a data atual como padrão no input
-    const today = new Date();
-    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-    document.getElementById('date-input').value = localDate;
-    updateSelectedDate(); setEntryMode('manual');
+    // Inicia o registro manual na data atual, acompanhando futuras viradas de dia.
+    // Uma escolha manual de outra data só fica fixa quando o usuário altera o calendário.
+    resetAutomaticEntryDate();
+    setEntryMode('manual');
     ensureTeamOptionConfig();
     populateManagedSelects(false);
 
@@ -3372,7 +3483,8 @@ html{scrollbar-gutter:stable}
       document.getElementById('activity-input').value = run.activity;
       if(run.cargo) { document.getElementById('cargo-input').value = run.cargo; applyCargoSelectColor(document.getElementById('cargo-input')); syncCargoPickerTrigger(); }
       if(run.modalidade) { document.getElementById('modalidade-input').value = run.modalidade; syncModalidadePickerTrigger(); }
-      if(run.date) document.getElementById('date-input').value = run.date;
+      // A data histórica do cronômetro pertence ao próprio registro em andamento;
+      // não deve substituir a data padrão do formulário de registro manual.
       setTimerUI(true); startTick(); setEntryMode('timer'); updateSelectedDate();
     } else {
       document.getElementById('activity-input').value = '';
@@ -3515,10 +3627,47 @@ html{scrollbar-gutter:stable}
     if (value === localDateStr(yesterday)) return 'ONTEM';
     return value.slice(8,10) + '/' + value.slice(5,7);
   }
+
+  // A data do registro manual acompanha o relógio local, a menos que o usuário
+  // escolha explicitamente uma data diferente da atual pelo calendário.
+  let entryDateManuallySelected = false;
+  let lastObservedEntryDay = localDateStr(new Date());
+
   function updateSelectedDate() {
     const input = document.getElementById('date-input');
+    if (!input) return;
     if (!input.value) input.value = localDateStr(new Date());
     document.getElementById('selected-date-label').textContent = selectedDateText(input.value);
+  }
+
+  function resetAutomaticEntryDate() {
+    const today = localDateStr(new Date());
+    lastObservedEntryDay = today;
+    entryDateManuallySelected = false;
+    const input = document.getElementById('date-input');
+    if (input) input.value = today;
+    updateSelectedDate();
+  }
+
+  function handleManualEntryDateChange() {
+    const input = document.getElementById('date-input');
+    if (!input) return;
+    const today = localDateStr(new Date());
+    lastObservedEntryDay = today;
+    entryDateManuallySelected = Boolean(input.value && input.value !== today);
+    updateSelectedDate();
+  }
+
+  function syncEntryDateAtDayChange() {
+    const today = localDateStr(new Date());
+    if (today === lastObservedEntryDay) return;
+    lastObservedEntryDay = today;
+    const input = document.getElementById('date-input');
+    if (!input) return;
+    if (!entryDateManuallySelected) input.value = today;
+    // Mesmo uma data fixada manualmente deve deixar de mostrar HOJE/ONTEM
+    // quando o dia do calendário mudar.
+    updateSelectedDate();
   }
   function setEntryMode(mode) {
     document.getElementById('manual-controls').hidden = mode !== 'manual';
@@ -3539,11 +3688,20 @@ html{scrollbar-gutter:stable}
       });
     });
     updateSelectedDate();
+    // Checagem periódica, ao voltar à aba e antes de registrar: cobre também
+    // navegadores que suspendem timers quando a página fica em segundo plano.
+    setInterval(syncEntryDateAtDayChange, 30000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) syncEntryDateAtDayChange();
+    });
+    window.addEventListener('focus', syncEntryDateAtDayChange);
   });
 
   async function addManualEntry(btn) {
     if (isTrackerObserver()) return;
     if (isActionPending('add-entry')) return;
+    // Garante a data correta mesmo se a virada ocorreu enquanto a aba dormia.
+    syncEntryDateAtDayChange();
     inheritManualEndTime();
     if (!["time-start", "time-end"].map(id => normalizeTimeField(document.getElementById(id))).every(Boolean)) return;
     const activity = document.getElementById('activity-input').value.trim();
@@ -4821,10 +4979,15 @@ html{scrollbar-gutter:stable}
 
   function fmtBR(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; }
 
-  // Só Geral e Projetos têm meta/média para bater (e "Todos", que soma tudo).
-  function periodCargoHasGoal(cargo) {
+  // Sem cargo selecionado, valem exclusivamente as metas gerais do Período.
+  // Cargos individuais só têm acompanhamento de metas quando configurados,
+  // exceto Projetos, que preserva a regra já existente até haver configuração.
+  function periodCargoHasGoal(cargo, cycle) {
     const key = String(cargo || '').trim().toLocaleLowerCase('pt-BR');
-    return key === '' || key === 'projetos';
+    if (!key) return true;
+    const cfg = cycle ? resolveGoalConfig(cycle, key) : null;
+    if (cfg) return !cfg.disabled;
+    return key === 'projetos';
   }
 
 
@@ -4834,61 +4997,214 @@ html{scrollbar-gutter:stable}
   function canEditGoals() {
     const k = analysisGoalKey();
     const t = (CACHE.myTeams || []).find(x => x.code === session.teamCode);
-    return !!k && periodCargoHasGoal(k) && !!(t && t.isAdmin);
+    return !!k && !!(t && t.isAdmin);
   }
-  function goalGearButton() { return `<button type="button" class="goal-gear" title="Configurar metas de horas" aria-label="Configurar metas de horas" onclick="openGoalsModal()">${GOAL_GEAR_SVG}</button>`; }
+  function goalGearButton() { return `<button type="button" class="goals-add-btn goals-edit-btn" title="Configurar metas deste cargo/projeto" aria-label="Configurar metas deste cargo/projeto" onclick="openGoalsModal()">${GOAL_GEAR_SVG}</button>`; }
   // Versão vigente para o período: a última salva até o fim dele (períodos encerrados não mudam retroativamente).
   function resolveGoalConfig(cycle, key) {
     let hit = null;
     (CACHE.goals || []).forEach(g => { if (g.cargo === key && String(g.effectiveFrom) <= String(cycle.endDate)) hit = g; });
     return hit;
   }
+  // Entrada livre como nos horários do registro: 1 -> 01:00, 123 -> 12:30,
+  // 947 -> 09:47 e 2033 -> 20:33. HH:MM permite durações acima de 24 h.
   function parseDurationInput(raw) {
     const t = String(raw || '').trim();
     if (!t) return null;
-    let m = t.match(/^(\d{1,3}):([0-5]\d)$/);
-    if (m) return (+m[1]) * 60 + (+m[2]);
-    if (!/^\d+$/.test(t)) return null;
-    if (t.length <= 2) { const n = +t; return (t.length === 2 && n > 24) ? (+t[0]) * 60 + (+t[1]) * 10 : n * 60; }
-    if (t.length === 3) { const mm = +t.slice(1); return mm < 60 ? (+t[0]) * 60 + mm : null; }
-    if (t.length === 4) { const mm = +t.slice(2); return mm < 60 ? (+t.slice(0, 2)) * 60 + mm : null; }
-    return null;
+    const withColon = t.match(/^(\d{1,4}):([0-5]\d)$/);
+    if (withColon) return Number(withColon[1]) * 60 + Number(withColon[2]);
+    if (!/^\d{1,6}$/.test(t)) return null;
+    const hhmm = (hh, mm) => mm < 60 ? hh * 60 + mm : null;
+    if (t.length <= 2) {
+      const h = Number(t);
+      // Compatibilidade com a entrada manual: 93 -> 09:30.
+      return t.length === 2 && h > 23
+        ? hhmm(Number(t[0]), Number(t[1]) * 10) : h * 60;
+    }
+    if (t.length === 3) {
+      const hh = Number(t.slice(0, 2)), last = Number(t[2]) * 10;
+      // Ex.: 123 -> 12:30. Se a hora não cabe num relógio (947),
+      // usar o padrão alternativo de entrada manual: 09:47.
+      return hh <= 23 ? hhmm(hh, last) : hhmm(Number(t[0]), Number(t.slice(1)));
+    }
+    return hhmm(Number(t.slice(0, -2)), Number(t.slice(-2)));
   }
   function fmtDurationInput(min) { min = Math.max(0, Math.round(min || 0)); return String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
+  function beginGoalsDurationEdit(input) {
+    input.dataset.previousValue = input.value || '00:00';
+    input.value = '';
+    input.setCustomValidity('');
+  }
+  function sanitizeGoalsDurationTyping(input) {
+    // Não força máscara enquanto o usuário digita.
+    input.value = input.value.replace(/[^\d:]/g, '').slice(0, 7);
+    input.setCustomValidity('');
+  }
+  function finishGoalsDurationEdit(input) {
+    const t = input.value.trim();
+    const min = t ? parseDurationInput(t) : null;
+    if (min === null || min > 60 * 168) {
+      input.value = input.dataset.previousValue || '00:00';
+      input.setCustomValidity('');
+      if (t) {
+        const err = document.getElementById('goals-err');
+        if (err) { err.textContent = 'Duração inválida. Use HH:MM (ex.: 12:30 ou 25:00).'; err.hidden = false; }
+      }
+      return;
+    }
+    input.value = fmtDurationInput(min);
+    const err = document.getElementById('goals-err');
+    if (err) err.hidden = true;
+  }
   function goalsToast(msg) {
     let el = document.getElementById('goals-toast');
     if (!el) { el = document.createElement('div'); el.id = 'goals-toast'; document.body.appendChild(el); }
     el.textContent = msg; el.className = 'show'; clearTimeout(el._t); el._t = setTimeout(() => el.className = '', 2600);
   }
-  function openGoalsModal() {
-    if (!canEditGoals()) return;
+  function canManageGoals() {
+    const t = (CACHE.myTeams || []).find(x => x.code === session.teamCode);
+    return !!(t && t.isAdmin);
+  }
+  // Os controles de metas só ficam disponíveis no período semanal ATIVO e selecionado.
+  function editableAnalysisGoalCycle() {
+    const active = getActiveCycle();
+    return active && active.id === analysisPeriodCycleId && active.unit === 'weeks' ? active : null;
+  }
+  function openAddGoalsModal() {
+    if (!canManageGoals()) return;
+    const cycle = editableAnalysisGoalCycle();
     const key = analysisGoalKey();
-    const cargoName = document.getElementById('analysis-cargo').selectedOptions[0]?.textContent || key;
-    const cycle = (DB.getCycles() || []).find(c => c.id === analysisPeriodCycleId);
-    if (!cycle) return;
+    if (!cycle || !key || periodCargoHasGoal(key, cycle)) return;
+    openGoalsModal(key, true);
+  }
+  function openGoalsModal(keyOverride, adding = false) {
+    if (!canManageGoals()) return;
+    const cycle = editableAnalysisGoalCycle();
+    const key = String(keyOverride || analysisGoalKey()).trim().toLocaleLowerCase('pt-BR');
+    if (!cycle || !key || key !== analysisGoalKey()) return;
+    if (adding ? periodCargoHasGoal(key, cycle) : !periodCargoHasGoal(key, cycle)) return;
+
+    // O cargo/projeto já vem do filtro que originou a abertura; não há outro select no modal.
+    const select = document.getElementById('analysis-cargo');
+    const opt = Array.from(select?.options || []).find(o => o.value.toLocaleLowerCase('pt-BR') === key);
+    if (!opt) return;
+    const cargoName = opt.textContent;
     let cur = resolveGoalConfig(cycle, key);
-    if (!cur) { // sem configuração: mostra os valores que hoje já valem
+    if (!cur || cur.disabled) {
       const h = (cycle.holidayWeeks || [])[0];
       cur = key === 'projetos'
         ? { normalMin: 60, normalAvg: 250, holidayMin: 60, holidayAvg: 200 }
-        : { normalMin: cycle.minimumMinutes || 0, normalAvg: cycle.goalMinutes || 0, holidayMin: h ? h.minimumMinutes : (cycle.minimumMinutes || 0), holidayAvg: h ? h.goalMinutes : (cycle.goalMinutes || 0) };
+        : adding
+          ? { normalMin: 0, normalAvg: 0, holidayMin: 0, holidayAvg: 0 }
+          : {
+              normalMin: cycle.minimumMinutes || 0,
+              normalAvg: cycle.goalMinutes || 0,
+              holidayMin: h ? h.minimumMinutes : (cycle.minimumMinutes || 0),
+              holidayAvg: h ? h.goalMinutes : (cycle.goalMinutes || 0)
+            };
     }
+
+    const opener = document.activeElement;
     closeGoalsModal();
-    const f = (id, label, v) => `<div class="field"><label for="${id}">${label}</label><input type="text" id="${id}" inputmode="numeric" autocomplete="off" value="${fmtDurationInput(v)}" onblur="this.value=fmtDurationInput(parseDurationInput(this.value)??0)"></div>`;
+    const f = (id, label, v) => `<div class="goals-field">
+      <label for="${id}">${label}</label>
+      <div class="goals-time-wrap">
+        <input id="${id}" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="00:00"
+          value="${fmtDurationInput(v)}" onfocus="beginGoalsDurationEdit(this)"
+          oninput="sanitizeGoalsDurationTyping(this)" onblur="finishGoalsDurationEdit(this)"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+        <span class="goals-unit" aria-hidden="true">h</span>
+      </div>
+    </div>`;
+
     const bd = document.createElement('div');
-    bd.id = 'goals-modal'; bd.className = 'goals-backdrop';
-    bd.innerHTML = `<div class="goals-card" role="dialog" aria-modal="true" aria-labelledby="goals-title">
+    bd.id = 'goals-modal';
+    bd.className = 'goals-backdrop';
+    bd._opener = opener;
+    bd.innerHTML = `<div class="goals-card" role="dialog" aria-modal="true" aria-labelledby="goals-title" aria-describedby="goals-subtitle">
       <button type="button" class="goals-x" aria-label="Fechar" onclick="closeGoalsModal()">×</button>
-      <h3 id="goals-title">Configurar metas de horas</h3>
-      <p class="goals-sub">Cargo/projeto: <strong>${escapeHtml(cargoName)}</strong></p>
-      <div class="goals-sec"><div class="goals-grid">${f('goal-nmin','Mínimo semanal',cur.normalMin)}${f('goal-navg','Média semanal necessária',cur.normalAvg)}</div><p class="goals-hint">Metas utilizadas nas semanas sem feriados.</p></div>
-      <div class="goals-sec goals-sep"><div class="goals-grid">${f('goal-hmin','Mínimo semanal com feriado',cur.holidayMin)}${f('goal-havg','Média semanal com feriado',cur.holidayAvg)}</div><p class="goals-hint">Metas utilizadas nas semanas identificadas como semanas com feriado (marcadas em Período).</p></div>
-      <p class="goals-err" id="goals-err" hidden></p>
-      <div class="goals-foot"><button type="button" class="btn-outline" onclick="closeGoalsModal()">Cancelar</button><button type="button" class="btn-solid" id="goals-save" onclick="saveGoalsModal('${escapeHtml(key)}')">Salvar alterações</button></div></div>`;
-    bd.addEventListener('mousedown', e => { if (e.target === bd) closeGoalsModal(); });
+      <div class="goals-head">
+        <h3 id="goals-title">Configurar metas de horas</h3>
+        <span class="goals-cargo-badge">${escapeHtml(cargoName)}</span>
+        <p class="goals-sub" id="goals-subtitle">Defina as metas semanais deste cargo/projeto.</p>
+      </div>
+      <section class="goals-sec" aria-labelledby="goals-normal-title">
+        <h4 id="goals-normal-title" class="goals-sec-title">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+          Semanas normais
+        </h4>
+        <div class="goals-grid">${f('goal-nmin','Mínimo semanal',cur.normalMin)}${f('goal-navg','Média semanal necessária',cur.normalAvg)}</div>
+        <p class="goals-hint">Usadas nas semanas sem feriado.</p>
+      </section>
+      <section class="goals-sec" aria-labelledby="goals-holiday-title">
+        <h4 id="goals-holiday-title" class="goals-sec-title">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.7L21 9.6l-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.3-.9L12 3Z"/></svg>
+          Semanas com feriado
+        </h4>
+        <div class="goals-grid">${f('goal-hmin','Mínimo semanal',cur.holidayMin)}${f('goal-havg','Média semanal necessária',cur.holidayAvg)}</div>
+        <p class="goals-hint">Usadas nas semanas marcadas como feriado em Período.</p>
+      </section>
+      <p class="goals-err" id="goals-err" role="alert" hidden></p>
+      <div class="goals-foot">
+        ${!adding && periodCargoHasGoal(key, cycle) ? '<button type="button" class="goals-remove" id="goals-remove" title="Remover metas específicas" aria-label="Remover metas específicas"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v7m4-7v7"/></svg></button>' : ''}
+        <button type="button" class="btn-outline" onclick="closeGoalsModal()">Cancelar</button>
+        <button type="button" class="btn-solid" id="goals-save">${adding ? 'Adicionar metas' : 'Salvar metas'}</button>
+      </div>
+    </div>`;
+
+    // Reaproveita integralmente as rotinas de validação, salvamento e remoção.
+    bd.querySelector('#goals-save').addEventListener('click', () => saveGoalsModal(key));
+    bd.querySelector('#goals-remove')?.addEventListener('click', () => removeGoalsModal(key));
+    bd.addEventListener('click', e => { if (e.target === bd) closeGoalsModal(); });
+    bd.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        closeGoalsModal();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusable = Array.from(bd.querySelectorAll('button:not(:disabled), input:not(:disabled)'));
+      if (!focusable.length) return;
+      if (e.shiftKey && document.activeElement === focusable[0]) {
+        e.preventDefault();
+        focusable[focusable.length - 1].focus();
+      } else if (!e.shiftKey && document.activeElement === focusable[focusable.length - 1]) {
+        e.preventDefault();
+        focusable[0].focus();
+      }
+    });
     document.body.appendChild(bd);
+    // Não apaga o valor de um campo só porque o modal foi aberto.
+    bd.querySelector('.goals-x').focus({ preventScroll: true });
   }
-  function closeGoalsModal() { document.getElementById('goals-modal')?.remove(); }
+  function closeGoalsModal() {
+    const bd = document.getElementById('goals-modal');
+    if (!bd) return;
+    const opener = bd._opener;
+    bd.remove();
+    if (opener?.isConnected) opener.focus({ preventScroll: true });
+  }
+  async function removeGoalsModal(key) {
+    if (!canManageGoals()) return;
+    const confirmOverlay = document.getElementById('app-confirm-overlay');
+    if (confirmOverlay) confirmOverlay.classList.add('goals-confirm-top');
+    let approved = false;
+    try {
+      approved = await appConfirm({ title: 'Remover metas específicas', message: 'Deseja remover as metas deste cargo/projeto?', note: 'Os registros de atividades e as metas gerais do período serão preservados.', confirmText: 'Remover metas', danger: true });
+    } finally {
+      if (confirmOverlay) confirmOverlay.classList.remove('goals-confirm-top');
+    }
+    if (!approved) return;
+    const btn = document.getElementById('goals-remove');
+    const err = document.getElementById('goals-err');
+    if (btn) btn.disabled = true;
+    try {
+      await api('deleteGoals', { code: session.teamCode, cargo: key });
+      await refreshTeamData();
+      closeGoalsModal(); renderAnalysis(); goalsToast('Metas específicas removidas.');
+    } catch (e) { if (btn) btn.disabled = false; if (err) { err.textContent = e.message || 'Não foi possível remover.'; err.hidden = false; } }
+  }
   async function saveGoalsModal(key) {
     const btn = document.getElementById('goals-save'), err = document.getElementById('goals-err');
     const v = id => parseDurationInput(document.getElementById(id).value);
@@ -4941,7 +5257,8 @@ html{scrollbar-gutter:stable}
     //  - todos os cargos/projetos: usa a média e o mínimo do próprio período (ex.: 20h/16h40, 16h40/13h20 com feriado).
     const onlyProjects = String(document.getElementById('analysis-cargo')?.value || '').trim().toLocaleLowerCase('pt-BR') === 'projetos';
     const goalKey = analysisGoalKey();
-    const goalCfg = goalKey ? resolveGoalConfig(cycle, goalKey) : null; // null = comportamento legado
+    const rawGoalCfg = goalKey ? resolveGoalConfig(cycle, goalKey) : null;
+    const goalCfg = rawGoalCfg && !rawGoalCfg.disabled ? rawGoalCfg : null;
     weeks.forEach(w => {
       const hol = (Array.isArray(cycle.holidayWeeks) ? cycle.holidayWeeks : []).filter(x => x.weekStart === w.weekStart).length;
       const isHol = Math.max(hol, w.holidayDate ? 1 : 0) > 0;
@@ -4959,7 +5276,7 @@ html{scrollbar-gutter:stable}
     const goalTotalMs = weeks.reduce((sum, w) => sum + w.sheetAvg * 60000, 0);
 
     const cargoFilter = document.getElementById('analysis-cargo')?.value || '';
-    const showGoal = periodCargoHasGoal(cargoFilter);
+    const showGoal = periodCargoHasGoal(cargoFilter, cycle);
 
     const team = DB.getTeams()[session.teamCode];
     const idleOwner = !!team && team.adminParticipatesInCycle === false ? team.admin : null;
@@ -5004,15 +5321,20 @@ html{scrollbar-gutter:stable}
       return `<tr><td class="member-col">${escapeHtml(u)}</td>${weekCells}<td class="total-col">${fmtClock(total)}</td>${goalCells}</tr>`;
     }).join('');
 
-    const goalGear = canEditGoals() ? goalGearButton() : '';
     const foot = showGoal ? `<tfoot>
-      <tr><td class="foot-label">Mínimo${goalGear}</td>${weeks.map(w => `<td>${fmtClock(w.sheetMin * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
-      <tr><td class="foot-label">Média${goalGear}</td>${weeks.map(w => `<td>${fmtClock(w.sheetAvg * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
+      <tr><td class="foot-label">Mínimo</td>${weeks.map(w => `<td>${fmtClock(w.sheetMin * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
+      <tr><td class="foot-label">Média</td>${weeks.map(w => `<td>${fmtClock(w.sheetAvg * 60000)}</td>`).join('')}<td class="foot-empty" colspan="4"></td></tr>
     </tfoot>` : '';
 
+    // Um cargo/projeto específico recebe apenas uma ação: configurar OU adicionar.
+    // Em "Todos os cargos/projetos", em períodos passados ou sem período ativo, não há botões.
+    const canConfigureCargo = !!goalKey && canManageGoals() && !!editableAnalysisGoalCycle();
+    const goalAction = !canConfigureCargo ? '' : showGoal
+      ? `<div class="goals-add-row">${goalGearButton()}</div>`
+      : `<div class="goals-add-row"><button type="button" class="goals-add-btn" onclick="openAddGoalsModal()" title="Adicionar metas para este cargo/projeto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Adicionar metas</button></div>`;
     content.innerHTML = members.length
       ? `<div class="period-sheet-wrap"><table class="period-sheet"><thead><tr><th>Membro</th>${head}<th class="goal-col">Total</th>${goalHead}</tr></thead><tbody>${rows}</tbody>${foot}</table></div>
-         ${showGoal ? '<div class="period-legend"><span><span class="lg-star">*</span>Abaixo do mínimo semanal</span></div>' : ''}`
+         ${(goalAction || rows.includes('class="min-flag"')) ? `<div class="period-legend-row">${goalAction}${rows.includes('class="min-flag"') ? '<div class="period-legend"><span><span class="lg-star">*</span>Abaixo do mínimo semanal</span></div>' : ''}</div>` : ''}`
       : '<div class="reports-empty">Sem membros neste filtro.</div>';
   }
 
@@ -6181,7 +6503,8 @@ html{scrollbar-gutter:stable}
     const targetThisPeriodMs = Math.max(currentMinimumMs, balanceTargetMs);
     const remainingThisPeriodMs = Math.max(0, targetThisPeriodMs - currentLoggedMs);
     const requiredMs = remainingMs / periodsRemaining;
-    const periodCompleted = remainingThisPeriodMs <= 30000 || remainingMs <= 30000;
+    // A conclusão exige cumprir também o mínimo da unidade atual.
+    const periodCompleted = remainingThisPeriodMs <= 30000;
     const needsExtra = !periodCompleted && targetThisPeriodMs > basePeriodGoalMs + 30000;
     const alertLevel = periodCompleted ? 'success' : (targetThisPeriodMs - currentLoggedMs > 25 * 3600000 ? 'danger' : 'warning');
     return { loggedMs, currentLoggedMs, goalMs, remainingMs, requiredMs, periodsRemaining, totalPeriods, basePeriodGoalMs, targetThisPeriodMs, remainingThisPeriodMs, periodCompleted, needsExtra, currentGoalMs, currentMinimumMs, alertLevel };
@@ -6268,14 +6591,16 @@ html{scrollbar-gutter:stable}
     }
     const u = CYCLE_UNIT_TEXT[cycle.unit];
     const periodName = u.singular;
-    const remaining = Math.max(0, progress.remainingMs);
+    // O aviso superior utiliza remainingThisPeriodMs: respeita o mínimo da semana,
+    // além do saldo redistribuído do período. A janela precisa usar o mesmo valor.
+    const remaining = Math.max(0, progress.remainingThisPeriodMs);
     const isWeek = periodName === 'semana';
     document.getElementById('final-period-title').textContent = isWeek
       ? 'Esta é a última semana do período'
       : `Este é o último ${periodName} do período`;
-    document.getElementById('final-period-text').innerHTML = remaining > 30000
-      ? `Para cumprir a média definida do período, você precisa fazer <strong>${escapeHtml(formatHM(remaining))}</strong> ${isWeek ? 'nesta última semana' : `neste último ${escapeHtml(periodName)}`}.`
-      : `Você já cumpriu a média necessária do período. Continue registrando suas atividades normalmente.`;
+    document.getElementById('final-period-text').innerHTML = !progress.periodCompleted && remaining > 30000
+      ? `Para cumprir a meta ${isWeek ? 'semanal' : 'do período'}, você precisa registrar <strong>${escapeHtml(formatHM(remaining))}</strong> ${isWeek ? 'nesta última semana' : `neste último ${escapeHtml(periodName)}`}.`
+      : `Você já cumpriu a meta ${isWeek ? 'desta semana' : 'necessária do período'}. Continue registrando suas atividades normalmente.`;
     overlay.hidden = false;
   }
 
@@ -6509,14 +6834,14 @@ html{scrollbar-gutter:stable}
     let top = '';
     if (history) {
       const editable = isTeamAdmin() && !ended;
-      const actions = editable ? `<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="closeCycleDataModal();startEditCycle('${cycle.id}')">Editar período</button><button type="button" class="btn-outline" onclick="closeCycleDataModal();deleteCycle('${cycle.id}', this)">Excluir</button></div>` : '';
+      const actions = editable ? `<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="closeCycleDataModal();startEditCycle('${cycle.id}')">Editar período</button></div>` : '';
       top = `<div class="cdm-info-top">${cycleStatusLabel(cycle)}${actions}</div>`;
     }
     return `${top}<div class="pc-metrics">${metric(ico.cal,'Início',fmtDateBR(cycle.startDate))}${metric(ico.cal,'Fim',fmtDateBR(cycle.endDate))}${metric(ico.target,'Meta',cycleGoalText(cycle))}${lastMetric}${row2}</div>${holBlock}`;
   }
   function renderCycleDetail(cycle,{history=false}={}){
     if(!cycle) return '';
-    const admin=isTeamAdmin(), u=CYCLE_UNIT_TEXT[cycle.unit], editable=admin&&cycle.endDate>=localDateStr(new Date()), actions=editable?`<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="startEditCycle('${cycle.id}')">Editar período</button><button type="button" class="btn-outline" onclick="deleteCycle('${cycle.id}', this)">Excluir</button></div>`:'';
+    const admin=isTeamAdmin(), u=CYCLE_UNIT_TEXT[cycle.unit], editable=admin&&cycle.endDate>=localDateStr(new Date()), actions=editable?`<div class="cycle-page-actions"><button type="button" class="btn-outline" onclick="startEditCycle('${cycle.id}')">Editar período</button></div>`:'';
     const remaining=cycleTimeLeft(cycle);
     const holidays = cycle.unit === 'weeks' ? (cycle.holidayWeeks || []) : [];
     // Ícones lineares (apenas apresentação)
@@ -6548,7 +6873,7 @@ html{scrollbar-gutter:stable}
     const row2 = metric(ico.layers,'Divisão',u.label)
       + (cycle.unit==='weeks' ? metric(ico.bars,'Mínimo semanal',formatCycleDraftMinutes(cycle.minimumMinutes || 0)) + metric(ico.flag,'Semanas com feriado',holidays.length) : '');
     const holBlock = holidays.length ? `<div class="card pc-block"><div class="pc-block-head"><h4>Semanas com feriado</h4><p>Semanas que possuem feriados e suas metas ajustadas.</p></div><div class="pc-hol-list">${holidayRows}</div></div>` : '';
-    return `<div class="card pc-hero"><div class="pc-hero-top"><div class="pc-hero-id"><span class="pc-hero-icon" aria-hidden="true">${ico.cal}</span><div><div class="pc-hero-titlerow"><h3>Período atual</h3>${cycleStatusLabel(cycle)}</div><p class="pc-hero-range">${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div class="pc-hero-actions">${actions}${dataBtn}</div></div><div class="pc-progress"><div class="pc-progress-label"><strong>${pct}%</strong> do período</div><div class="pc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div class="pc-bar-fill" style="width:${pct}%"></div></div><div class="pc-progress-foot"><span><strong>${elapsedDays}</strong> ${elapsedDays===1?'dia decorrido':'dias decorridos'}</span><span><strong>${leftDays}</strong> ${leftDays===1?'dia restante':'dias restantes'}</span></div></div></div>`;
+    return `<div class="card pc-hero"><div class="pc-hero-top"><div class="pc-hero-id"><span class="pc-hero-icon" aria-hidden="true">${ico.cal}</span><div><div class="pc-hero-titlerow"><h3>Período atual</h3>${cycleStatusLabel(cycle)}</div><p class="pc-hero-range">${fmtDateBR(cycle.startDate)} — ${fmtDateBR(cycle.endDate)}</p></div></div><div class="pc-hero-actions">${dataBtn}${actions}</div></div><div class="pc-progress"><div class="pc-progress-label"><strong>${pct}%</strong> do período</div><div class="pc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div class="pc-bar-fill" style="width:${pct}%"></div></div><div class="pc-progress-foot"><span><strong>${elapsedDays}</strong> ${elapsedDays===1?'dia decorrido':'dias decorridos'}</span><span><strong>${leftDays}</strong> ${leftDays===1?'dia restante':'dias restantes'}</span></div></div></div>`;
   }
   function openNewCycleForm(){
     if(!isTeamAdmin()) return;
@@ -6560,6 +6885,7 @@ html{scrollbar-gutter:stable}
     document.getElementById('cycle-submit-label').textContent = 'Criar período';
     document.getElementById('cycle-submit-icon').hidden = false;
     document.getElementById('cycle-cancel-btn').hidden = false;
+    document.getElementById('cycle-delete-btn').hidden = true;
     updateCycleFormUnit();
     const modal=document.getElementById('cycle-form-modal');
     if(modal) modal.hidden=false;
@@ -6583,7 +6909,7 @@ html{scrollbar-gutter:stable}
     if(!el||!team)return;
     const admin=isTeamAdmin();
     if(!cycle){
-      el.innerHTML=`<div class="cycle-page-head"><div><h3>Período</h3><p>Acompanhe o período atual da equipe.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Criar período</button></div>':''}</div><div class="card cycle-empty-state">${escapeHtml(team.name)} não iniciou nenhum período.</div>`;
+      el.innerHTML=`<div class="cycle-page-head"><div><h3>Período</h3><p>Acompanhe o período atual da equipe.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Criar período</button></div>':''}</div><p class="cycle-empty-state cycle-empty-message">${escapeHtml(team.name)} não iniciou nenhum período.</p>`;
       return;
     }
     el.innerHTML=`<div class="cycle-page-head"><div><h3>Período</h3><p>Visão geral do período atualmente em andamento.</p></div>${admin?'<div class="cycle-page-actions"><button type="button" class="btn-solid" onclick="openNewCycleForm()">Novo período</button></div>':''}</div>${renderCycleDetail(cycle)}`;
@@ -6597,8 +6923,7 @@ html{scrollbar-gutter:stable}
     // Reutiliza o detalhe existente para preservar metas, feriados e ações.
     const detail = renderCycleDetail(cycle,{history:true})
       .replace(/<button[^>]*onclick="openCycleDataModal[^>]*>[\s\S]*?<\/button>/, '')
-      .replaceAll('onclick="startEditCycle(', 'onclick="closeCycleDataModal();startEditCycle(')
-      .replaceAll('onclick="deleteCycle(', 'onclick="closeCycleDataModal();deleteCycle(');
+      .replaceAll('onclick="startEditCycle(', 'onclick="closeCycleDataModal();startEditCycle(');
     return detail + renderCycleMembersTable(cycle,filter);
   }
   function renderCycleRecordsPage(){
@@ -6609,8 +6934,54 @@ html{scrollbar-gutter:stable}
   }
   function renderCycleMemberArea(){ renderCycleCurrentPage(); }
   function renderAdminCycleSummary(){ /* conteúdo integrado às páginas internas do período */ }
+  function dismissEndedCycleNotice(){
+    const overlay = document.getElementById('ended-cycle-overlay');
+    if (overlay) {
+      overlay.hidden = true;
+      if (overlay._returnFocus?.isConnected) overlay._returnFocus.focus({ preventScroll: true });
+    }
+  }
+
+  function ensureEndedCycleNotice(){
+    let overlay = document.getElementById('ended-cycle-overlay');
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.id = 'ended-cycle-overlay';
+    overlay.className = 'final-period-overlay';
+    overlay.hidden = true;
+    overlay.innerHTML = `<div class="final-period-notice" role="dialog" aria-modal="true" aria-labelledby="ended-cycle-title" aria-describedby="ended-cycle-text">
+      <button class="final-period-close" type="button" aria-label="Fechar aviso" onclick="dismissEndedCycleNotice()">×</button>
+      <div class="final-period-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 3v4M16 3v4"/><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="m9 15 2 2 4-4"/></svg></div>
+      <h2 id="ended-cycle-title">Período encerrado</h2>
+      <p id="ended-cycle-text"></p>
+    </div>`;
+    overlay.addEventListener('click', e => { if (e.target === overlay) dismissEndedCycleNotice(); });
+    overlay.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.preventDefault(); dismissEndedCycleNotice(); }
+    });
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
   function notifyEndedCycle(){
-    const team=DB.getTeams()[session.teamCode]; if(!team || (team.admin===session.username&&!adminParticipatesInCycle()))return; const today=localDateStr(new Date()); const ended=DB.getCycles().filter(c=>c.teamCode===session.teamCode&&c.endDate<today).sort((a,b)=>b.endDate.localeCompare(a.endDate))[0]; if(!ended)return; const key=`petimer_cycle_ended_${session.teamCode}_${session.username}_${ended.id}`; if(sessionStorage.getItem(key))return; sessionStorage.setItem(key,'1'); setTimeout(()=>alert(`O período de ${fmtDateBR(ended.startDate)} a ${fmtDateBR(ended.endDate)} terminou. Acesse Registros de Períodos para consultar os resultados.`),100);
+    const team = DB.getTeams()[session.teamCode];
+    if (!team || (team.admin === session.username && !adminParticipatesInCycle())) return;
+    const today = localDateStr(new Date());
+    const ended = DB.getCycles().filter(c => c.teamCode === session.teamCode && c.endDate < today)
+      .sort((a,b) => b.endDate.localeCompare(a.endDate))[0];
+    if (!ended) return;
+    const key = `petimer_cycle_ended_${session.teamCode}_${session.username}_${ended.id}`;
+    if (sessionStorage.getItem(key)) return;
+    const code = session.teamCode, username = session.username;
+    sessionStorage.setItem(key, '1');
+    setTimeout(() => {
+      if (!session || session.teamCode !== code || session.username !== username || document.getElementById('main-app')?.hidden) return;
+      const overlay = ensureEndedCycleNotice();
+      document.getElementById('ended-cycle-text').innerHTML = `O período de <strong>${escapeHtml(fmtDateBR(ended.startDate))} a ${escapeHtml(fmtDateBR(ended.endDate))}</strong> terminou.<br>Veja os resultados em <strong>Período › Registros de Períodos</strong>.`;
+      overlay._returnFocus = document.activeElement;
+      overlay.hidden = false;
+      overlay.querySelector('.final-period-close').focus({ preventScroll: true });
+    }, 100);
   }
 
   function isTeamAdmin() {
@@ -6709,6 +7080,7 @@ html{scrollbar-gutter:stable}
   document.getElementById('cycle-submit-label').textContent = 'Salvar alterações';
   document.getElementById('cycle-submit-icon').hidden = true;
   document.getElementById('cycle-cancel-btn').hidden = false;
+  document.getElementById('cycle-delete-btn').hidden = false;
   document.getElementById('cycle-form-modal').hidden = false;
 }
 
@@ -6721,6 +7093,7 @@ html{scrollbar-gutter:stable}
     document.getElementById('cycle-submit-label').textContent = 'Criar período';
     document.getElementById('cycle-submit-icon').hidden = false;
     document.getElementById('cycle-cancel-btn').hidden = false;
+    document.getElementById('cycle-delete-btn').hidden = true;
     updateCycleFormUnit();
     hideCycleForm();
   }
