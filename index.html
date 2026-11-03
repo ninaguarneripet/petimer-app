@@ -2514,7 +2514,7 @@ html{scrollbar-gutter:stable}
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzk4LXUBR-J2wUA_8TcamKihWDE9ea06YBH6hE0QylIHkNqR4OTIIBbKalvGiLlZIHY/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxXMhqrNbpbVeltWnzmr7O41yrY_47nasQNJmHaPpEtgr3sZGsjVQx0sHMIRgHb4IYX/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -3028,7 +3028,7 @@ html{scrollbar-gutter:stable}
           }
         }
       }
-      session = { username: d.user.username, name: d.user.displayName, teamCode: null, isMaster: !!d.isMaster };
+      session = { username: d.user.username, name: d.user.displayName, teamCode: null, isMaster: !!d.isMaster, mustChange: !!d.mustChange };
       CACHE.users[session.username] = { username: session.username, name: session.name };
       CACHE.myTeams = d.teams || [];
       // 2) Restaura a equipe anterior (se ainda for membro); a view/subview já foi restaurada visualmente.
@@ -3056,6 +3056,7 @@ html{scrollbar-gutter:stable}
     } finally {
       window.petimerRestoringSession = false;
       hidePetimerLoading();
+      maybeForceReset();
     }
   }
 
@@ -3199,9 +3200,11 @@ html{scrollbar-gutter:stable}
       const d = await api('me');
       CACHE.myTeams = d.teams || [];
       session.isMaster = !!d.isMaster;
+      session.mustChange = !!d.mustChange;
     } catch (err) { CACHE.myTeams = []; }
     showScreen('hub-screen');
     renderHub();
+    maybeForceReset();
   }
 
   async function logout() {
@@ -7233,13 +7236,14 @@ html{scrollbar-gutter:stable}
         const flags = [];
         if (u.locked) flags.push('<span class="master-chip warn">Bloqueado</span>');
         if (!u.hasRecovery) flags.push('<span class="master-chip">Sem pergunta de segurança</span>');
+        if (u.mustChange) flags.push('<span class="master-chip warn">Aguardando nova senha</span>');
         if (u.isMaster) flags.push('<span class="master-chip ok">Master</span>');
         const teams = u.teams.length ? u.teams.map(t => escapeHtml(t.name) + ' <span class="master-code">' + escapeHtml(t.code) + '</span>').join('<br>') : '—';
         return `<tr>
           <td><strong>${escapeHtml(u.displayName)}</strong><div class="master-sub">@${escapeHtml(u.username)}</div>${flags.length ? '<div class="master-flags">' + flags.join('') + '</div>' : ''}</td>
           <td>${masterFmtDate(u.createdAt)}</td>
           <td>${teams}</td>
-          <td><button type="button" class="profile-btn profile-btn-secondary master-btn" data-user="${escapeHtml(u.username)}" onclick="openMasterUserDialog(this.dataset.user)">Senha</button></td>
+          <td><button type="button" class="profile-btn profile-btn-secondary master-btn" data-user="${escapeHtml(u.username)}" onclick="masterResetPassword(this.dataset.user, this)">Redefinir senha</button></td>
         </tr>`;
       }).join('');
       list.innerHTML = rows
@@ -7260,61 +7264,51 @@ html{scrollbar-gutter:stable}
         : '<p class="master-empty">Nenhuma equipe encontrada.</p>';
     }
   }
-  const MASTER_QUESTIONS = {
-    q1: 'Qual o nome do seu primeiro animal de estimação?',
-    q2: 'Qual o nome da cidade onde você nasceu?',
-    q3: 'Qual o nome do seu melhor amigo de infância?',
-    q4: 'Qual foi o modelo do seu primeiro carro ou bicicleta?',
-    q5: 'Qual o nome da sua escola primária?'
-  };
-  let masterDialogUser = null;
-  function masterDialogError(text) {
-    const el = document.getElementById('master-user-error');
+  async function masterResetPassword(username, button) {
+    const ok = await appConfirm({
+      title: 'Redefinir senha',
+      message: 'A senha de **@' + username + '** voltará a ser **123456**.',
+      note: 'No próximo login, a pessoa será obrigada a escolher uma nova senha e uma nova pergunta de segurança.',
+      confirmText: 'Redefinir', danger: false
+    });
+    if (!ok) return;
+    return runOnce('master-reset-' + username, button, 'Redefinindo...', async () => {
+      try {
+        await api('adminResetPassword', { username });
+        masterShowMsg('Senha de @' + username + ' redefinida para 123456.', false);
+        await loadMasterAdmin();
+      } catch (err) { masterShowMsg(err.message || 'Não foi possível redefinir.', true); }
+    });
+  }
+  // ---------- TROCA OBRIGATÓRIA APÓS REDEFINIÇÃO ----------
+  function maybeForceReset() {
+    if (!session || !session.mustChange) return;
+    ['force-reset-pass', 'force-reset-pass2', 'force-reset-answer'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const err = document.getElementById('force-reset-error'); if (err) err.hidden = true;
+    document.getElementById('force-reset-overlay').hidden = false;
+    setTimeout(() => document.getElementById('force-reset-pass')?.focus(), 50);
+  }
+  function forceResetError(text) {
+    const el = document.getElementById('force-reset-error');
     el.textContent = text || ''; el.hidden = !text;
   }
-  function openMasterUserDialog(username) {
-    const u = (masterAdminData?.users || []).find(x => x.username === username);
-    if (!u) return;
-    masterDialogUser = username;
-    document.getElementById('master-user-title').textContent = 'Senha de @' + username;
-    document.getElementById('master-user-name').textContent = u.displayName;
-    document.getElementById('master-user-question').textContent = u.questionText || 'Nenhuma pergunta cadastrada.';
-    document.getElementById('master-user-password').value = '123456';
-    document.getElementById('master-user-newq').checked = false;
-    document.getElementById('master-user-newq-box').hidden = true;
-    document.getElementById('master-user-qid').value = u.questionId && MASTER_QUESTIONS[u.questionId] ? u.questionId : 'q1';
-    document.getElementById('master-user-answer').value = '';
-    masterDialogError('');
-    document.getElementById('master-user-overlay').hidden = false;
-  }
-  function closeMasterUserDialog() { document.getElementById('master-user-overlay').hidden = true; masterDialogUser = null; }
-  function toggleMasterNewQuestion() {
-    const on = document.getElementById('master-user-newq').checked;
-    document.getElementById('master-user-newq-box').hidden = !on;
-    if (on) setTimeout(() => document.getElementById('master-user-answer')?.focus(), 30);
-  }
-  async function submitMasterUserDialog(e) {
+  async function submitForcedReset(e) {
     if (e) e.preventDefault();
-    const username = masterDialogUser;
-    if (!username) return;
     const btn = actionButton(e);
-    const newPassword = document.getElementById('master-user-password').value;
-    if (newPassword.length < 6) return masterDialogError('A senha precisa ter pelo menos 6 caracteres.');
-    const payload = { username, newPassword };
-    if (document.getElementById('master-user-newq').checked) {
-      const answer = document.getElementById('master-user-answer').value.trim();
-      if (answer.length < 2) return masterDialogError('Informe a resposta de segurança.');
-      payload.questionId = document.getElementById('master-user-qid').value;
-      payload.answer = answer;
-    }
-    masterDialogError('');
-    return runOnce('master-reset-' + username, btn, 'Salvando...', async () => {
+    const newPassword = document.getElementById('force-reset-pass').value;
+    const confirmPass = document.getElementById('force-reset-pass2').value;
+    const answer = document.getElementById('force-reset-answer').value.trim();
+    if (newPassword.length < 6) return forceResetError('A nova senha deve ter pelo menos 6 caracteres.');
+    if (newPassword === '123456') return forceResetError('Escolha uma senha diferente da padrão.');
+    if (newPassword !== confirmPass) return forceResetError('A confirmação da senha não confere.');
+    if (answer.length < 2) return forceResetError('Informe a resposta de segurança.');
+    forceResetError('');
+    return runOnce('force-reset', btn, 'Salvando...', async () => {
       try {
-        await api('adminResetPassword', payload);
-        closeMasterUserDialog();
-        masterShowMsg('Senha de @' + username + ' redefinida para ' + newPassword + (payload.questionId ? ' e pergunta de segurança atualizada.' : '.'), false);
-        await loadMasterAdmin();
-      } catch (err) { masterDialogError(err.message || 'Não foi possível redefinir.'); }
+        await api('completePasswordReset', { newPassword, questionId: document.getElementById('force-reset-qid').value, answer });
+        session.mustChange = false;
+        document.getElementById('force-reset-overlay').hidden = true;
+      } catch (err) { forceResetError(err.message || 'Não foi possível salvar.'); }
     });
   }
   async function masterDeleteTeam(code, button) {
@@ -7365,25 +7359,19 @@ html{scrollbar-gutter:stable}
   </div>
 </div>
 
-<div class="profile-popover-card hub-modal" id="master-user-overlay" style="z-index:1300" hidden onclick="if(event.target===this) closeMasterUserDialog()">
-  <form class="profile-dialog" role="dialog" aria-modal="true" aria-labelledby="master-user-title" onsubmit="submitMasterUserDialog(event)">
-    <div class="profile-dialog-head"><h3 id="master-user-title">Senha</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeMasterUserDialog()">×</button></div>
+<div class="profile-popover-card" id="force-reset-overlay" style="z-index:2000" hidden>
+  <form class="profile-dialog" role="alertdialog" aria-modal="true" aria-labelledby="force-reset-title" onsubmit="submitForcedReset(event)">
+    <div class="profile-dialog-head"><h3 id="force-reset-title">Defina uma nova senha</h3></div>
     <div class="profile-dialog-body">
-      <div class="profile-view-card">
-        <div class="profile-view-row"><span class="profile-view-label">Nome</span><span class="profile-view-value" id="master-user-name">-</span></div>
-        <div class="profile-view-row"><span class="profile-view-label">Pergunta</span><span class="profile-view-value" id="master-user-question">-</span></div>
-        <div class="profile-view-row"><span class="profile-view-label">Resposta</span><span class="profile-view-value">Guardada criptografada, não pode ser exibida</span></div>
+      <p class="profile-dialog-sub">A sua senha foi redefinida para a padrão. Escolha uma nova e selecione uma nova pergunta de segurança.</p>
+      <div class="profile-form-grid">
+        <div class="profile-field"><label for="force-reset-pass">Nova senha</label><input id="force-reset-pass" type="password" maxlength="80" autocomplete="new-password" required></div>
+        <div class="profile-field"><label for="force-reset-pass2">Confirmar nova senha</label><input id="force-reset-pass2" type="password" maxlength="80" autocomplete="new-password" required></div>
+        <div class="profile-field"><label for="force-reset-qid">Pergunta de segurança</label><select id="force-reset-qid"><option value="q1">Qual o nome do seu primeiro animal de estimação?</option><option value="q2">Qual o nome da cidade onde você nasceu?</option><option value="q3">Qual o nome do seu melhor amigo de infância?</option><option value="q4">Qual foi o modelo do seu primeiro carro ou bicicleta?</option><option value="q5">Qual o nome da sua escola primária?</option></select></div>
+        <div class="profile-field"><label for="force-reset-answer">Resposta</label><input id="force-reset-answer" type="text" maxlength="80" autocomplete="off" required></div>
       </div>
-      <div class="profile-form-grid" style="margin-top:14px">
-        <div class="profile-field"><label for="master-user-password">Nova senha</label><input id="master-user-password" type="text" maxlength="80" autocomplete="off" value="123456"><span class="profile-field-hint">Padrão: 123456. Peça para a pessoa trocar em Meu perfil.</span></div>
-        <label class="master-check"><input type="checkbox" id="master-user-newq" onchange="toggleMasterNewQuestion()"> Cadastrar nova pergunta e resposta de segurança</label>
-        <div id="master-user-newq-box" hidden>
-          <div class="profile-field"><label for="master-user-qid">Pergunta</label><select id="master-user-qid"><option value="q1">Qual o nome do seu primeiro animal de estimação?</option><option value="q2">Qual o nome da cidade onde você nasceu?</option><option value="q3">Qual o nome do seu melhor amigo de infância?</option><option value="q4">Qual foi o modelo do seu primeiro carro ou bicicleta?</option><option value="q5">Qual o nome da sua escola primária?</option></select></div>
-          <div class="profile-field" style="margin-top:10px"><label for="master-user-answer">Resposta</label><input id="master-user-answer" type="text" maxlength="80" autocomplete="off"></div>
-        </div>
-      </div>
-      <p class="master-admin-msg is-error" id="master-user-error" hidden style="margin-top:12px"></p>
-      <div class="profile-dialog-actions"><button class="profile-btn profile-btn-secondary" type="button" onclick="closeMasterUserDialog()">Cancelar</button><button class="profile-btn profile-btn-primary" type="submit">Redefinir senha</button></div>
+      <p class="master-admin-msg is-error" id="force-reset-error" hidden style="margin-top:12px"></p>
+      <div class="profile-dialog-actions"><button class="profile-btn profile-btn-secondary" type="button" onclick="logout()">Sair</button><button class="profile-btn profile-btn-primary" type="submit">Salvar</button></div>
     </div>
   </form>
 </div>
