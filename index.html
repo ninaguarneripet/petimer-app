@@ -1836,6 +1836,33 @@ select.reports-select,.team-sector-select,#reg-question{border-radius:var(--ui-r
 html{scrollbar-gutter:stable}
 @supports not (scrollbar-gutter:stable){html{overflow-y:scroll}}
 </style>
+<style id="master-admin-style">
+.master-admin-dialog{width:min(860px,calc(100vw - 32px));max-height:calc(100vh - 48px);display:flex;flex-direction:column}
+.master-admin-body{padding:16px 22px 22px;overflow:auto;min-height:0}
+.master-toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.master-tabs{display:inline-flex;gap:4px;padding:3px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2)}
+.master-tab{border:0;background:transparent;color:var(--muted);font:600 12.5px/1 inherit;padding:8px 12px;border-radius:7px;cursor:pointer}
+.master-tab span{margin-left:5px;font-weight:500;opacity:.8}
+.master-tab.active{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+#master-admin-search{flex:1 1 220px;max-width:340px;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;font-size:13px}
+.master-admin-msg{margin:0 0 12px;padding:9px 12px;border-radius:8px;font-size:12.5px;background:rgba(47,125,104,.12);color:#2f7d68}
+.master-admin-msg.is-error{background:rgba(232,86,79,.12);color:var(--danger)}
+.master-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+.master-table{width:100%;border-collapse:collapse;font-size:12.5px;color:var(--text)}
+.master-table th{text-align:left;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+.master-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.master-table tr:last-child td{border-bottom:0}
+.master-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.master-code{font:600 11.5px/1 ui-monospace,Menlo,monospace;color:var(--muted);letter-spacing:.04em}
+.master-flags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.master-chip{font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:99px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted)}
+.master-chip.warn{background:rgba(232,86,79,.12);border-color:transparent;color:var(--danger)}
+.master-chip.ok{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.master-actions{text-align:right;white-space:nowrap}
+.master-btn{padding:7px 11px;font-size:12px}
+.master-check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text);cursor:pointer}
+.master-empty{margin:24px 0;text-align:center;color:var(--muted);font-size:13px}
+</style>
 <style id="observer-toggle-style">
 .profile-menu #observer-mode-toggle.is-on{color:var(--accent,#276097);background:color-mix(in srgb,var(--accent,#276097) 10%,transparent);}
 </style>
@@ -1951,10 +1978,16 @@ html{scrollbar-gutter:stable}
     <div id="hub-list-view">
     <div class="hub-head">
       <h2 style="margin:0; font-size:22px;">Olá, <span id="hub-user-name" style="color:var(--accent-dark)"></span></h2>
-      <button class="hub-logout" onclick="logout()" aria-label="Sair da conta">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path><path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"></path></svg>
-        <span>Sair da conta</span>
-      </button>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="hub-logout" id="hub-master-admin" type="button" onclick="openMasterAdmin()" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+          <span>Administração PETimer</span>
+        </button>
+        <button class="hub-logout" onclick="logout()" aria-label="Sair da conta">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path><path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"></path></svg>
+          <span>Sair da conta</span>
+        </button>
+      </div>
     </div>
 
 
@@ -2083,6 +2116,10 @@ html{scrollbar-gutter:stable}
         <button type="button" onclick="openTeamSwitcher()">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11"></path><path d="m15 4 3 3-3 3"></path><path d="M17 17H6"></path><path d="m9 14-3 3 3 3"></path></svg>
           <span>Trocar de equipe</span>
+        </button>
+        <button type="button" id="master-admin-toggle" onclick="openMasterAdmin()" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+          <span>Administração PETimer</span>
         </button>
         <button type="button" id="observer-mode-toggle" onclick="toggleObserverMode()" aria-pressed="false" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -2477,7 +2514,7 @@ html{scrollbar-gutter:stable}
   // ---------- CONEXÃO COM O BACKEND (Google Apps Script + Planilha) ----------
   /* Cole aqui a URL do seu Web App do Apps Script
      (Implantar > Nova implantação > Aplicativo da Web > copiar URL) */
-  const API_URL = "https://script.google.com/macros/s/AKfycbwg-ssR1xnXWnJesb796GuQUXIZzWWfHMZzuwE_h5I48My8sgRlm95bilWX-ebl15BA/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzk4LXUBR-J2wUA_8TcamKihWDE9ea06YBH6hE0QylIHkNqR4OTIIBbKalvGiLlZIHY/exec";
 
   let authToken = localStorage.getItem('petimer_token') || null;
 
@@ -2991,7 +3028,7 @@ html{scrollbar-gutter:stable}
           }
         }
       }
-      session = { username: d.user.username, name: d.user.displayName, teamCode: null };
+      session = { username: d.user.username, name: d.user.displayName, teamCode: null, isMaster: !!d.isMaster };
       CACHE.users[session.username] = { username: session.username, name: session.name };
       CACHE.myTeams = d.teams || [];
       // 2) Restaura a equipe anterior (se ainda for membro); a view/subview já foi restaurada visualmente.
@@ -3161,6 +3198,7 @@ html{scrollbar-gutter:stable}
     try {
       const d = await api('me');
       CACHE.myTeams = d.teams || [];
+      session.isMaster = !!d.isMaster;
     } catch (err) { CACHE.myTeams = []; }
     showScreen('hub-screen');
     renderHub();
@@ -3180,6 +3218,7 @@ html{scrollbar-gutter:stable}
 
   // ---------- HUB ----------
   function renderHub() {
+    syncMasterUi();
     const displayName = session.name || session.username;
 
     const nameDisplay = document.getElementById('hub-user-name');
@@ -3390,6 +3429,7 @@ html{scrollbar-gutter:stable}
 
         const me = await api('me');
         CACHE.myTeams = me.teams || [];
+        session.isMaster = !!me.isMaster;
         if (session.teamCode) await refreshTeamData();
         setupApp();
         refreshProfileDialog();
@@ -3461,6 +3501,7 @@ html{scrollbar-gutter:stable}
 
     const initials = String(currentName || session.username || 'U').trim().split(/\s+/).filter(Boolean).slice(0,2).map(p => p[0]).join('').toUpperCase();
     document.getElementById('sidebar-profile-trigger').textContent = initials || 'U';
+    syncMasterUi();
     document.getElementById('admin-add-area').hidden = !isTeamAdmin();
     const mayManageTeamOptions = isTeamAdmin();
     const cargoManageFooter = document.getElementById('cargo-manage-footer');
@@ -7131,8 +7172,221 @@ html{scrollbar-gutter:stable}
     document.documentElement.removeAttribute('data-petimer-restore-view');
     try { if (authToken && !petimerLoadingDepth) showPetimerLoading('Carregando PETimer...'); } catch (_) {}
   }
+
+  // ---------- ADMINISTRAÇÃO PETimer (usuário master) ----------
+  let masterAdminData = null;
+  let masterAdminTab = 'users';
+  function syncMasterUi() {
+    const on = !!(session && session.isMaster);
+    const a = document.getElementById('master-admin-toggle');
+    const b = document.getElementById('hub-master-admin');
+    if (a) a.hidden = !on;
+    if (b) b.hidden = !on;
+  }
+  function masterFmtDate(v) {
+    const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : '—';
+  }
+  function masterShowMsg(text, isError) {
+    const el = document.getElementById('master-admin-msg');
+    if (!el) return;
+    el.textContent = text || '';
+    el.hidden = !text;
+    el.classList.toggle('is-error', !!isError);
+  }
+  async function openMasterAdmin() {
+    if (!session || !session.isMaster) return;
+    closeProfileMenu();
+    document.getElementById('master-admin-overlay').hidden = false;
+    document.getElementById('master-admin-search').value = '';
+    masterShowMsg('');
+    await loadMasterAdmin();
+  }
+  function closeMasterAdmin() { document.getElementById('master-admin-overlay').hidden = true; }
+  async function loadMasterAdmin() {
+    const list = document.getElementById('master-admin-list');
+    if (!masterAdminData) list.innerHTML = '<p class="master-empty">Carregando...</p>';
+    try {
+      masterAdminData = await api('adminOverview');
+      renderMasterAdmin();
+    } catch (err) {
+      list.innerHTML = '<p class="master-empty">' + escapeHtml(err.message || 'Não foi possível carregar.') + '</p>';
+    }
+  }
+  function setMasterAdminTab(tab) {
+    masterAdminTab = tab;
+    document.getElementById('master-tab-users').classList.toggle('active', tab === 'users');
+    document.getElementById('master-tab-teams').classList.toggle('active', tab === 'teams');
+    document.getElementById('master-admin-search').placeholder = tab === 'users' ? 'Buscar por nome ou usuário' : 'Buscar por equipe, código ou criador';
+    renderMasterAdmin();
+  }
+  function renderMasterAdmin() {
+    const d = masterAdminData;
+    const list = document.getElementById('master-admin-list');
+    if (!d) return;
+    document.getElementById('master-count-users').textContent = d.users.length;
+    document.getElementById('master-count-teams').textContent = d.teams.length;
+    const q = String(document.getElementById('master-admin-search').value || '').trim().toLocaleLowerCase('pt-BR');
+    const has = (...vals) => !q || vals.some(v => String(v || '').toLocaleLowerCase('pt-BR').includes(q));
+    if (masterAdminTab === 'users') {
+      const rows = d.users.filter(u => has(u.username, u.displayName)).map(u => {
+        const flags = [];
+        if (u.locked) flags.push('<span class="master-chip warn">Bloqueado</span>');
+        if (!u.hasRecovery) flags.push('<span class="master-chip">Sem pergunta de segurança</span>');
+        if (u.isMaster) flags.push('<span class="master-chip ok">Master</span>');
+        const teams = u.teams.length ? u.teams.map(t => escapeHtml(t.name) + ' <span class="master-code">' + escapeHtml(t.code) + '</span>').join('<br>') : '—';
+        return `<tr>
+          <td><strong>${escapeHtml(u.displayName)}</strong><div class="master-sub">@${escapeHtml(u.username)}</div>${flags.length ? '<div class="master-flags">' + flags.join('') + '</div>' : ''}</td>
+          <td>${masterFmtDate(u.createdAt)}</td>
+          <td>${teams}</td>
+          <td><button type="button" class="profile-btn profile-btn-secondary master-btn" data-user="${escapeHtml(u.username)}" onclick="openMasterUserDialog(this.dataset.user)">Senha</button></td>
+        </tr>`;
+      }).join('');
+      list.innerHTML = rows
+        ? '<div class="master-scroll"><table class="master-table"><thead><tr><th>Usuário</th><th>Criado em</th><th>Equipes</th><th>Senha</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+        : '<p class="master-empty">Nenhum usuário encontrado.</p>';
+    } else {
+      const rows = d.teams.filter(t => has(t.name, t.code, t.admin, t.adminName)).map(t => `<tr>
+          <td><strong>${escapeHtml(t.name)}</strong></td>
+          <td><span class="master-code">${escapeHtml(t.code)}</span></td>
+          <td>${escapeHtml(t.adminName || t.admin)}<div class="master-sub">@${escapeHtml(t.admin)}</div></td>
+          <td>${t.members}</td>
+          <td>${t.entries}</td>
+          <td>${masterFmtDate(t.createdAt)}</td>
+          <td class="master-actions"><button type="button" class="profile-btn profile-btn-danger master-btn" data-code="${escapeHtml(t.code)}" onclick="masterDeleteTeam(this.dataset.code, this)">Excluir</button></td>
+        </tr>`).join('');
+      list.innerHTML = rows
+        ? '<div class="master-scroll"><table class="master-table"><thead><tr><th>Equipe</th><th>Código</th><th>Criador</th><th>Membros</th><th>Registros</th><th>Criada em</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+        : '<p class="master-empty">Nenhuma equipe encontrada.</p>';
+    }
+  }
+  const MASTER_QUESTIONS = {
+    q1: 'Qual o nome do seu primeiro animal de estimação?',
+    q2: 'Qual o nome da cidade onde você nasceu?',
+    q3: 'Qual o nome do seu melhor amigo de infância?',
+    q4: 'Qual foi o modelo do seu primeiro carro ou bicicleta?',
+    q5: 'Qual o nome da sua escola primária?'
+  };
+  let masterDialogUser = null;
+  function masterDialogError(text) {
+    const el = document.getElementById('master-user-error');
+    el.textContent = text || ''; el.hidden = !text;
+  }
+  function openMasterUserDialog(username) {
+    const u = (masterAdminData?.users || []).find(x => x.username === username);
+    if (!u) return;
+    masterDialogUser = username;
+    document.getElementById('master-user-title').textContent = 'Senha de @' + username;
+    document.getElementById('master-user-name').textContent = u.displayName;
+    document.getElementById('master-user-question').textContent = u.questionText || 'Nenhuma pergunta cadastrada.';
+    document.getElementById('master-user-password').value = '123456';
+    document.getElementById('master-user-newq').checked = false;
+    document.getElementById('master-user-newq-box').hidden = true;
+    document.getElementById('master-user-qid').value = u.questionId && MASTER_QUESTIONS[u.questionId] ? u.questionId : 'q1';
+    document.getElementById('master-user-answer').value = '';
+    masterDialogError('');
+    document.getElementById('master-user-overlay').hidden = false;
+  }
+  function closeMasterUserDialog() { document.getElementById('master-user-overlay').hidden = true; masterDialogUser = null; }
+  function toggleMasterNewQuestion() {
+    const on = document.getElementById('master-user-newq').checked;
+    document.getElementById('master-user-newq-box').hidden = !on;
+    if (on) setTimeout(() => document.getElementById('master-user-answer')?.focus(), 30);
+  }
+  async function submitMasterUserDialog(e) {
+    if (e) e.preventDefault();
+    const username = masterDialogUser;
+    if (!username) return;
+    const btn = actionButton(e);
+    const newPassword = document.getElementById('master-user-password').value;
+    if (newPassword.length < 6) return masterDialogError('A senha precisa ter pelo menos 6 caracteres.');
+    const payload = { username, newPassword };
+    if (document.getElementById('master-user-newq').checked) {
+      const answer = document.getElementById('master-user-answer').value.trim();
+      if (answer.length < 2) return masterDialogError('Informe a resposta de segurança.');
+      payload.questionId = document.getElementById('master-user-qid').value;
+      payload.answer = answer;
+    }
+    masterDialogError('');
+    return runOnce('master-reset-' + username, btn, 'Salvando...', async () => {
+      try {
+        await api('adminResetPassword', payload);
+        closeMasterUserDialog();
+        masterShowMsg('Senha de @' + username + ' redefinida para ' + newPassword + (payload.questionId ? ' e pergunta de segurança atualizada.' : '.'), false);
+        await loadMasterAdmin();
+      } catch (err) { masterDialogError(err.message || 'Não foi possível redefinir.'); }
+    });
+  }
+  async function masterDeleteTeam(code, button) {
+    const t = (masterAdminData?.teams || []).find(x => x.code === code);
+    if (!t) return;
+    const ok = await appConfirm({
+      title: 'Excluir equipe',
+      message: 'Excluir a equipe **' + t.name + '** (código ' + t.code + ')?',
+      note: 'Apaga a equipe, ' + t.entries + ' registro(s), períodos e metas. Não dá para desfazer.',
+      confirmText: 'Excluir equipe', danger: true
+    });
+    if (!ok) return;
+    return runOnce('master-delete-team-' + code, button, 'Excluindo...', async () => {
+      try {
+        await api('adminDeleteTeam', { code });
+        masterShowMsg('Equipe ' + t.name + ' excluída.', false);
+        await loadMasterAdmin();
+        if (session && session.teamCode === code) {
+          closeMasterAdmin(); stopPolling(); clearInterval(tickInterval);
+          DB.saveRunning(null);
+          session.teamCode = null;
+          try { localStorage.removeItem('petimer_last_team'); } catch (_) {}
+          try { const m = await api('me'); CACHE.myTeams = m.teams || []; } catch (_) {}
+          goToHub();
+        } else {
+          try { const m = await api('me'); CACHE.myTeams = m.teams || []; } catch (_) {}
+        }
+      } catch (err) { masterShowMsg(err.message || 'Não foi possível excluir.', true); }
+    });
+  }
   document.addEventListener('DOMContentLoaded', init);
 </script>
+
+<div class="profile-popover-card hub-modal" id="master-admin-overlay" hidden onclick="if(event.target===this) closeMasterAdmin()">
+  <div class="profile-dialog master-admin-dialog" role="dialog" aria-modal="true" aria-labelledby="master-admin-title">
+    <div class="profile-dialog-head"><h3 id="master-admin-title">Administração PETimer</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeMasterAdmin()">×</button></div>
+    <div class="master-admin-body">
+      <div class="master-toolbar">
+        <div class="master-tabs">
+          <button type="button" class="master-tab active" id="master-tab-users" onclick="setMasterAdminTab('users')">Usuários <span id="master-count-users">0</span></button>
+          <button type="button" class="master-tab" id="master-tab-teams" onclick="setMasterAdminTab('teams')">Equipes <span id="master-count-teams">0</span></button>
+        </div>
+        <input type="search" id="master-admin-search" placeholder="Buscar por nome ou usuário" oninput="renderMasterAdmin()" autocomplete="off">
+      </div>
+      <p class="master-admin-msg" id="master-admin-msg" hidden></p>
+      <div id="master-admin-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="profile-popover-card hub-modal" id="master-user-overlay" style="z-index:1300" hidden onclick="if(event.target===this) closeMasterUserDialog()">
+  <form class="profile-dialog" role="dialog" aria-modal="true" aria-labelledby="master-user-title" onsubmit="submitMasterUserDialog(event)">
+    <div class="profile-dialog-head"><h3 id="master-user-title">Senha</h3><button class="profile-dialog-close" type="button" aria-label="Fechar" onclick="closeMasterUserDialog()">×</button></div>
+    <div class="profile-dialog-body">
+      <div class="profile-view-card">
+        <div class="profile-view-row"><span class="profile-view-label">Nome</span><span class="profile-view-value" id="master-user-name">-</span></div>
+        <div class="profile-view-row"><span class="profile-view-label">Pergunta</span><span class="profile-view-value" id="master-user-question">-</span></div>
+        <div class="profile-view-row"><span class="profile-view-label">Resposta</span><span class="profile-view-value">Guardada criptografada, não pode ser exibida</span></div>
+      </div>
+      <div class="profile-form-grid" style="margin-top:14px">
+        <div class="profile-field"><label for="master-user-password">Nova senha</label><input id="master-user-password" type="text" maxlength="80" autocomplete="off" value="123456"><span class="profile-field-hint">Padrão: 123456. Peça para a pessoa trocar em Meu perfil.</span></div>
+        <label class="master-check"><input type="checkbox" id="master-user-newq" onchange="toggleMasterNewQuestion()"> Cadastrar nova pergunta e resposta de segurança</label>
+        <div id="master-user-newq-box" hidden>
+          <div class="profile-field"><label for="master-user-qid">Pergunta</label><select id="master-user-qid"><option value="q1">Qual o nome do seu primeiro animal de estimação?</option><option value="q2">Qual o nome da cidade onde você nasceu?</option><option value="q3">Qual o nome do seu melhor amigo de infância?</option><option value="q4">Qual foi o modelo do seu primeiro carro ou bicicleta?</option><option value="q5">Qual o nome da sua escola primária?</option></select></div>
+          <div class="profile-field" style="margin-top:10px"><label for="master-user-answer">Resposta</label><input id="master-user-answer" type="text" maxlength="80" autocomplete="off"></div>
+        </div>
+      </div>
+      <p class="master-admin-msg is-error" id="master-user-error" hidden style="margin-top:12px"></p>
+      <div class="profile-dialog-actions"><button class="profile-btn profile-btn-secondary" type="button" onclick="closeMasterUserDialog()">Cancelar</button><button class="profile-btn profile-btn-primary" type="submit">Redefinir senha</button></div>
+    </div>
+  </form>
+</div>
 
 <div class="profile-popover-card" id="profile-dialog-overlay" hidden onclick="if(event.target===this) closeProfileDialog()">
   <form class="profile-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-dialog-title" onsubmit="saveProfileChanges(event)">
