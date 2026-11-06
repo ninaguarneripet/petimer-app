@@ -2611,6 +2611,59 @@ html{scrollbar-gutter:stable}
     saveCycles: (v) => { CACHE.cycles = v; }
   };
 
+  /* HORAS REAIS: intervalos simultâneos do mesmo membro contam uma única vez.
+     Os registros e suas durações individuais continuam intactos no backend.
+     Para gráficos por categoria, divide cada trecho simultâneo igualmente entre
+     as atividades ativas; assim, a soma das categorias equivale às horas reais. */
+  function workInterval(e) {
+    if (!e || !e.date) return null;
+    const start = String(e.startTime || '').match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (!start) return null;
+    const begin = (+start[1] * 3600 + +start[2] * 60 + +(start[3] || 0)) * 1000;
+    if (!Number.isFinite(begin) || begin < 0 || begin >= 86400000) return null;
+    let duration = Number(e.duration) || 0;
+    if (e.isRunning && e.start) duration = Math.max(0, Date.now() - new Date(e.start).getTime());
+    if (!Number.isFinite(duration) || duration <= 0) return null;
+    // Backend divide registros que atravessam a meia-noite em partes diárias.
+    // No caso de um cronômetro ainda aberto, não contabilizar além do dia local.
+    return [begin, Math.min(86400000, begin + duration)];
+  }
+
+  function effectiveWorkDurations(entries) {
+    const result = new Map();
+    const groups = new Map();
+    (entries || []).forEach(e => {
+      result.set(e, 0);
+      const interval = workInterval(e);
+      if (!interval) {
+        // Compatibilidade com registros antigos sem horários utilizáveis.
+        result.set(e, Math.max(0, Number(e.duration) || 0));
+        return;
+      }
+      const key = String(e.user || '') + '\x1f' + String(e.date || '');
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push({ e, start: interval[0], end: interval[1] });
+    });
+    groups.forEach(items => {
+      const boundaries = [...new Set(items.flatMap(x => [x.start, x.end]))].sort((a,b) => a-b);
+      for (let i = 1; i < boundaries.length; i++) {
+        const a = boundaries[i-1], b = boundaries[i];
+        if (b <= a) continue;
+        const active = items.filter(x => x.start < b && x.end > a);
+        if (!active.length) continue;
+        const portion = (b-a) / active.length;
+        active.forEach(x => result.set(x.e, result.get(x.e) + portion));
+      }
+    });
+    return result;
+  }
+
+  function uniqueWorkMs(entries) {
+    let total = 0;
+    effectiveWorkDurations(entries).forEach(ms => { total += ms; });
+    return total;
+  }
+
   function mapEntryFromServer(e) {
     return { id: e.entryId, user: e.user, teamCode: session.teamCode, activity: e.activity, cargo: e.cargo, cargoColor: e.cargoColor, modalidade: e.modalidade, date: e.date, startTime: e.startTime, endTime: e.endTime, duration: e.duration };
   }
@@ -4185,7 +4238,7 @@ html{scrollbar-gutter:stable}
     Object.keys(sections).sort().reverse().forEach(bucket => {
       const dates = sections[bucket];
       if (!dates.length) return;
-      const weekTotal = dates.reduce((sum,date) => sum + grouped[date].reduce((s,e)=>s+(Number(e.duration)||0),0), 0);
+      const weekTotal = uniqueWorkMs(dates.flatMap(date => grouped[date]));
       html += `<div class="entries-week-section">`;
       html += `<div class="entries-week-title"><span>${sectionLabel(bucket)}</span><span class="entries-week-total">Total da semana: <strong>${fmtDur(weekTotal, true)}</strong></span></div>`;
 
@@ -4202,7 +4255,7 @@ html{scrollbar-gutter:stable}
           const weekday = dateObj.toLocaleDateString('pt-BR', { weekday:'short' }).replace('.', '');
           dateStr = `${weekday.toUpperCase()}, ${dateLabel}`;
         }
-        const dayTotal = grouped[date].reduce((sum,e)=>sum+(Number(e.duration)||0),0);
+        const dayTotal = uniqueWorkMs(grouped[date]);
         html += `<div class="day-group"><div class="day-group-header"><span>${readOnly ? escapeHtml(dateObj.toLocaleDateString('pt-BR', {weekday:'long',day:'numeric',month:'long',year:'numeric'})) : dateStr.toUpperCase()}</span><span class="day-group-total">${readOnly ? 'Total do dia:' : 'Total:'} <strong>${fmtDur(dayTotal, true)}</strong></span></div>`;
 
         grouped[date].sort((a, b) => {
@@ -4993,7 +5046,7 @@ html{scrollbar-gutter:stable}
     if (analysisMode === 'overview') {
       renderAnalysisOverview(entries, start);
     } else {
-      const total = entries.reduce((sum,e)=>sum+(Number(e.duration)||0),0);
+      const total = uniqueWorkMs(entries);
       const totalEl = document.getElementById('analysis-table-total'); if (totalEl) totalEl.textContent = fmtClock(total);
       const group = document.getElementById('analysis-table-group-label'); if (group) group.textContent = analysisMode === 'detailed' ? 'Registros individuais' : 'Agrupado por Cargo/Projeto';
       const content = document.getElementById('analysis-table-content'); if (!content) return;
@@ -5333,11 +5386,12 @@ html{scrollbar-gutter:stable}
     members.forEach(u => { byUser[u] = weeks.map(() => 0); });
     const weekIndex = {};
     weeks.forEach((w, i) => { weekIndex[w.weekStart] = i; });
+    const effective = effectiveWorkDurations(entries);
     entries.forEach(e => {
       if (!byUser[e.user]) return;
       const i = weekIndex[weekStartOfDate(e.date)];
       if (i === undefined) return;
-      byUser[e.user][i] += Number(e.duration) || 0;
+      byUser[e.user][i] += effective.get(e) || 0;
     });
 
     if (note) note.textContent = '';
@@ -5403,7 +5457,7 @@ html{scrollbar-gutter:stable}
     renderAnalysis();
   }
 
-  function renderAnalysisSide(entries, activityTotals, total) {
+  function renderAnalysisSide(entries, activityTotals, total, effective) {
     const list = document.getElementById('dash-top-activities');
     const hint = document.getElementById('dash-side-hint');
     if (!list) return;
@@ -5416,7 +5470,7 @@ html{scrollbar-gutter:stable}
       scopeMembers.forEach(u => { byUser[u] = { duration: 0, cargos: {} }; });
       entries.forEach(e => {
         if (!byUser[e.user]) byUser[e.user] = { duration: 0, cargos: {} };
-        const dur = Number(e.duration) || 0, cargo = e.cargo || 'Sem cargo';
+        const dur = effective.get(e) || 0, cargo = e.cargo || 'Sem cargo';
         byUser[e.user].duration += dur;
         if (!byUser[e.user].cargos[cargo]) byUser[e.user].cargos[cargo] = { duration: 0, color: dashboardCargoColor(e) };
         byUser[e.user].cargos[cargo].duration += dur;
@@ -5438,19 +5492,21 @@ html{scrollbar-gutter:stable}
   }
 
   function renderAnalysisOverview(entries, start) {
-    const total = entries.reduce((sum,e)=>sum+(Number(e.duration)||0),0);
+    const effective = effectiveWorkDurations(entries);
+    const total = uniqueWorkMs(entries);
     document.getElementById('dash-total-time').textContent = fmtClock(total);
     document.getElementById('dash-donut-total').textContent = fmtClock(total);
 
     const cargoTotals = {}, locationTotals = {}, activityTotals = {};
     entries.forEach(e => {
+      const counted = effective.get(e) || 0;
       const cargo = e.cargo || 'Sem cargo';
       const loc = e.modalidade || 'Sem localização';
-      cargoTotals[cargo] = (cargoTotals[cargo] || 0) + (Number(e.duration)||0);
-      locationTotals[loc] = (locationTotals[loc] || 0) + (Number(e.duration)||0);
+      cargoTotals[cargo] = (cargoTotals[cargo] || 0) + counted;
+      locationTotals[loc] = (locationTotals[loc] || 0) + counted;
       const actKey = e.activity || 'Sem descrição';
       if (!activityTotals[actKey]) activityTotals[actKey] = { duration:0, cargo, color:dashboardCargoColor(e) };
-      activityTotals[actKey].duration += Number(e.duration)||0;
+      activityTotals[actKey].duration += counted;
     });
 
     const topKey = obj => Object.entries(obj).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
@@ -5464,7 +5520,7 @@ html{scrollbar-gutter:stable}
       const d = new Date(e.date + 'T12:00:00');
       const idx = Math.round((startOfDay(d)-startOfDay(start))/86400000);
       if (idx < 0 || idx > 6) return;
-      const dur = Number(e.duration)||0;
+      const dur = effective.get(e) || 0;
       const cargo = e.cargo || 'Sem cargo';
       daily[idx].total += dur;
       if (!daily[idx].cargos[cargo]) daily[idx].cargos[cargo] = {duration:0,color:dashboardCargoColor(e)};
@@ -5510,7 +5566,7 @@ html{scrollbar-gutter:stable}
     }).join('') : '<div class="empty">Sem registros nesta semana.</div>';
 
     // Card lateral: horas por membro / atividades
-    renderAnalysisSide(entries, activityTotals, total);
+    renderAnalysisSide(entries, activityTotals, total, effective);
   }
 
   function renderReportDetailed(entries) {
@@ -5524,9 +5580,10 @@ html{scrollbar-gutter:stable}
   }
 
   function renderReportWeekly(entries, start) {
+    const effective = effectiveWorkDurations(entries);
     const cargos={};
     entries.forEach(e=>{
-      const cargo=e.cargo||'Sem cargo', color=dashboardCargoColor(e), d=new Date(e.date+'T12:00:00'), idx=Math.round((startOfDay(d)-startOfDay(start))/86400000), dur=Number(e.duration)||0;
+      const cargo=e.cargo||'Sem cargo', color=dashboardCargoColor(e), d=new Date(e.date+'T12:00:00'), idx=Math.round((startOfDay(d)-startOfDay(start))/86400000), dur=effective.get(e)||0;
       if(idx<0||idx>6) return;
       if(!cargos[cargo]) cargos[cargo]={days:Array(7).fill(0),total:0,color};
       cargos[cargo].days[idx]+=dur; cargos[cargo].total+=dur;
@@ -5614,7 +5671,7 @@ html{scrollbar-gutter:stable}
     if(!win) return alert('O navegador bloqueou a janela de exportação. Permita pop-ups para o PETimer e tente novamente.');
 
     const {start,end}=analysisWeekRange();
-    const total=entries.reduce((sum,e)=>sum+(Number(e.duration)||0),0);
+    const total=uniqueWorkMs(entries);
     const colors=['#276097','#4f8ec7','#7b61a8','#2f8a70','#c58a2d','#b85c69','#557c8d','#6a8f3f','#8b6d52','#4a6fa5','#a15f9d','#3d8b91'];
     const colorFor=(key,index)=>{
       const known=getCargoColor(key);
@@ -5626,10 +5683,11 @@ html{scrollbar-gutter:stable}
     const dayNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 
     const daily=Array.from({length:7},(_,i)=>({date:new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),total:0}));
+    const effective = effectiveWorkDurations(entries);
     const cargoTotals={};
     const descTotals={};
     entries.forEach((e,idx)=>{
-      const dur=Number(e.duration)||0;
+      const dur=effective.get(e)||0;
       const d=new Date(e.date+'T12:00:00');
       const dayIndex=Math.round((startOfDay(d)-startOfDay(start))/86400000);
       if(dayIndex>=0 && dayIndex<7) daily[dayIndex].total+=dur;
@@ -6513,11 +6571,15 @@ html{scrollbar-gutter:stable}
     const all = DB.getEntries().filter(e => e.teamCode === session.teamCode && e.user === username);
     const run = DB.getRunning();
     if (run && run.teamCode === session.teamCode && run.user === username) all.push({...run, isRunning:true});
+    const counted = effectiveWorkDurations(all.filter(e => {
+      const date = e.date || (e.start ? localDateStr(new Date(e.start)) : '');
+      return date >= cycle.startDate && date <= cycle.endDate;
+    }));
     let loggedMs = 0, currentLoggedMs = 0;
     all.forEach(e => {
       const date = e.date || (e.start ? localDateStr(new Date(e.start)) : '');
       if (date < cycle.startDate || date > cycle.endDate) return;
-      const duration = Math.max(0, e.isRunning ? Date.now() - new Date(e.start).getTime() : Number(e.duration) || 0);
+      const duration = counted.get(e) || 0;
       const activityTs = new Date(date + 'T' + (e.startTime || '00:00')).getTime();
       loggedMs += duration;
       if (activityTs >= countStart && activityTs < countEnd) currentLoggedMs += duration;
