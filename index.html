@@ -3038,7 +3038,44 @@ html{scrollbar-gutter:stable}
         teamCode: session.teamCode, view: currentView, cycleSubView, analysisMode
       }));
     } catch (_) { /* Preferência opcional; nunca impede a navegação. */ }
+    syncPetimerHistory();
   }
+
+  // ---------- HISTÓRICO DO NAVEGADOR (botão voltar/avançar) ----------
+  let petimerHistoryLock = false;
+
+  function petimerHash() {
+    let h = currentView;
+    if (currentView === 'analysis' && analysisMode !== 'overview') h += '/' + analysisMode;
+    if (currentView === 'cycle' && cycleSubView !== 'current') h += '/' + cycleSubView;
+    return '#' + h;
+  }
+
+  function syncPetimerHistory() {
+    if (petimerHistoryLock || !session?.teamCode) return;
+    const hash = petimerHash();
+    if (location.hash === hash && history.state?.petimer) return;
+    const state = { petimer: true, view: currentView, cycleSubView, analysisMode };
+    // Primeira vez: só marca a entrada atual. Depois: cria uma entrada nova a cada mudança.
+    if (!history.state?.petimer) history.replaceState(state, '', hash);
+    else history.pushState(state, '', hash);
+  }
+
+  window.addEventListener('popstate', (e) => {
+    const s = e.state;
+    if (!s?.petimer || !session?.teamCode) return;
+    petimerHistoryLock = true;            // evita criar nova entrada ao restaurar
+    try {
+      setAnalysisMode(s.analysisMode, null, false);
+      switchCycleSubView(s.cycleSubView, false);
+      const btn = Array.from(document.querySelectorAll('.nav-item'))
+        .find(b => b.getAttribute('onclick')?.includes("switchView('" + s.view + "'"));
+      switchView(s.view, btn);            // já renderiza a tela
+    } finally {
+      petimerHistoryLock = false;
+    }
+  });
+
   function preparePetimerVisualRestore() {
     const state = window.petimerVisualRestore;
     if (!state || !authToken) return;
